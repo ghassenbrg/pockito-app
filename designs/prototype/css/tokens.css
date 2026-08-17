@@ -1,0 +1,195 @@
+/* ============================================================
+   Pockito Design System — tokens
+   Generated from tokens.json. Do not edit by hand.
+   Anchored on the hand-authored logo SVGs.
+   ============================================================ */
+
+:root {
+  /* ── primitives ─────────────────────────────────────────── */
+  --pk-slate-50:#F8FAFC;  --pk-slate-100:#F1F5F9; --pk-slate-200:#E2E8F0;
+  --pk-slate-300:#CBD5E1; --pk-slate-400:#94A3B8; --pk-slate-500:#64748B;
+  --pk-slate-600:#475569; --pk-slate-700:#334155; --pk-slate-800:#1E293B;
+  --pk-slate-900:#0F172A; --pk-slate-950:#020617;
+
+  --pk-indigo-50:#EEF2FF;  --pk-indigo-100:#E0E7FF; --pk-indigo-200:#C7D2FE;
+  --pk-indigo-300:#A5B4FC; --pk-indigo-400:#818CF8; --pk-indigo-500:#6366F1;
+  --pk-indigo-600:#4F46E5; --pk-indigo-700:#4338CA; --pk-indigo-800:#3730A3;
+  --pk-indigo-900:#312E81; --pk-indigo-950:#1E1B4B;
+
+  --pk-cyan-400:#22D3EE;  --pk-cyan-500:#06B6D4; --pk-cyan-600:#0891B2;
+  --pk-amber-50:#FFFBEB;  --pk-amber-100:#FEF3C7; --pk-amber-200:#FDE68A;
+  --pk-amber-300:#FCD34D; --pk-amber-400:#FBBF24; --pk-amber-500:#F59E0B;
+  --pk-amber-600:#D97706; --pk-amber-700:#B45309;
+  --pk-emerald-400:#34D399; --pk-emerald-600:#059669; --pk-emerald-700:#047857;
+  --pk-rose-400:#FB7185;  --pk-rose-500:#F43F5E;  --pk-rose-600:#E11D48;
+
+  /* ── brand ──────────────────────────────────────────────── */
+  --pk-brand-primary:         var(--pk-indigo-600);
+  --pk-brand-primary-hover:   var(--pk-indigo-700);
+  --pk-brand-primary-pressed: var(--pk-indigo-800);
+  --pk-brand-primary-subtle:  var(--pk-indigo-50);
+  --pk-brand-secondary:       var(--pk-cyan-500);
+  --pk-brand-accent:          var(--pk-amber-400);
+  --pk-brand-ink:             var(--pk-slate-900);
+  --pk-brand-gradient: linear-gradient(135deg, #4F46E5 0%, #06B6D4 100%);
+
+  /* ── semantic · surfaces ────────────────────────────────── */
+  --pk-bg-page:    var(--pk-slate-50);
+  --pk-bg-surface: #FFFFFF;
+  --pk-bg-raised:  #FFFFFF;
+  --pk-bg-sunken:  var(--pk-slate-100);
+  --pk-bg-hero:    var(--pk-indigo-600);
+  --pk-bg-inverse: var(--pk-slate-900);
+
+  /* ── semantic · text ────────────────────────────────────── */
+  --pk-text-primary:     var(--pk-slate-900);
+  --pk-text-secondary:   var(--pk-slate-600);
+  --pk-text-tertiary:    var(--pk-slate-500);
+  --pk-text-disabled:    var(--pk-slate-400);
+  --pk-text-inverse:     #FFFFFF;
+  --pk-text-link:        var(--pk-indigo-600);
+  --pk-text-on-hero:     #FFFFFF;
+  --pk-text-on-hero-muted: rgba(255,255,255,.72);
+
+  /* ── semantic · borders ─────────────────────────────────── */
+  --pk-border-subtle:  var(--pk-slate-200);
+  --pk-border-default: var(--pk-slate-300);
+  --pk-border-strong:  var(--pk-slate-400);
+  --pk-border-focus:   var(--pk-indigo-600);
+
+  /* ── semantic · shared money (the amber channel) ────────── */
+  --pk-shared:         var(--pk-amber-400);  /* fills, marks, rules — never text */
+  --pk-shared-strong:  var(--pk-amber-700);  /* text on the amber surface */
+  --pk-shared-surface: var(--pk-amber-50);
+  --pk-shared-border:  var(--pk-amber-200);
+
+  /* ── semantic · balance direction ───────────────────────── */
+  --pk-balance-owed:    var(--pk-emerald-700);
+  --pk-balance-owing:   var(--pk-amber-700);
+  --pk-balance-settled: var(--pk-slate-500);
+
+  /* ── semantic · feedback ────────────────────────────────── */
+  --pk-success: var(--pk-emerald-700); --pk-success-surface: #ECFDF5;
+  --pk-warning: var(--pk-amber-700);   --pk-warning-surface: var(--pk-amber-50);
+  --pk-danger:  var(--pk-rose-600);    --pk-danger-surface:  #FFF1F2;
+  --pk-info:    var(--pk-indigo-600);  --pk-info-surface:    var(--pk-indigo-50);
+
+  /* ── category marks (assigned by index, never by meaning) ─ */
+  --pk-cat-1:#10B981; --pk-cat-2:#4F46E5; --pk-cat-3:#06B6D4;  --pk-cat-4:#FBBF24;
+  --pk-cat-5:#F43F5E; --pk-cat-6:#8B5CF6; --pk-cat-7:#F59E0B;  --pk-cat-8:#0EA5E9;
+  --pk-cat-9:#EC4899; --pk-cat-10:#64748B;--pk-cat-11:#14B8A6; --pk-cat-12:#A855F7;
+
+  /* ── typography ─────────────────────────────────────────── */
+  --pk-font-sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --pk-font-mono: "SF Mono", ui-monospace, "Roboto Mono", Menlo, monospace;
+
+  --pk-size-display:40px; --pk-lh-display:44px;
+  --pk-size-h1:28px;      --pk-lh-h1:34px;
+  --pk-size-h2:22px;      --pk-lh-h2:28px;
+  --pk-size-h3:17px;      --pk-lh-h3:24px;
+  --pk-size-body-lg:16px; --pk-lh-body-lg:24px;
+  --pk-size-body:15px;    --pk-lh-body:22px;
+  --pk-size-body-sm:13px; --pk-lh-body-sm:18px;
+  --pk-size-caption:12px; --pk-lh-caption:16px;
+  --pk-size-overline:11px;--pk-lh-overline:14px;
+
+  --pk-weight-regular:400; --pk-weight-medium:500; --pk-weight-semibold:600;
+  --pk-weight-bold:700;    --pk-weight-extrabold:800;
+
+  /* ── space ──────────────────────────────────────────────── */
+  --pk-space-1:4px;  --pk-space-2:8px;  --pk-space-3:12px; --pk-space-4:16px;
+  --pk-space-5:20px; --pk-space-6:24px; --pk-space-7:28px; --pk-space-8:32px;
+  --pk-space-10:40px;--pk-space-12:48px;--pk-space-16:64px;--pk-space-20:80px;
+
+  /* ── radius ─────────────────────────────────────────────── */
+  --pk-radius-sm:8px;  --pk-radius-md:12px; --pk-radius-lg:16px;
+  --pk-radius-xl:20px; --pk-radius-2xl:24px; --pk-radius-full:9999px;
+
+  /* ── elevation ──────────────────────────────────────────── */
+  --pk-elevation-sm:0 1px 2px 0 rgba(15,23,42,.05);
+  --pk-elevation-md:0 4px 12px -2px rgba(15,23,42,.08), 0 2px 4px -2px rgba(15,23,42,.04);
+  --pk-elevation-lg:0 12px 24px -6px rgba(15,23,42,.12), 0 4px 8px -4px rgba(15,23,42,.06);
+  --pk-elevation-fab:0 8px 20px -4px rgba(251,191,36,.44);
+
+  /* ── motion ─────────────────────────────────────────────── */
+  --pk-duration-fast:150ms; --pk-duration-base:250ms;
+  --pk-duration-slow:350ms; --pk-duration-deliberate:500ms;
+  --pk-ease-standard:cubic-bezier(.4,0,.2,1);
+  --pk-ease-decelerate:cubic-bezier(0,0,.2,1);
+  --pk-ease-sheet:cubic-bezier(.32,.72,0,1);
+
+  /* ── size ───────────────────────────────────────────────── */
+  --pk-touch-target:44px;
+  --pk-row-single:56px; --pk-row-double:64px; --pk-row-triple:72px; --pk-row-action:80px;
+  --pk-icon-sm:16px; --pk-icon-md:20px; --pk-icon-lg:24px; --pk-icon-xl:32px;
+  --pk-avatar-xs:24px; --pk-avatar-sm:32px; --pk-avatar-md:40px;
+  --pk-avatar-lg:48px; --pk-avatar-xl:64px;
+  --pk-fab:56px; --pk-nav-height:64px; --pk-header-height:56px;
+
+  /* ── share rule (the signature) ─────────────────────────── */
+  --pk-share-rule-height:2px;
+  --pk-share-rule-track:var(--pk-border-subtle);
+  --pk-share-rule-fill:var(--pk-shared);
+  --pk-share-rule-width-row:64px;
+}
+
+/* ── dark theme ───────────────────────────────────────────── */
+:root[data-theme="dark"] {
+  --pk-bg-page:var(--pk-slate-950); --pk-bg-surface:var(--pk-slate-900);
+  --pk-bg-raised:var(--pk-slate-800); --pk-bg-sunken:var(--pk-slate-950);
+  --pk-bg-inverse:var(--pk-slate-50);
+
+  --pk-text-primary:var(--pk-slate-50); --pk-text-secondary:var(--pk-slate-400);
+  --pk-text-tertiary:var(--pk-slate-400); --pk-text-disabled:var(--pk-slate-500);
+  --pk-text-inverse:var(--pk-slate-900); --pk-text-link:var(--pk-indigo-400);
+
+  --pk-border-subtle:var(--pk-slate-800); --pk-border-default:var(--pk-slate-700);
+  --pk-border-strong:var(--pk-slate-600); --pk-border-focus:var(--pk-indigo-400);
+
+  --pk-shared-strong:var(--pk-amber-300);
+  --pk-shared-surface:#3E2E0B; --pk-shared-border:#78500B;
+
+  --pk-balance-owed:var(--pk-emerald-400); --pk-balance-owing:var(--pk-amber-300);
+  --pk-balance-settled:var(--pk-slate-400);
+
+  --pk-success:var(--pk-emerald-400); --pk-success-surface:#052E20;
+  --pk-warning:var(--pk-amber-300);   --pk-warning-surface:#3E2E0B;
+  --pk-danger:var(--pk-rose-400);     --pk-danger-surface:#4C0519;
+  --pk-info:var(--pk-indigo-400);     --pk-info-surface:var(--pk-indigo-950);
+
+  --pk-elevation-sm:0 1px 2px 0 rgba(0,0,0,.4);
+  --pk-elevation-md:0 4px 12px -2px rgba(0,0,0,.5);
+  --pk-elevation-lg:0 12px 24px -6px rgba(0,0,0,.6);
+}
+
+/* ── base primitives every surface inherits ───────────────── */
+.pk-money {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.pk-share-rule {
+  height: var(--pk-share-rule-height);
+  background: var(--pk-share-rule-track);
+  border-radius: var(--pk-share-rule-height);
+  overflow: hidden;
+  display: flex;
+}
+.pk-share-rule__mine {
+  height: 100%;
+  background: var(--pk-share-rule-fill);
+  min-width: 4%;
+}
+
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--pk-border-focus);
+  outline-offset: 2px;
+  border-radius: var(--pk-radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --pk-duration-fast:1ms; --pk-duration-base:1ms;
+    --pk-duration-slow:1ms; --pk-duration-deliberate:1ms;
+  }
+}

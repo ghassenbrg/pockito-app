@@ -1,0 +1,3279 @@
+{
+  "@@locale": "en",
+  "navHome": "Home",
+  "navAccounts": "Accounts",
+  "navSpaces": "Spaces",
+  "navMore": "More",
+  "addMoneyEvent": "Add money event",
+  "actionCancel": "Cancel",
+  "actionSave": "Save",
+  "actionDone": "Done",
+  "actionRetry": "Try again",
+  "actionUndo": "Undo",
+  "actionClearSearch": "Clear search",
+  "actionResetAll": "Reset all",
+  "actionSaveView": "Save view",
+  "actionGotIt": "Got it",
+  "actionSearch": "Search",
+  "sortNewestFirst": "Newest first",
+  "sortOldestFirst": "Oldest first",
+  "sortLargestAmount": "Largest amount",
+  "sortSmallestAmount": "Smallest amount",
+  "sortNameAsc": "Name A–Z",
+  "sortNameDesc": "Name Z–A",
+  "sortHighestBalance": "Highest balance",
+  "sortLowestBalance": "Lowest balance",
+  "sortBy": "Sort by",
+  "roleOwner": "Owner",
+  "roleAdmin": "Admin",
+  "roleMember": "Member",
+  "roleViewer": "Viewer",
+  "roleOwnerSummary": "Full control, including roles and archiving. There is always one owner.",
+  "roleAdminSummary": "Can edit anyone’s expenses, manage budgets, invite and remove members.",
+  "roleMemberSummary": "Can add expenses, edit their own, and settle up.",
+  "roleViewerSummary": "Can see everything and change nothing.",
+  "spaceTypeHousehold": "Household",
+  "spaceTypeTrip": "Trip",
+  "spaceTypeCouple": "Couple",
+  "spaceTypeFriends": "Friends",
+  "spaceTypeOther": "Other",
+  "readOnlyViewerTitle": "You have view-only access",
+  "readOnlyViewerReason": "Viewers can see everything here and change nothing.",
+  "readOnlyArchivedTitle": "{space} is archived",
+  "@readOnlyArchivedTitle": {
+    "placeholders": {
+      "space": {
+        "type": "String"
+      }
+    }
+  },
+  "readOnlyArchivedReason": "Archived Spaces keep their history and accept no new writes. Reopen it to add or change anything.",
+  "actionReopen": "Reopen",
+  "offlineTitle": "You’re offline, so we didn’t {action}",
+  "@offlineTitle": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "offlineBody": "Nothing was half-saved — the change was stopped before it started. What you typed is still here; try again when you have a connection.",
+  "offlineNotNow": "Not now",
+  "deniedWhoCanHelpOne": "Ask {name} to do it.",
+  "@deniedWhoCanHelpOne": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deniedWhoCanHelpMany": "Ask one of {names}.",
+  "@deniedWhoCanHelpMany": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "deniedDefaultTitle": "You can’t do that here",
+  "conflictTitle": "{name} changed this while you were editing",
+  "@conflictTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "conflictBody": "Two versions of “{label}” exist. Nothing has been overwritten — pick which one wins.",
+  "@conflictBody": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "conflictKeepTheirs": "Keep {name}’s version",
+  "@conflictKeepTheirs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "conflictKeepTheirsDetail": "Your edits are discarded and the form reloads.",
+  "conflictKeepMine": "Keep mine",
+  "conflictKeepMineDetail": "Your version replaces theirs. The change stays in the activity log either way.",
+  "conflictCompare": "Compare them first",
+  "conflictCompareDetail": "Reload theirs alongside yours and decide field by field.",
+  "recordVoided": "Voided",
+  "recordDraft": "Draft",
+  "recordDraftBanner": "Draft — not counted yet",
+  "recordDraftBody": "Nothing about your balances or budgets has moved. Confirm it when you are sure it is right.",
+  "recordVoidedBody": "It stays in your history and counts towards nothing.",
+  "actionConfirm": "Confirm",
+  "actionRestore": "Restore",
+  "actionVoid": "Void",
+  "chartViewAsTable": "View as a table",
+  "chartNotEnoughHistory": "Not enough history yet to draw a trend.",
+  "chartNothingRecorded": "Nothing has been recorded this period, so there is nothing to break down yet.",
+  "chartEverythingElse": "Everything else",
+  "comparisonFlat": "About the same as {period}",
+  "@comparisonFlat": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "comparisonMore": "{percent}% more than {period}",
+  "@comparisonMore": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "comparisonLess": "{percent}% less than {period}",
+  "@comparisonLess": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSpent": "SPENT",
+  "homeIn": "IN",
+  "homeNetWorth": "Net worth",
+  "homeThingsNeedYou": "{count, plural, =1{1 thing needs you} other{{count} things need you}}",
+  "@homeThingsNeedYou": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeAndMore": "and {count} more",
+  "@homeAndMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeWhoOwesWhom": "Who owes whom",
+  "homeEveryoneSettled": "Everyone is settled across your Spaces.",
+  "homeNoSpacesYet": "No shared Spaces yet. Create one when you start splitting something.",
+  "homeSpendingTrend": "Spending trend",
+  "homeWhereItWent": "Where it went",
+  "homeThisMonthInFull": "This month in full",
+  "homeAccounts": "Accounts",
+  "homeBudgets": "Budgets",
+  "homeUpcoming": "Upcoming",
+  "homeRecent": "Recent",
+  "homeSeeAll": "See all",
+  "homeViewActivity": "View activity",
+  "homeYouOwe": "You owe {name}",
+  "@homeYouOwe": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeOwesYou": "{name} owes you",
+  "@homeOwesYou": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeYouKept": "You kept {amount} this month",
+  "@homeYouKept": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeYouOverspent": "You spent {amount} more than came in",
+  "@homeYouOverspent": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeStillFree": "{amount} still free after what is already committed",
+  "@homeStillFree": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeMoneyIn": "Money in",
+  "homeMoneyOut": "Money out",
+  "homeKept": "Kept",
+  "homeKeptDetail": "of what came in",
+  "homeStillDue": "Still due",
+  "homeStillDueDetail": "subscriptions left this month",
+  "searchTitle": "Search",
+  "searchHintGlobal": "Accounts, Spaces, categories, budgets, activity…",
+  "searchEmptyTitle": "Search everything",
+  "searchEmptyBody": "Type at least two letters. This looks across accounts, Spaces, categories, budgets, recurring items and your whole activity.",
+  "searchNoMatchTitle": "Nothing matches “{query}”",
+  "@searchNoMatchTitle": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "searchNoMatchBody": "Try fewer letters, or a merchant, note or member name.",
+  "searchKindAccount": "Account",
+  "searchKindSpace": "Space",
+  "searchKindCategory": "Category",
+  "searchKindRecurring": "Recurring",
+  "searchKindBudget": "Budget",
+  "searchKindActivity": "Activity",
+  "activityTitle": "Activity",
+  "activityCount": "{count, plural, =1{1 money event} other{{count} money events}}",
+  "@activityCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "activitySearchHint": "Search merchant, note, category, tag or account",
+  "activityFilters": "Filters",
+  "activityShowMore": "Show more · {count} left",
+  "@activityShowMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "activityNoneTitle": "No activity yet",
+  "activityNoneBody": "Record an expense, income or transfer to start your timeline.",
+  "activityNoMatchTitle": "No matching money events",
+  "activityNoMatchBody": "Try another phrase or clear the active filters.",
+  "activitySavedViews": "{count} saved",
+  "@activitySavedViews": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "periodAnyTime": "Any time",
+  "periodThisMonth": "This month",
+  "periodLastMonth": "Last month",
+  "periodCustom": "Custom range",
+  "fxConvertedTo": "Converted to {currency}",
+  "@fxConvertedTo": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "fxRateLine": "1 {from} = {rate} {to} · {source} · {date}",
+  "@fxRateLine": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "fxRateHistory": "Rate history",
+  "fxManualRate": "your manual rate",
+  "fxNetWorthNote": "Converted to {currency}. Every rate used is listed below, with the day it was captured.",
+  "@fxNetWorthNote": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "fxMissingTitle": "Some balances are not in this total",
+  "fxMissingBody": "There is no rate for {currencies}, so those balances are shown on their own rather than folded into a number that would be a guess.",
+  "@fxMissingBody": {
+    "placeholders": {
+      "currencies": {
+        "type": "String"
+      }
+    }
+  },
+  "setupTitle": "Getting set up",
+  "setupProgress": "{done} of {total}",
+  "@setupProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "setupHide": "Hide this",
+  "setupStepProfile": "Add your name and reporting currency",
+  "setupStepAccount": "Add your first account",
+  "setupStepTransaction": "Record something you spent",
+  "setupStepSpace": "Create a Space for shared money",
+  "setupStepBudget": "Set a budget you care about",
+  "quickScanReceipt": "Scan a receipt",
+  "quickSharedExpense": "Shared expense",
+  "quickSettleUp": "Settle up",
+  "quickRecordIncome": "Record income",
+  "quickNewBudget": "New budget",
+  "saveBlockedOffline": "Offline — try again in a moment",
+  "saveBlockedPermission": "You can’t add expenses here",
+  "notifAll": "All ({count})",
+  "@notifAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notifWaitingCount": "Waiting on you ({count})",
+  "@notifWaitingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notifUpdatesCount": "Updates ({count})",
+  "@notifUpdatesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notifWaiting": "Waiting on you",
+  "notifUpdates": "Updates",
+  "notifNothingWaiting": "Nothing is waiting on you",
+  "notifNoUpdates": "No updates",
+  "notifSwitchFilter": "Switch the filter to see everything else.",
+  "notifShowAll": "Show all",
+  "notifMasterSwitch": "The master switch for everything below",
+  "notifMarkAllRead": "Mark all read",
+  "notifDismissed": "Notification dismissed",
+  "aiSectionTitle": "Ask about your money",
+  "aiExplainMonth": "Explain this month",
+  "aiExplainMonthDetail": "What moved, and what is behind it",
+  "aiCompareMonths": "Compare two months",
+  "aiCompareMonthsDetail": "Category by category, largest change first",
+  "aiFlagUnusual": "Flag anything unusual",
+  "aiFlagUnusualDetail": "Against each category’s own recent average",
+  "aiAnswerFootnote": "Read from your own records — nothing was generated.",
+  "aiThisMonth": "This month",
+  "aiAgainstLastMonth": "Against last month",
+  "aiAnythingUnusual": "Anything unusual",
+  "aiSpentVs": "You spent {amount}, {direction} {period} ({previous}).",
+  "@aiSpentVs": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "direction": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      },
+      "previous": {
+        "type": "String"
+      }
+    }
+  },
+  "aiDirectionSame": "about the same as",
+  "aiDirectionMore": "more than",
+  "aiDirectionLess": "less than",
+  "aiBiggestShare": "The biggest share went on {category}: {amount}.",
+  "@aiBiggestShare": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "aiKept": "You kept {kept} of the {income} that came in.",
+  "@aiKept": {
+    "placeholders": {
+      "kept": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      }
+    }
+  },
+  "aiOverspent": "You spent {amount} more than came in.",
+  "@aiOverspent": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "aiStillDue": "{amount} of subscriptions is still due before the month ends.",
+  "@aiStillDue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "aiDeltaUp": "{category}: up {amount}",
+  "@aiDeltaUp": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "aiDeltaDown": "{category}: down {amount}",
+  "@aiDeltaDown": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "aiNothingToCompare": "There is nothing in either month to compare.",
+  "aiNothingUnusual": "Nothing is far from its own recent average. That is not the same as nothing being expensive — only that nothing is out of character.",
+  "aiUnusualLine": "{category} is well above its own average for the last three months, at {amount}.",
+  "@aiUnusualLine": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "spaceMemberCount": "{count, plural, =1{1 member} other{{count} members}}",
+  "@spaceMemberCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "spaceManagePeople": "Manage",
+  "spaceFullActivityLog": "Full activity log",
+  "currencyNoRate": "No conversion rate available",
+  "currencyAvailable": "{count} currencies available",
+  "@currencyAvailable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hapticsTitle": "Haptic feedback",
+  "hapticsDetail": "A short tap on selection, saving and destructive confirms",
+  "widgetTitle": "Home screen widget",
+  "widgetRefresh": "Send to the home screen",
+  "widgetPushed": "Home screen widget updated",
+  "widgetIntro": "This is exactly what the widget shows, drawn from the same figures as the app. Tapping it anywhere opens Pockito.",
+  "widgetSizeSmall": "Small · net worth only",
+  "widgetSizeMedium": "Medium · net worth and this month",
+  "widgetSizeLarge": "Large · adds who owes whom",
+  "widgetTapOpens": "Tapping the widget opens Home",
+  "weCouldnTFindThat": "We couldn’t find that screen",
+  "nothingOpensAtYourMoney": "Nothing opens at {p0}. Your money and data are untouched.",
+  "@nothingOpensAtYourMoney": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "goToHome": "Go to Home",
+  "closeToTheLimit": "Close to the limit",
+  "atThisPaceYouFinish": "At this pace you finish the {p0} {p1} over.",
+  "@atThisPaceYouFinish": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "atThisPaceYouFinish2": "At this pace you finish the {p0} at {p1}.",
+  "@atThisPaceYouFinish2": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "includesCarriedOverFromLast": "Includes {p0} carried over from last {p1}.",
+  "@includesCarriedOverFromLast": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "pockitoAppIconFeaturingKito": "Pockito app icon featuring Kito",
+  "percentOfUsed": "{p0} percent of {p1} used",
+  "@percentOfUsed": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "offlineChangesStayOnThis": "Offline · changes stay on this device",
+  "stayInTheLoop": "Stay in the loop",
+  "getNotifiedWhenSomeoneAdds": "Get notified when someone adds a shared expense, pays you back, or when a budget needs attention.",
+  "miraAddedGroceries": "Mira added Groceries · €84.00",
+  "miraSaysShePaidYou": "Mira says she paid you ¥5,000",
+  "youVeUsedOfGroceries": "You’ve used 80% of Groceries",
+  "turnOnNotifications": "Turn on notifications",
+  "prototypeOnlyNoSystemPermission": "Prototype only · no system permission is requested",
+  "pickWhatHappenedYouCan": "Pick what happened. You can change any detail before saving.",
+  "readAReceipt": "Read a receipt",
+  "pickADate": "Pick a date",
+  "chooseAnAccount": "Choose an account",
+  "outsidePockitoNoWalletMovement": "Outside Pockito · no wallet movement",
+  "chooseACategory": "Choose a category",
+  "chooseACurrency": "Choose a currency",
+  "noDecimalPlaces": "{p0} · no decimal places",
+  "@noDecimalPlaces": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "decimalPlaces": "{p0} · {p1} decimal places",
+  "@decimalPlaces": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "chooseAMember": "Choose a member",
+  "eGBerlinTrip": "e.g. Berlin trip",
+  "noReceiptKeptScanningOne": "No receipt kept. Scanning one keeps the capture, so you can check the charge months later.",
+  "connectedToThis": "Connected to this",
+  "canDoThis": "{p0} can do this.",
+  "@canDoThis": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "keepItAsItIs": "Keep it as it is",
+  "typeToContinue": "Type “{p0}” to continue.",
+  "@typeToContinue": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "thatDidnTWork": "That didn’t work",
+  "thatDidnTLoad": "That didn’t load",
+  "theListIsStillOn": "The list is still on your device — this was a problem reading it.",
+  "yourSpendingIsSteadyShared": "Your spending is steady. Shared costs and transfers are already separated from personal spending.",
+  "isOverItsLimitYour": "{p0} is over its limit. Your other balances are unchanged.",
+  "@isOverItsLimitYour": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "isGettingCloseToIts": "{p0} is getting close to its limit. A quick review now can keep the month comfortable.",
+  "@isGettingCloseToIts": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "weCouldNotRefreshYour": "We could not refresh your overview",
+  "yourLocalDataIsSafe": "Your local data is safe. Try loading it again.",
+  "markedAsPaid": "{p0} marked as paid",
+  "@markedAsPaid": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "yourMoneyFinallyInOne": "Your money, finally in one place.",
+  "addAnAccountToTrack": "Add an account to track your own money, or start a space to share expenses with people you trust.",
+  "chooseWhereToBegin": "Choose where to begin",
+  "seeBalancesActivityAndNet": "See balances, activity and net worth together.",
+  "createASharedSpace": "Create a shared space",
+  "splitAHomeTripOr": "Split a home, trip or project without guesswork.",
+  "exploreWithSampleData": "Explore with sample data",
+  "acrossAccounts": "Across {p0} accounts · {p1}",
+  "@acrossAccounts": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "nothingLeftYourAccounts": "Nothing left your accounts",
+  "ofThatLeftYourAccounts": "{p0}% of {p1} that left your accounts",
+  "@ofThatLeftYourAccounts": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "nothingCameInThisMonth": "Nothing came in this month",
+  "noDueDate": "No due date",
+  "dueInDays": "Due in {p0} days",
+  "@dueInDays": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "thingsNeedYou": "{p0} things need you",
+  "@thingsNeedYou": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "isWellAboveItsRecent": "{p0} is well above its recent average at {p1}.",
+  "@isWellAboveItsRecent": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "showMoreLeft": "Show more · {p0} left",
+  "@showMoreLeft": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "nameThisView": "Name this view",
+  "eGReimbursableWorkTravel": "e.g. Reimbursable work travel",
+  "filterCombinationsYouBuiltOnce": "Filter combinations you built once.",
+  "moneyEventNotFound": "Money event not found",
+  "thisItemHasBeenRemoved": "This item has been removed from your local prototype.",
+  "confirmedItCountsFromNow": "Confirmed — it counts from now on",
+  "voidThisMoneyEvent": "Void this money event?",
+  "itStaysInYourHistory2": "It stays in your history, struck through, and stops counting towards balances and budgets.",
+  "theLinkedSharedExpenseIs": "The linked shared expense is voided too, and everyone’s balances update. Both rows stay visible in the history.",
+  "editMoneyEvent": "Edit money event",
+  "youCanFillThisIn": "You can fill this in, but saving is blocked until there is a connection — nothing gets half-written.",
+  "youCanTAddExpenses": "You can’t add expenses to {p0}",
+  "@youCanTAddExpenses": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "viewersCanSeeEverythingAnd": "Viewers can see everything and change nothing.",
+  "thisSpaceIsArchivedSo": "This Space is archived, so it is read-only.",
+  "youDoNotHavePermission": "You do not have permission to add expenses here.",
+  "enterAnAmountGreaterThan": "Enter an amount greater than zero",
+  "whatWasThisFor": "What was this for?",
+  "addAShortDescription": "Add a short description",
+  "whyThisHappenedOrAnything": "Why this happened, or anything to remember",
+  "paidOutsidePockitoNoWallet": "Paid outside Pockito · no wallet movement",
+  "noAccountMovement": "No account movement",
+  "thePayerSAccountIs": "The payer’s account is outside your personal ledger.",
+  "chooseTheDestination": "Choose the destination",
+  "capturedWithThisTransfer": "Captured with this transfer",
+  "rateMustBeMoreThan": "Rate must be more than zero",
+  "automaticRateUnavailableChooseManual": "Automatic rate unavailable. Choose Manual to continue.",
+  "paidWithOptional": "Paid with (optional)",
+  "shareThisExpense": "Share this expense",
+  "personalSpendingOnly": "Personal spending only",
+  "updatesTheAccountAndEveryone": "Updates the account and everyone’s balance",
+  "noAutomaticRateEnterA": "No automatic rate. Enter a manual rate to continue.",
+  "receiptKeptDetailsFilledIn": "Receipt kept · details filled in — review before saving",
+  "receiptKeptWeCouldNot": "Receipt kept · we could not read it, so nothing was filled in",
+  "attachAReceipt": "Attach a receipt",
+  "whatIsItEG": "What is it? e.g. Restaurant bill",
+  "enterAnAmountBeforeEditing": "Enter an amount before editing the split",
+  "chooseAValidExchangeRate": "Choose a valid exchange rate to continue",
+  "enterAnExchangeRateFor": "Enter an exchange rate for this wallet payment",
+  "moneyEventAdded": "Money event added",
+  "moneyEventUpdated": "Money event updated",
+  "yourVersionWasKept": "Your version was kept",
+  "loadedTheirVersionSNumbers": "Loaded their version’s numbers — check each field, then save.",
+  "fitTheWholeReceiptInside": "Fit the whole receipt inside the frame",
+  "previewLowConfidence": "Preview low confidence",
+  "previewFailedScan": "Preview failed scan",
+  "readingMerchantTotalAndDate": "Reading merchant, total and date…",
+  "oneQuickCheck": "One quick check",
+  "merchantAndCategoryHaveLow": "Merchant and category have low confidence. Every field stays editable before saving.",
+  "augustGroceries": "15 August 2026 · Groceries",
+  "thisIsALocalOcr": "This is a local OCR simulation. Nothing was uploaded and you can edit every field before saving.",
+  "useTheseDetails": "Use these details",
+  "weCouldNotReadThis": "We could not read this document",
+  "theImageMayBeBlurred": "The image may be blurred, cropped or offline. No financial data was created.",
+  "theImageWasTooBlurred": "The image was too blurred to read. Nothing was filled in for you.",
+  "enterDetailsManually": "Enter details manually",
+  "searchPaymentMethods": "Search payment methods",
+  "recordsThatWereUndoneKept": "Records that were undone, kept for the history",
+  "stagedRecordsThatDoNot": "Staged records that do not count yet",
+  "everythingIsAllocated": "Everything is allocated",
+  "useThisSplit": "Use this split",
+  "addALineForEach": "Add a line for each thing on the bill, then tick who had it. Anything you don’t itemise is split evenly.",
+  "everyLineAccountedFor": "Every line accounted for",
+  "notItemisedSplitEvenly": "{p0} not itemised — split evenly",
+  "@notItemisedSplitEvenly": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "whatWasOnTheBill": "What was on the bill?",
+  "eGTheWine": "e.g. the wine",
+  "howMuchWas": "How much was {p0}?",
+  "@howMuchWas": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "thatAmountDidnTLook": "That amount didn’t look like a number",
+  "thisIsHowItLands": "This is how it lands",
+  "nothingIsSavedYetGoing": "Nothing is saved yet. Going back keeps the editor open.",
+  "percentagesMustTotal": "Percentages must total 100%",
+  "enterAtLeastOnePositive": "Enter at least one positive share",
+  "moreThanOnePersonPaid": "More than one person paid",
+  "whoPaidWhat": "Who paid what",
+  "payersAddUpTo": "Payers add up to {p0}",
+  "@payersAddUpTo": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "sharedMoneyWithoutTheAwkward": "Shared money, without the awkward maths",
+  "searchSpacesOrTheirMembers": "Search {p0} Spaces or their members",
+  "@searchSpacesOrTheirMembers": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "shareMoneyWithLessFriction": "Share money with less friction",
+  "createASpaceForA": "Create a space for a home, trip, couple or group of friends.",
+  "createASpace": "Create a space",
+  "noSpaceMatches": "No Space matches “{p0}”",
+  "@noSpaceMatches": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "tryADifferentNameType": "Try a different name, type or member.",
+  "spaceNotFound": "Space not found",
+  "itMayHaveBeenRemoved": "It may have been removed from the prototype.",
+  "everyoneIsSettled": "Everyone is settled",
+  "cyclesPreserveYourHistory": "Cycles preserve your history",
+  "startANewCycleTo": "Start a new cycle to reset current balances and the space budget. Nothing historical is deleted.",
+  "startNewCycle": "Start new cycle",
+  "noSharedExpensesYet": "No shared expenses yet",
+  "noExpensesMatchTheseFilters": "No expenses match these filters",
+  "addTheFirstExpenseAnd": "Add the first expense and Pockito will keep everyone’s balance clear.",
+  "tryShowingSettledAndUnsettled": "Try showing settled and unsettled expenses, or include every payer.",
+  "joinedTheSpace": "{p0} joined the space",
+  "@joinedTheSpace": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "everyAmountIsInThe": "Every amount is in {p0}, the space currency.",
+  "@everyAmountIsInThe": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "whoPaysWhom": "Who pays whom",
+  "startANewCycle": "Start a new cycle?",
+  "currentBalancesAndSpaceBudget": "Current balances and space-budget usage restart at zero. Expenses, contributions, analytics and settlements remain in the previous cycle.",
+  "newCycleStartedHistoryPreserved": "New cycle started · history preserved",
+  "paidByMe": "Paid by me",
+  "paidByMember": "Paid by member",
+  "expenseNotFound": "Expense not found",
+  "thisExpenseHasBeenRemoved": "This expense has been removed.",
+  "thisClosedCycleRecordIs": "This closed-cycle record is read-only so its totals remain trustworthy.",
+  "chargedToYourWallet": "Charged to your wallet",
+  "whoPaysWhat": "Who pays what",
+  "theSpaceThisBelongsTo": "The Space this belongs to",
+  "yourAccountMovement": "Your account movement",
+  "itStaysVisibleToEveryone": "It stays visible to everyone, struck through, and stops counting towards the Space balance. Your linked account movement is undone with it.",
+  "kanaExampleComFranExample": "kana@example.com, fran@example.com",
+  "whatAreYouSharing": "What are you sharing?",
+  "theSpaceCurrencyIsThe": "The space currency is the single source of truth for balances.",
+  "youCanShareAnInvite": "You can share an invite link now or do it later.",
+  "eGFlatOrTokyo": "e.g. Flat or Tokyo Trip",
+  "nameYourSpace": "Name your space",
+  "monthlySpaceBudgetOptional": "Monthly space budget (optional)",
+  "resetsForANewMonth": "Resets for a new month or space cycle",
+  "enterABudgetGreaterThan": "Enter a budget greater than zero",
+  "separateMultiplePeopleWithCommas": "Separate multiple people with commas",
+  "inviteLinkReady": "Invite link ready",
+  "inviteLinkCopied": "Invite link copied",
+  "createAndInvite": "Create and invite",
+  "notificationPreviewsTurnedOn": "Notification previews turned on",
+  "createdInvitationsPending": "{p0} created · invitations pending",
+  "@createdInvitationsPending": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "itMayHaveBeenRemoved2": "It may have been removed or you may have left it.",
+  "youCanTInvitePeople": "You can’t invite people here",
+  "onlyOwnersAndAdminsCan": "Only owners and admins can invite people.",
+  "tryADifferentNameOr": "Try a different name or clear the search.",
+  "inviteResentTo": "Invite resent to {p0}",
+  "@inviteResentTo": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "newInviteSentTo": "New invite sent to {p0}",
+  "@newInviteSentTo": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "noInvitationsYet": "No invitations yet",
+  "inviteKanaFranOrAnyone": "Invite Kana, Fran, or anyone you share money with.",
+  "invitedAsExpiresInDays": "{p0} invited as {p1} · expires in {p2} days",
+  "@invitedAsExpiresInDays": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      },
+      "p2": {
+        "type": "Object"
+      }
+    }
+  },
+  "revokeSInvite": "Revoke {p0}’s invite?",
+  "@revokeSInvite": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "theLinkStopsWorkingImmediately": "The link stops working immediately. You can invite them again at any time.",
+  "sInviteRevoked": "{p0}’s invite revoked",
+  "@sInviteRevoked": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "youCanTChangeRoles": "You can’t change roles here",
+  "onlyTheOwnerCanChange": "Only the owner can change roles.",
+  "youCanTRemoveThis": "You can’t remove this member",
+  "theOwnerCannotBeRemoved": "The owner cannot be removed. Transfer ownership first.",
+  "onlyOwnersAndAdminsCan2": "Only owners and admins can remove members.",
+  "removeFromSpace": "Remove from Space",
+  "youCanTLeaveThis": "You can’t leave this Space",
+  "youAreTheOnlyOwner": "You are the only owner. Make someone else the owner first, so the Space is never left unmanaged.",
+  "thisSpaceCannotBeLeft": "This Space cannot be left right now.",
+  "whatTheyCanDoChanges": "What they can do changes immediately.",
+  "isNowA": "{p0} is now a {p1}",
+  "@isNowA": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "youLoseAccessToIts": "You lose access to its expenses and balances. Rejoining needs a new invitation from an owner or admin.",
+  "settleTheBalanceFirst": "Settle the balance first",
+  "hasABalanceInThis": "{p0} has a {p1} balance in this cycle. Settle it before removing them so the history stays consistent.",
+  "@hasABalanceInThis": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "theyWillKeepAccessTo": "They will keep access to their past records but cannot add new expenses.",
+  "linkExpiresIn": "Link expires in",
+  "copyInviteLink": "Copy invite link",
+  "onlyOwnersAndAdminsCan3": "Only owners and admins can change Space settings.",
+  "isOpenAgain": "{p0} is open again",
+  "@isOpenAgain": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "members": "{p0} · {p1} · {p2} members",
+  "@members": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      },
+      "p2": {
+        "type": "Object"
+      }
+    }
+  },
+  "whoChangedWhatAndWhen": "Who changed what, and when",
+  "includesMemberAndSettingsChanges": "Includes member and settings changes",
+  "onlyTheOwnerCanArchive": "Only the owner can archive or reopen a Space.",
+  "automaticallyPreFillsEveryNew": "Automatically pre-fills every new expense. It can always be overridden.",
+  "exactAmountsDependOnThe": "Exact amounts depend on the expense total. New expenses start equally allocated and require confirmation in the split editor.",
+  "everyoneReceivesAnEqualResponsibility": "Everyone receives an equal responsibility.",
+  "percentagesMustTotalCurrently": "Percentages must total 100% (currently {p0}%).",
+  "@percentagesMustTotalCurrently": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "enterAtLeastOnePositive2": "Enter at least one positive share.",
+  "saveDefaultSplit": "Save default split",
+  "equalAcrossMembers": "Equal across {p0} members",
+  "@equalAcrossMembers": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "exactAmountsConfirmPerExpense": "Exact amounts · confirm per expense",
+  "itemizedAssignEachLinePer": "Itemized · assign each line per expense",
+  "membersCanNoLongerAdd": "Members can no longer add expenses, but the complete history remains available.",
+  "thereAreNoOutstandingPayments": "There are no outstanding payments in this cycle.",
+  "thisRecordsASettlementNever": "This records a settlement, never spending.",
+  "eGAugustUtilities": "e.g. August utilities",
+  "enterAValidAmount": "Enter a valid amount",
+  "amountCannotExceed": "Amount cannot exceed {p0}",
+  "@amountCannotExceed": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "confirmsThisBeforeAnyBalance": "{p0} confirms this before any balance moves. You can cancel it until then.",
+  "@confirmsThisBeforeAnyBalance": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "youAreTheOneBeing": "You are the one being paid, so recording it confirms it straight away.",
+  "sendForConfirmation": "Send for confirmation",
+  "partialSettlementRecorded": "Partial settlement recorded",
+  "everyMemberIsAtExpenses": "Every member is at {p0}. Expenses and settlements remain in this cycle’s history.",
+  "@everyMemberIsAtExpenses": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "backToSpaces": "Back to spaces",
+  "settleRemainingBalance": "Settle remaining balance",
+  "viewSettlementHistory": "View settlement history",
+  "itsSettlementHistoryIsNo": "Its settlement history is no longer available.",
+  "noSettlementsYet": "No settlements yet",
+  "whenSomeonePaysAnotherBack": "When someone pays another back, it’ll be recorded here.",
+  "settlementNotFound": "Settlement not found",
+  "itMayHaveBeenRemoved3": "It may have been removed from the local prototype.",
+  "waitingOnConfirmation": "Waiting on confirmation",
+  "saysThisMoneyReachedYou": "{p0} says this money reached you. Nothing has moved yet — confirming is what shifts the balance.",
+  "@saysThisMoneyReachedYou": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "thatDidnTHappen": "That didn’t happen",
+  "youProposedItSoConfirming": "You proposed it, so confirming it yourself would let one person declare the other has been paid.",
+  "cancelThisProposal": "Cancel this proposal",
+  "whereDidTheMoneyLand": "Where did the money land?",
+  "cancelThisSettlement": "Cancel this settlement",
+  "itStaysInTheHistory": "It stays in the history as cancelled. Nothing about the balance changes, because nothing moved.",
+  "cycleHistoryIsNoLonger": "Cycle history is no longer available.",
+  "openCurrentCycle": "Open current cycle",
+  "noPreviousCycles": "No previous cycles",
+  "onceEveryoneIsSettledStart": "Once everyone is settled, start a new cycle to preserve this period here.",
+  "expensesSettlements": "{p0} expenses · {p1} settlements",
+  "@expensesSettlements": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "cycleNotFound": "Cycle not found",
+  "thisHistoricalSnapshotIsUnavailable": "This historical snapshot is unavailable.",
+  "settledCycleReadOnly": "Settled cycle · read-only",
+  "thisSnapshotDoesNotChange": "This snapshot does not change when the current cycle changes.",
+  "theSnapshotRetainsExpenseReferences": "The snapshot retains {p0} expense references and all aggregate totals.",
+  "@theSnapshotRetainsExpenseReferences": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "returnToCurrentCycle": "Return to current cycle",
+  "noArchivedSpaces": "No archived spaces",
+  "finishedTripsAndOldGroups": "Finished trips and old groups can live here.",
+  "acrossAllSpaces": "Across all spaces",
+  "itsActivityLogIsNo": "Its activity log is no longer available.",
+  "searchThisLog": "Search this log",
+  "refusedActionsOnly": "Refused actions only",
+  "nothingRecordedYet": "Nothing recorded yet",
+  "nobodyHasBeenRefusedAn": "Nobody has been refused an action here.",
+  "addingAnExpenseOrChanging": "Adding an expense or changing a setting will show up here, with who did it.",
+  "startWithAnAccount": "Start with an account",
+  "accountsAreWhereMoneyEnters": "Accounts are where money enters and leaves Pockito.",
+  "noAccountMatches": "No account matches “{p0}”",
+  "@noAccountMatches": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "tryADifferentNameType2": "Try a different name, type or currency.",
+  "accountNotFound": "Account not found",
+  "correctTheBalance": "Correct the balance",
+  "balanceOverTheLastDays": "{p0} balance over the last 30 days, ending at {p1}",
+  "@balanceOverTheLastDays": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "availableToSpend": "Available to spend",
+  "recordThisAccountSFirst": "Record this account’s first money event.",
+  "itsHistoryStaysAvailableYou": "Its history stays available. You can restore it from Archived accounts.",
+  "eGRevolut": "e.g. Revolut",
+  "giveThisAccountAName": "Give this account a name",
+  "creditLimitOptional": "Credit limit (optional)",
+  "letsPockitoShowWhatIs": "Lets Pockito show what is left to spend, not only what is owed",
+  "savingsGoalOptional": "Savings goal (optional)",
+  "showsProgressOnTheAccount": "Shows progress on the account",
+  "preselectedWhenRecordingAnExpense": "Preselected when recording an expense",
+  "noArchivedAccounts": "No archived accounts",
+  "archivedAccountsWillAppearHere": "Archived accounts will appear here with their history intact.",
+  "availableByCurrency": "Available by currency",
+  "currenciesStaySeparateUntilReporting": "Currencies stay separate until reporting. Pockito never combines money without a rate.",
+  "inThisMonth": "IN THIS MONTH",
+  "outThisMonth": "OUT THIS MONTH",
+  "connectAnApp": "Connect an app",
+  "youStayInControl": "You stay in control",
+  "kitoSurfacesAiInsightsBut": "Kito surfaces AI insights, but connections only see approved data and financial writes always get a preview.",
+  "noConnectedApps": "No connected apps",
+  "connectAnAiApplicationAnd": "Connect an AI application and choose exactly what it can read or change.",
+  "suspendedReviewNeeded": "Suspended · review needed",
+  "verifiedByPockito": "Verified by Pockito",
+  "customMcpClient": "Custom MCP client",
+  "chooseAnApplication": "Choose an application",
+  "thisPrototypeSimulatesAuthorizationNo": "This prototype simulates authorization. No token or external connection is created.",
+  "unverifiedApplicationUseExtraCare": "Unverified application · use extra care",
+  "allowAccessToPockito": "Allow access to Pockito?",
+  "chooseTheMinimumAccessThis": "Choose the minimum access this app needs. You can revoke it later.",
+  "namesTypesCurrenciesAndBalances": "Names, types, currencies and balances",
+  "moneyEventsAndCategories": "Money events and categories",
+  "sharedExpensesAndWhoOwes": "Shared expenses and who owes whom",
+  "calculatedSpendingAndBudgetSummaries": "Calculated spending and budget summaries",
+  "allowFinancialChanges": "Allow financial changes",
+  "createAndUpdateExpensesOr": "Create and update expenses or subscriptions",
+  "writesArePreviewedFirstHigh": "Writes are previewed first. High-risk actions can wait for approval in Pockito.",
+  "connectionNotFound": "Connection not found",
+  "itMayHaveBeenDisconnected": "It may have been disconnected.",
+  "theAppLosesAccessImmediately": "The app loses access immediately. Money events it previously created stay attributed and visible.",
+  "noAiActivity": "No AI activity",
+  "readsAndWritesFromConnected": "Reads and writes from connected apps will appear here with attribution.",
+  "blockedMemberInvitation": "Blocked member invitation",
+  "financeSidekickOutsideGrantedCapabilities": "Finance Sidekick · outside granted capabilities",
+  "nothingNeedsApproval": "Nothing needs approval",
+  "highImpactActionsRequestedBy": "High-impact actions requested by connected apps will wait here.",
+  "requestsYourApproval": "Requests your approval",
+  "approvedAndRecorded": "Approved and recorded",
+  "noTagsYet": "No tags yet",
+  "tagsCutAcrossCategoriesA": "Tags cut across categories. A “Berlin trip” tag collects its groceries, transport and restaurants in one place.",
+  "tryADifferentWordOr": "Try a different word, or add a new tag.",
+  "addATag": "Add a tag",
+  "notUsedYet": "Not used yet",
+  "seeEverythingTaggedWithThis": "See everything tagged with this",
+  "recordsKeepTheirOtherTags": "Records keep their other tags; nothing else changes.",
+  "addPaymentMethod": "Add payment method",
+  "noPaymentMethodsYet": "No payment methods yet",
+  "anAccountSaysWhereThe": "An account says where the money lives. A payment method says how it left — which card, which direct debit.",
+  "newPaymentMethod": "New payment method",
+  "eGAmexGold": "e.g. Amex Gold",
+  "lastFourDigitsOptional": "Last four digits (optional)",
+  "paymentMethodAdded": "Payment method added",
+  "dateDescriptionAmountCurrencyCategory": "date,description,amount,currency,category,account\n2026-08-16,Rewe,-32.50,EUR,Groceries,Revolut\n2026-08-16,Refund from Zalando,24.00,EUR,Refunds,Visa\n2026-08-12,Rewe,-32.50,EUR,Groceries,Revolut\n2026-08-99,Broken row,-10.00,EUR,Groceries,Revolut\n",
+  "pasteCsvWithAHeader": "Paste CSV with a header row: date, description, amount, currency, category, account. A negative amount is money out.",
+  "checkTheRows": "Check the rows",
+  "toImportAlreadyRecordedUnreadable": "{p0} to import · {p1} already recorded · {p2} unreadable",
+  "@toImportAlreadyRecordedUnreadable": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      },
+      "p2": {
+        "type": "Object"
+      }
+    }
+  },
+  "nothingHereCanBeImported": "Nothing here can be imported",
+  "itIsOnYourClipboard": "It is on your clipboard. Here is exactly what was copied.",
+  "itMayHaveBeenRemoved4": "It may have been removed.",
+  "pockitoThinksThisAccountHolds": "Pockito thinks this account holds",
+  "whatIsActuallyThere": "What is actually there",
+  "thisRecordsACorrectionOf": "This records a correction of {p0} in. It is not income and never counts as earning.",
+  "@thisRecordsACorrectionOf": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "thisRecordsACorrectionOf2": "This records a correction of {p0} out. It is not an expense and never counts as spending.",
+  "@thisRecordsACorrectionOf2": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "whyDoesItDiffer": "Why does it differ?",
+  "eGCountedTheWallet": "e.g. Counted the wallet",
+  "recordTheCorrection": "Record the correction",
+  "enterTheRealBalance": "Enter the real balance",
+  "sayWhyItDiffers": "Say why it differs",
+  "noRateAvailable": "No rate available",
+  "atMockRate": "{p0} at mock rate",
+  "@atMockRate": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "planWithoutPolicingYourself": "Plan without policing yourself",
+  "budgetsShowPaceAndRemaining": "Budgets show pace and remaining allowance without judging ordinary spending.",
+  "budgetNotFound": "Budget not found",
+  "itMayHaveBeenDeleted": "It may have been deleted.",
+  "projectedEndOf": "Projected end of {p0}",
+  "@projectedEndOf": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "nothingCountedYet": "Nothing counted yet",
+  "matchingExpensesWillAppearHere": "Matching expenses will appear here automatically.",
+  "expensesStayUntouchedOnlyThis": "Expenses stay untouched. Only this limit and its alerts are removed.",
+  "eGGroceries": "e.g. Groceries",
+  "nameThisBudget": "Name this budget",
+  "allExpenseCategories": "All expense categories",
+  "onlySelectedCategoriesCount": "Only selected categories count",
+  "allWalletsAreIncluded": "All wallets are included",
+  "onlySelectedWalletsCount": "Only selected wallets count",
+  "enterALimitGreaterThan": "Enter a limit greater than zero",
+  "carryTheLeftoverOver": "Carry the leftover over",
+  "whateverIsUnspentAtThe": "Whatever is unspent at the end of a {p0} is added to the next one.",
+  "@whateverIsUnspentAtThe": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "searchRecurringItems": "Search recurring items",
+  "noActiveSubscriptions": "No active subscriptions",
+  "addRecurringPaymentsToSee": "Add recurring payments to see upcoming charges and monthly cost.",
+  "subscriptionNotFound": "Subscription not found",
+  "paymentHistoryRemainsInActivity": "Payment history remains in Activity. The recurring item leaves the active list.",
+  "noPaymentsRecorded": "No payments recorded",
+  "recordedPaymentsAppearHereAnd": "Recorded payments appear here and in Activity.",
+  "walletDebitUsingTheCurrent": "\n\nWallet debit: ≈ {p0} using the current {p1} rate.",
+  "@walletDebitUsingTheCurrent": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "willBeRecordedFrom": "{p0} will be recorded from {p1}.{p2}",
+  "@willBeRecordedFrom": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      },
+      "p2": {
+        "type": "Object"
+      }
+    }
+  },
+  "skipThisPayment": "Skip this payment?",
+  "noExpenseIsRecordedThe": "No expense is recorded. The next due date advances by one billing period.",
+  "eGSpotify": "e.g. Spotify",
+  "nameThisSubscription": "Name this subscription",
+  "enterAnAmount": "Enter an amount",
+  "monthlyOnDay": "Monthly on day {p0}",
+  "@monthlyOnDay": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "noCategoryMatches": "No category matches “{p0}”",
+  "@noCategoryMatches": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "tryADifferentNameOr2": "Try a different name, or add a new category.",
+  "activeAnnualized": "{p0} active · {p1} annualized",
+  "@activeAnnualized": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "dayOfMonth": "Day of month",
+  "aPockitoCategoryItCan": "A Pockito category — it can be hidden but never deleted, because records may still point at it.",
+  "yourOwnCategory": "Your own category",
+  "nestUnderAnotherCategory": "Nest under another category",
+  "itReappearsInPickersAnd": "It reappears in pickers and filters.",
+  "itStaysOnEveryRecord": "It stays on every record that already uses it, and stops appearing in pickers.",
+  "isVisibleAgain": "{p0} is visible again",
+  "@isVisibleAgain": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "isTopLevelAgain": "{p0} is top-level again",
+  "@isTopLevelAgain": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "categoriesOnlyNestOneLevel": "Categories only nest one level deep.",
+  "hasItsOwnSubcategoriesSo": "{p0} has its own subcategories, so it cannot become one.",
+  "@hasItsOwnSubcategoriesSo": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "reassignBeforeDeleting": "Reassign before deleting",
+  "isUsedByExistingMoney": "{p0} is used by existing money events. Choose where they should move.",
+  "@isUsedByExistingMoney": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "reassignAndDelete": "Reassign and delete",
+  "everythingBeyondYourDayTo": "Everything beyond your day-to-day money",
+  "cutAcrossCategoriesBerlinTrip": "Cut across categories — “Berlin trip”, “Work”",
+  "answerHowMuchWentOn": "Answer “how much went on the Amex”",
+  "netWorthAndThisMonth": "Net worth and this month, at a glance",
+  "csvInCsvOrJson": "CSV in, CSV or JSON out",
+  "budgetsSharedMoneyAndApprovals": "Budgets, shared money and approvals",
+  "replayOnboardingPreviewAnInvite": "Replay onboarding, preview an invite, browse the state catalogue",
+  "exploreTheFirstRunExperience": "Explore the first-run experience",
+  "previewAnIncomingSpaceInvite": "Preview an incoming space invite",
+  "loadingEmptyErrorAndOffline": "Loading, empty, error and offline",
+  "resetPrototypeData": "Reset prototype data",
+  "resetAllPrototypeData": "Reset all prototype data?",
+  "everyLocalChangeIsReplaced": "Every local change is replaced with the original coherent Pockito fixture data.",
+  "prototypeDataReset": "Prototype data reset",
+  "avatarColoursRotateLocallyIn": "Avatar colours rotate locally in this prototype",
+  "thisChangesReportingTotalsOnly": "This changes reporting totals only. Account and space currencies never change silently.",
+  "howShouldPockitoConvertCurrencies": "How should Pockito convert currencies?",
+  "originalAmountsAreAlwaysPreserved": "Original amounts are always preserved. Converted totals are approximate and carry the captured rate.",
+  "automaticSnapshotActive": "Automatic snapshot active",
+  "mockedLocallyForThePrototype": "Mocked locally for the prototype; no live FX service is called.",
+  "manualRatesRemainActiveUntil": "Manual rates remain active until you switch back. Transfers cannot be saved when a required pair has no valid rate.",
+  "yourManualRate": "Your manual {p0} → {p1} rate",
+  "@yourManualRate": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "saveManualRates": "Save manual rates",
+  "enterAValidRateFor": "Enter a valid rate for {p0}",
+  "@enterAValidRateFor": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "manualExchangeRatesSaved": "Manual exchange rates saved",
+  "followYourDevice": "Follow your device",
+  "alwaysUseMode": "Always use {p0} mode",
+  "@alwaysUseMode": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "typographyBordersAndSemanticColours": "Typography, borders and semantic colours adapt together.",
+  "notificationPreviewEnabled": "Notification preview enabled",
+  "noSystemPermissionIsRequested": "No system permission is requested in this prototype.",
+  "kitoTheOfficialPockitoMascot": "Kito, the official Pockito mascot",
+  "moneyWithKitoPrototype": "Money, with Kito · Prototype 0.1.0",
+  "pockitoGivesPersonalAndShared": "Pockito gives personal and shared money one coherent home. Kito is the calm, helpful companion for insights, empty states and meaningful milestones. This Flutter build uses local fixture data only.",
+  "noPersonalDataLeavesThis": "No personal data leaves this local prototype.",
+  "prototypeTermsAreIntentionallyLocal": "Prototype terms are intentionally local and illustrative.",
+  "sharedExpensesBudgetAlertsAnd": "Shared expenses, budget alerts and approvals will appear here.",
+  "homeScreenStates": "Home screen states",
+  "chooseAStateReturnHome": "Choose a state, return Home, and inspect the production treatment.",
+  "purposefulEmptyState": "Purposeful empty state",
+  "everyEmptySurfaceExplainsWhat": "Every empty surface explains what belongs here and offers a meaningful next action.",
+  "coherentFixtureData": "Coherent fixture data",
+  "recoverableFullScreenError": "Recoverable full-screen error",
+  "welcomeToPockito": "Welcome to Pockito",
+  "personalAndSharedMoneyIn": "Personal and shared money in one coherent place.",
+  "continueWithApple": "Continue with Apple",
+  "continueWithGoogle": "Continue with Google",
+  "youExampleCom": "you@example.com",
+  "continueWithEmail": "Continue with email",
+  "previewAuthenticationError": "Preview authentication error",
+  "authenticationIsSimulatedLocallyIn": "Authentication is simulated locally in this UI prototype.",
+  "weCouldnTSignYou": "We couldn’t sign you in",
+  "nothingWasChangedCheckYour": "Nothing was changed. Check your connection and try again, or choose another sign-in method.",
+  "returnToPrototype": "Return to prototype",
+  "moneyThatMakesSense": "Money that makes sense",
+  "seeYourOwnAccountsAnd": "See your own accounts and the money you share, without double-counting either.",
+  "makePockitoYours": "Make Pockito yours",
+  "setTheIdentityAndDefaults": "Set the identity and defaults people will see in shared spaces. You can change these later.",
+  "localProfileAvatar": "local://profile/avatar",
+  "chooseProfilePhoto": "Choose profile photo",
+  "photoSelectedLocally": "Photo selected locally",
+  "useDeviceSetting": "Use device setting",
+  "setYourHomeBase": "Set your home base",
+  "thisOnlyControlsReportingEvery": "This only controls reporting. Every account and space keeps its own currency.",
+  "givePockitoOnePlaceWhere": "Give Pockito one place where money enters and leaves.",
+  "useTheSampleAccount": "Use the sample account",
+  "shareMoneyWithSomeone": "Share money with someone?",
+  "createASpaceForA2": "Create a space for a home, trip, couple or group. You can always do this later.",
+  "yesCreateASharedSpace": "Yes, create a shared space",
+  "notRightNow": "Not right now",
+  "spacesAreReadyWhenYou": "Spaces are ready when you are",
+  "shareThisLinkTheInvite": "Share this link. The invite expires in seven days and can be revoked.",
+  "youCanCreateAShared": "You can create a shared space from the Spaces tab at any time.",
+  "pockitoWorksBeautifullyForPersonal": "Pockito works beautifully for personal money too.",
+  "youReAllSet": "You’re all set",
+  "yourOverviewAccountsSharedSpaces": "Your overview, accounts, shared spaces and activity are ready to explore.",
+  "enterYourNameToContinue": "Enter your name to continue",
+  "addAnAccountNameAnd": "Add an account name and valid balance",
+  "joinBookClub": "Join Book Club?",
+  "samInvitedYouToA": "Sam invited you to a 4-person shared space using EUR.",
+  "joinedBookClubLocally": "Joined Book Club locally",
+  "whatLeftYourAccounts": "What left your accounts",
+  "onlyYourShare": "Only your share",
+  "aCompleteSampleDatasetIs": "A complete sample dataset is ready",
+  "youCanAddEditSplit": "You can add, edit, split, settle and explore without connecting any real financial service.",
+  "confirmSettlement": "Confirm settlement",
+  "expenseCount": "{count, plural, =1{1 expense} other{{count} expenses}}",
+  "@expenseCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settlementCount": "{count, plural, =1{1 settlement} other{{count} settlements}}",
+  "@settlementCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "paymentCount": "{count, plural, =1{1 payment} other{{count} payments}}",
+  "@paymentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cycleCount": "{count, plural, =1{1 previous cycle} other{{count} previous cycles}}",
+  "@cycleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recordCount": "{count, plural, =1{1 record} other{{count} records}}",
+  "@recordCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "activeAccountCount": "{count, plural, =1{1 active account} other{{count} active accounts}}",
+  "@activeAccountCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "memberCountPlain": "{count, plural, =1{1 member} other{{count} members}}",
+  "@memberCountPlain": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "peopleCount": "{count, plural, =1{1 person} other{{count} people}}",
+  "@peopleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "connectionCount": "{count, plural, =1{1 connection} other{{count} connections}}",
+  "@connectionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetCount": "{count, plural, =1{1 active budget} other{{count} active budgets}}",
+  "@budgetCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoryCount": "{count, plural, =1{1 category} other{{count} categories}}",
+  "@categoryCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "methodCount": "{count, plural, =1{1 payment method} other{{count} payment methods}}",
+  "@methodCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "savedViewCount": "{count, plural, =1{1 saved} other{{count} saved}}",
+  "@savedViewCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "activeSubscriptionCount": "{count, plural, =1{1 active} other{{count} active}}",
+  "@activeSubscriptionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tagCount": "{count, plural, =1{1 tag} other{{count} tags}}",
+  "@tagCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chooseAnAccountX": "Choose an account",
+  "exportsExactlyWhatActivityIs": "Exports exactly what Activity is showing right now — {p0} after your filters, not the whole ledger.",
+  "@exportsExactlyWhatActivityIs": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "readFromThisReceipt": "Read from this receipt: {p0}",
+  "@readFromThisReceipt": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "spendingByCategory": "Spending by category. {p0}",
+  "@spendingByCategory": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "trendFromTo": "Trend from {p0} to {p1}. {p2}",
+  "@trendFromTo": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      },
+      "p2": {
+        "type": "Object"
+      }
+    }
+  },
+  "nobodyMatches": "Nobody matches “{p0}”",
+  "@nobodyMatches": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "nothingMatchesQuery": "Nothing matches “{p0}”.",
+  "@nothingMatchesQuery": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "searchCategoriesCount": "Search {p0} categories",
+  "@searchCategoriesCount": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "proposedByAwaiting": "Proposed by {p0} · awaiting {p1} confirmation",
+  "@proposedByAwaiting": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "moveOutOf": "Move out of {p0}",
+  "@moveOutOf": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "yourWord": "your",
+  "theirWord": "their",
+  "statusLabel": "Status",
+  "confirmedWord": "Confirmed",
+  "cancelledWord": "Cancelled",
+  "moveOutOfParent": "Move out of {p0}",
+  "@moveOutOfParent": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "unverifiedClient": "Unverified client",
+  "animatedSkeletons": "Animated skeletons",
+  "firstUseGuidance": "First-use guidance",
+  "localModeBanner": "Local-mode banner",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "aiApp": "AI app",
+  "kitoNoticed": "Kito noticed",
+  "goodMorning": "Good morning",
+  "goodAfternoon": "Good afternoon",
+  "goodEvening": "Good evening",
+  "spent": "Spent",
+  "x0Over": "{p0} over",
+  "@x0Over": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "x0Left": "{p0} left",
+  "@x0Left": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "x0X1OfX2X3X4": "{p0}: {p1} of {p2}. {p3}. {p4}",
+  "@x0X1OfX2X3X4": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      },
+      "p2": {
+        "type": "Object"
+      },
+      "p3": {
+        "type": "Object"
+      },
+      "p4": {
+        "type": "Object"
+      }
+    }
+  },
+  "ofX0": "of {p0}",
+  "@ofX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "settled": "Settled",
+  "youReOwed": "You're owed",
+  "youOwe": "You owe",
+  "transfer": "Transfer",
+  "uncategorised": "Uncategorised",
+  "shared": "Shared",
+  "yourShareX0": "Your share {p0}",
+  "@yourShareX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "x0OfX1X2": "{p0} of {p1} · {p2}",
+  "@x0OfX1X2": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      },
+      "p2": {
+        "type": "Object"
+      }
+    }
+  },
+  "lastX0": "last {p0}",
+  "@lastX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "retry": "Retry",
+  "addMoney": "Add money",
+  "expense": "Expense",
+  "income": "Income",
+  "betweenAccounts": "Between accounts",
+  "scan": "Scan",
+  "x0Results": "{p0} results",
+  "@x0Results": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "amount": "Amount",
+  "date": "Date",
+  "lastWeek": "Last week",
+  "searchAccounts": "Search accounts",
+  "searchCategories": "Search categories",
+  "inX0": "in {p0}",
+  "@inX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "searchX0Currencies": "Search {p0} currencies",
+  "@searchX0Currencies": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "all": "All",
+  "you": "You",
+  "x0You": "{p0} (you)",
+  "@x0You": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "searchMembers": "Search members",
+  "tags": "Tags",
+  "newTag": "New tag",
+  "clear": "Clear",
+  "voidedX0": "Voided {p0}.",
+  "@voidedX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "attachments": "Attachments",
+  "attach": "Attach",
+  "removeX0": "Remove {p0}",
+  "@removeX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "queued": "Queued",
+  "reading": "Reading",
+  "read": "Read",
+  "unreadable": "Unreadable",
+  "capturedX0": "Captured {p0}",
+  "@capturedX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "reason": "Reason",
+  "delete": "Delete",
+  "youCanTX0": "You can’t {p0}",
+  "@youCanTX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "saving": "Saving…",
+  "loading": "Loading",
+  "payX0": "Pay {p0}?",
+  "@payX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "x0WillBeRecordedFromX1ThisIsLocalPrototypeDa": "{p0} will be recorded from {p1}. This is local prototype data.",
+  "@x0WillBeRecordedFromX1ThisIsLocalPrototypeDa": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "recordPayment": "Record payment",
+  "view": "View",
+  "assistant": "Assistant",
+  "notifications": "Notifications",
+  "addAccount": "Add account",
+  "createSpace": "Create space",
+  "and": " and ",
+  "overdueByX0DayX1": "Overdue by {p0} day{p1}",
+  "@overdueByX0DayX1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "dueToday": "Due today",
+  "pay": "Pay",
+  "add": "Add",
+  "chooseMonth": "Choose month",
+  "x0MoneyEventX1": "{p0} money event{p1}",
+  "@x0MoneyEventX1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "clearFilters": "Clear filters",
+  "tag": "Tag",
+  "paymentMethod": "Payment method",
+  "includingVoided": "Including voided",
+  "draftsHidden": "Drafts hidden",
+  "savedX0": "Saved “{p0}”",
+  "@savedX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "savedViews": "Saved views",
+  "deleteX0": "Delete {p0}",
+  "@deleteX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "moneyEvent": "Money event",
+  "restored": "Restored",
+  "edit": "Edit",
+  "duplicate": "Duplicate",
+  "type": "Type",
+  "from": "From",
+  "notTracked": "Not tracked",
+  "to": "To",
+  "sent": "Sent",
+  "received": "Received",
+  "exchangeRate": "Exchange rate",
+  "rateCaptured": "Rate captured",
+  "fee": "Fee",
+  "none": "None",
+  "sharedSpace": "Shared space",
+  "addedVia": "Added via",
+  "aiConnection": "AI connection",
+  "paidWith": "Paid with",
+  "originalAmount": "Original amount",
+  "rateUsed": "Rate used",
+  "correctionReason": "Correction reason",
+  "note": "Note",
+  "receipts": "Receipts",
+  "settlement": "Settlement",
+  "whyOptional": "Why? (optional)",
+  "voidIt": "Void it",
+  "voidedX02": "Voided {p0}",
+  "@voidedX02": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "youReOffline": "You’re offline",
+  "description": "Description",
+  "source": "Source",
+  "merchant": "Merchant",
+  "noteOptional": "Note (optional)",
+  "toAccount": "To account",
+  "fromAccount": "From account",
+  "automatic": "Automatic",
+  "manual": "Manual",
+  "l1X0InX1": "1 {p0} in {p1}",
+  "@l1X0InX1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "x0UpdatedX1": "{p0} · updated {p1}",
+  "@x0UpdatedX1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "feeOptional": "Fee (optional)",
+  "destinationReceives": "Destination receives",
+  "fromX0X1Rate": "≈ from {p0} · {p1} rate",
+  "@fromX0X1Rate": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "notRecorded": "Not recorded",
+  "paidBy": "Paid by",
+  "split": "Split",
+  "walletConversion": "Wallet conversion",
+  "x0SpaceAmount": "{p0} space amount",
+  "@x0SpaceAmount": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "saveChanges": "Save changes",
+  "addIncome": "Add income",
+  "addTransfer": "Add transfer",
+  "addExpense": "Add expense",
+  "spaceDefault6040": "Space default · 60/40",
+  "equallyBetweenX0": "Equally between {p0}",
+  "@equallyBetweenX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "x0x1X2People": "{p0}{p1} · {p2} people",
+  "@x0x1X2People": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      },
+      "p2": {
+        "type": "Object"
+      }
+    }
+  },
+  "receiptX0": "Receipt · {p0}",
+  "@receiptX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "reviewReceipt": "Review receipt",
+  "scanReceipt": "Scan receipt",
+  "closeScanner": "Close scanner",
+  "captureReceipt": "Capture receipt",
+  "lowConfidenceMode": "Low-confidence mode ✓",
+  "failureMode": "Failure mode ✓",
+  "retake": "Retake",
+  "retryScan": "Retry scan",
+  "unreadableReceipt": "Unreadable receipt",
+  "filterActivity": "Filter activity",
+  "allTime": "All time",
+  "previousMonth": "Previous month",
+  "wallet": "Wallet",
+  "searchSpaces": "Search Spaces",
+  "searchTags": "Search tags",
+  "lifecycle": "Lifecycle",
+  "showVoided": "Show voided",
+  "showDrafts": "Show drafts",
+  "showEverything": "Show everything",
+  "applyX0Filters": "Apply {p0} filters",
+  "@applyX0Filters": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "splitExpense": "Split expense",
+  "x0InX1": "{p0} in {p1}",
+  "@x0InX1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "equal": "Equal",
+  "percentage": "Percentage",
+  "shares": "Shares",
+  "exactAmounts": "Exact amounts",
+  "itemized": "Itemized",
+  "x0You2": "{p0} · You",
+  "@x0You2": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "previewSplit": "Preview split",
+  "addLine": "Add line",
+  "keepEditing": "Keep editing",
+  "onePayer": "One payer",
+  "voidedX03": "Voided: {p0}",
+  "@voidedX03": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "voidX0": "Void {p0}?",
+  "@voidX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "open": "Open",
+  "archivedSpaces": "Archived spaces",
+  "youOweX0": "You owe {p0}",
+  "@youOweX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "x0OwesYou": "{p0} owes you",
+  "@x0OwesYou": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "settlementHistory": "Settlement history",
+  "members2": "Members",
+  "spaceSettings": "Space settings",
+  "money": "Money",
+  "people": "People",
+  "x0PreviousX1": "{p0} previous {p1}",
+  "@x0PreviousX1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "cycleHistory": "Cycle history",
+  "x0Expenses": "{p0} expenses",
+  "@x0Expenses": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "filter": "Filter",
+  "x0AddedX1": "{p0} added {p1}",
+  "@x0AddedX1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "balanceBreakdown": "Balance breakdown",
+  "paidX0ShareX1": "Paid {p0} · share {p1}",
+  "@paidX0ShareX1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "notYet": "Not yet",
+  "filterExpenses": "Filter expenses",
+  "unsettled": "Unsettled",
+  "allMembers": "All members",
+  "allCategories": "All categories",
+  "applyFilters": "Apply filters",
+  "editExpense": "Edit expense",
+  "historicalExpense": "Historical expense",
+  "recordedBy": "Recorded by",
+  "someone": "Someone",
+  "splitMethod": "Split method",
+  "sharedBudget": "Shared budget",
+  "inviteSomeone": "Invite someone",
+  "spaceName": "Space name",
+  "spaceCurrency": "Space currency",
+  "icon": "Icon",
+  "colour": "Colour",
+  "names": "Names",
+  "emails": "Emails",
+  "copy": "Copy",
+  "skipInvitation": "Skip invitation",
+  "x0Monthly": "{p0} monthly",
+  "@x0Monthly": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "membersInvites": "Members & invites",
+  "invite": "Invite",
+  "searchX0Members": "Search {p0} members",
+  "@searchX0Members": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "pendingInvitesX0": "Pending invites ({p0})",
+  "@pendingInvitesX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "x0AsX1X2X3": "{p0} · as {p1} · {p2}{p3}",
+  "@x0AsX1X2X3": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      },
+      "p2": {
+        "type": "Object"
+      },
+      "p3": {
+        "type": "Object"
+      }
+    }
+  },
+  "pending": "Pending",
+  "resend": "Resend",
+  "revoke": "Revoke",
+  "x0JoinedAsX1": "{p0} joined as {p1}",
+  "@x0JoinedAsX1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "simulateAcceptance": "Simulate acceptance",
+  "simulateDecline": "Simulate decline",
+  "invitationHistory": "Invitation history",
+  "x0AsX1": "{p0} · as {p1}",
+  "@x0AsX1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "inviteAgain": "Invite again",
+  "keepIt": "Keep it",
+  "viewBalances": "View balances",
+  "changeRole": "Change role",
+  "currentlyX0": "Currently {p0}",
+  "@currentlyX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "leaveX0": "Leave {p0}",
+  "@leaveX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "x0SRole": "{p0}’s role",
+  "@x0SRole": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "leaveX02": "Leave {p0}?",
+  "@leaveX02": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "leave": "Leave",
+  "youLeftX0": "You left {p0}",
+  "@youLeftX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "x0SBalance": "{p0}’s balance",
+  "@x0SBalance": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "currentCycle": "Current cycle",
+  "lifetime": "Lifetime",
+  "removeX02": "Remove {p0}?",
+  "@removeX02": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "remove": "Remove",
+  "x0Removed": "{p0} removed",
+  "@x0Removed": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "inviteToX0": "Invite to {p0}",
+  "@inviteToX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "name": "Name",
+  "email": "Email",
+  "joinAs": "Join as",
+  "x0DayX1": "{p0} day{p1}",
+  "@x0DayX1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "sendInvite": "Send invite",
+  "defaultSplit": "Default split",
+  "youAreX0": "You are {p0}",
+  "@youAreX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "activityLog": "Activity log",
+  "newExpenses": "New expenses",
+  "settlements": "Settlements",
+  "allActivity": "All activity",
+  "reopenSpace": "Reopen Space",
+  "archiveSpace": "Archive Space",
+  "renameSpace": "Rename space",
+  "exact": "Exact",
+  "archiveX0": "Archive {p0}?",
+  "@archiveX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "archive": "Archive",
+  "backToX0": "Back to {p0}",
+  "@backToX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "suggestedPayments": "Suggested payments",
+  "x0PayX1X2": "{p0} pay{p1} {p2}",
+  "@x0PayX1X2": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      },
+      "p2": {
+        "type": "Object"
+      }
+    }
+  },
+  "paidFrom": "Paid from",
+  "receivedIn": "Received in",
+  "walletMovement": "Wallet movement",
+  "reviewSettlement": "Review settlement",
+  "goBack": "Go back",
+  "x0PaymentX1RemainThisWalletMovementDidNotCou": "{p0} payment{p1} remain. This wallet movement did not count as spending.",
+  "@x0PaymentX1RemainThisWalletMovementDidNotCou": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "x0X1X2Total": "{p0} {p1} · {p2} total",
+  "@x0X1X2Total": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      },
+      "p2": {
+        "type": "Object"
+      }
+    }
+  },
+  "pastSettlements": "Past settlements",
+  "cycleClosedX0": "Cycle closed {p0}",
+  "@cycleClosedX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "newSettlement": "New settlement",
+  "x0PaidX1": "{p0} paid {p1}",
+  "@x0PaidX1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "aMember": "A member",
+  "settlementDetail": "Settlement detail",
+  "settlementConfirmed": "Settlement confirmed",
+  "settlementCancelled": "Settlement cancelled",
+  "x0ConfirmsThisBeforeAnyBalanceMoves": "{p0} confirms this before any balance moves.",
+  "@x0ConfirmsThisBeforeAnyBalanceMoves": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "onlyX0CanConfirmThis": "Only {p0} can confirm this",
+  "@onlyX0CanConfirmThis": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "theRecipient": "The recipient",
+  "cancelSettlement": "Cancel settlement",
+  "spaceCycles": "Space cycles",
+  "x0ExpensesX1": "{p0} expenses · {p1}",
+  "@x0ExpensesX1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "x0OfX1Budget": "{p0} of {p1} budget",
+  "@x0OfX1Budget": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "previousCyclesX0": "Previous cycles ({p0})",
+  "@previousCyclesX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "period": "Period",
+  "noBudget": "No budget",
+  "finalStatus": "Final status",
+  "everyoneSettled": "Everyone settled",
+  "memberContributions": "Member contributions",
+  "responsibleForX0": "Responsible for {p0}",
+  "@responsibleForX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "paidX0": "Paid {p0}",
+  "@paidX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "categories": "Categories",
+  "expensesX0": "Expenses ({p0})",
+  "@expensesX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "allTimeBalance": "All-time balance",
+  "cycle": "Cycle",
+  "breakdown": "Breakdown",
+  "x0PaidX12": "{p0} paid · {p1}",
+  "@x0PaidX12": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "viaX0": "via {p0}",
+  "@viaX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "x0Activity": "{p0} activity",
+  "@x0Activity": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "friendly": "Friendly",
+  "detailed": "Detailed",
+  "accountActions": "Account actions",
+  "reorderAccounts": "Reorder accounts",
+  "archivedAccounts": "Archived accounts",
+  "searchX0Accounts": "Search {p0} accounts",
+  "@searchX0Accounts": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "editAccount": "Edit account",
+  "archiveAccount": "Archive account",
+  "last30Days": "Last 30 days",
+  "ofX0Limit": "of {p0} limit",
+  "@ofX0Limit": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "savingsGoal": "Savings goal",
+  "x0OfX1": "{p0} of {p1}",
+  "@x0OfX1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "recentActivity": "Recent activity",
+  "accountName": "Account name",
+  "accountType": "Account type",
+  "currency": "Currency",
+  "openingBalance": "Opening balance",
+  "currentBalance": "Current balance",
+  "defaultAccount": "Default account",
+  "x0Added": "{p0} added",
+  "@x0Added": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "accountUpdated": "Account updated",
+  "x0X1Rate": "≈ {p0} · {p1} rate",
+  "@x0X1Rate": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "aiIntegrations": "AI & integrations",
+  "connections": "Connections",
+  "lastUsedX0": "Last used {p0}",
+  "@lastUsedX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "authorizationRequest": "Authorization request",
+  "verifiedApplication": "Verified application",
+  "transactions": "Transactions",
+  "spacesBalances": "Spaces & balances",
+  "analytics": "Analytics",
+  "allowX0": "Allow {p0}",
+  "@allowX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "donTAllow": "Don’t allow",
+  "financialChanges": "Financial changes",
+  "connected": "Connected",
+  "suspended": "Suspended",
+  "lastUsed": "Last used",
+  "reads": "Reads",
+  "writes": "Writes",
+  "permissions": "Permissions",
+  "disconnectApp": "Disconnect app",
+  "connectionPermissions": "Connection permissions",
+  "savePermissions": "Save permissions",
+  "disconnectX0": "Disconnect {p0}?",
+  "@disconnectX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "disconnect": "Disconnect",
+  "aiActivity": "AI activity",
+  "addedX0": "Added {p0}",
+  "@addedX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "pendingApprovals": "Pending approvals",
+  "recordedOn": "Recorded on",
+  "reject": "Reject",
+  "approve": "Approve",
+  "requestRejected": "Request rejected",
+  "addTag": "Add tag",
+  "searchX0Tags": "Search {p0} tags",
+  "@searchX0Tags": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "nothingMatchesX0": "Nothing matches “{p0}”",
+  "@nothingMatchesX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "onX0RecordX1": "On {p0} record{p1}",
+  "@onX0RecordX1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "renameX0": "Rename {p0}",
+  "@renameX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "tagAdded": "Tag added",
+  "tagRenamed": "Tag renamed",
+  "rename": "Rename",
+  "x0Deleted": "{p0} deleted",
+  "@x0Deleted": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "paymentMethods": "Payment methods",
+  "addOne": "Add one",
+  "card": "Card",
+  "bankTransfer": "Bank transfer",
+  "cash": "Cash",
+  "directDebit": "Direct debit",
+  "digitalWallet": "Digital wallet",
+  "x0Records": "{p0} records",
+  "@x0Records": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "saved": "Saved",
+  "importExport": "Import & export",
+  "export": "Export",
+  "import": "Import",
+  "lineX0X1": "Line {p0} · {p1}",
+  "@lineX0X1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "importX0RecordX1": "Import {p0} record{p1}",
+  "@importX0RecordX1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "x0Imported": "{p0} imported",
+  "@x0Imported": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "x0Copied": "{p0} copied",
+  "@x0Copied": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "correctX0": "Correct {p0}",
+  "@correctX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "balanceCorrected": "Balance corrected",
+  "reportingTotal": "Reporting total",
+  "reportingCurrency": "Reporting currency",
+  "notCombined": "Not combined",
+  "createBudget": "Create budget",
+  "personal": "Personal",
+  "sharedSpaces": "Shared spaces",
+  "editBudget": "Edit budget",
+  "deleteBudget": "Delete budget",
+  "used": "Used",
+  "limit": "Limit",
+  "carriedOver": "Carried over",
+  "lastX02": "Last {p0}",
+  "@lastX02": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "scope": "Scope",
+  "over": "Over",
+  "close": "Close",
+  "onTrack": "On track",
+  "includedSpending": "Included spending",
+  "monthlyHistory": "Monthly history",
+  "allExpenses": "All expenses",
+  "allWallets": "all wallets",
+  "x0X1Only": "{p0} · {p1} only",
+  "@x0X1Only": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "deleteX02": "Delete {p0}?",
+  "@deleteX02": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "budgetName": "Budget name",
+  "wallets": "Wallets",
+  "allWallets2": "All wallets",
+  "x0Limit": "{p0} limit",
+  "@x0Limit": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "resets": "Resets",
+  "everyX0Days": "Every {p0} days",
+  "@everyX0Days": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "fewerDays": "Fewer days",
+  "moreDays": "More days",
+  "alertAt80": "Alert at 80%",
+  "alertAt100": "Alert at 100%",
+  "subscriptions": "Subscriptions",
+  "active": "Active",
+  "addSubscription": "Add subscription",
+  "paused": "Paused",
+  "editSubscription": "Edit subscription",
+  "pause": "Pause",
+  "resume": "Resume",
+  "nextDue": "Next due",
+  "notScheduled": "Not scheduled",
+  "unknown": "Unknown",
+  "started": "Started",
+  "skipNext": "Skip next",
+  "paymentHistory": "Payment history",
+  "everyYear": "Every year",
+  "everyWeek": "Every week",
+  "everyDay": "Every day",
+  "everyMonth": "Every month",
+  "everyX0Months": "Every {p0} months",
+  "@everyX0Months": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "recordX0": "Record {p0}?",
+  "@recordX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "record": "Record",
+  "skip": "Skip",
+  "billingCurrency": "Billing currency",
+  "cadence": "Cadence",
+  "addCategory": "Add category",
+  "editCategory": "Edit category",
+  "saveCategory": "Save category",
+  "x0OverBudget": "{p0} over budget",
+  "@x0OverBudget": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "x0Remaining": "{p0} remaining",
+  "@x0Remaining": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "monthlyCost": "Monthly cost",
+  "repeats": "Repeats",
+  "subcategory": "Subcategory",
+  "pockitoCategory": "Pockito category",
+  "customCategory": "Custom category",
+  "showAgain": "Show again",
+  "hide": "Hide",
+  "x0Hidden": "{p0} hidden",
+  "@x0Hidden": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "nestX0Under": "Nest {p0} under",
+  "@nestX0Under": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "x0NowSitsUnderX1": "{p0} now sits under {p1}",
+  "@x0NowSitsUnderX1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "moveTo": "Move to",
+  "x0MoneyEvents": "{p0} money events",
+  "@x0MoneyEvents": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "x0Active": "{p0} active",
+  "@x0Active": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "defaultCurrency": "Default currency",
+  "x0ReportingOnly": "{p0} · Reporting only",
+  "@x0ReportingOnly": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "exchangeRates": "Exchange rates",
+  "automaticX0": "Automatic · {p0}",
+  "@automaticX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "manualRates": "Manual rates",
+  "preferences": "Preferences",
+  "appearance": "Appearance",
+  "language": "Language",
+  "aboutPockito": "About Pockito",
+  "prototypeTools": "Prototype tools",
+  "prototype": "Prototype",
+  "replayOnboarding": "Replay onboarding",
+  "invitationReview": "Invitation review",
+  "stateCatalogue": "State catalogue",
+  "reset": "Reset",
+  "editProfile": "Edit profile",
+  "displayName": "Display name",
+  "country": "Country",
+  "saveProfile": "Save profile",
+  "reportingInX0": "Reporting in {p0}",
+  "@reportingInX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "providerX0": "Provider · {p0}",
+  "@providerX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "lastUpdatedX0": "Last updated · {p0}",
+  "@lastUpdatedX0": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "manualConfiguration": "Manual configuration",
+  "preview": "Preview",
+  "pockitoSurface": "Pockito surface",
+  "language2": "Language · 言語",
+  "privacy": "Privacy",
+  "terms": "Terms",
+  "licences": "Licences",
+  "allQuiet": "All quiet",
+  "components": "Components",
+  "moneyTogether": "Money, together.",
+  "bankAccount": "Bank account",
+  "getStarted": "Get started",
+  "light": "Light",
+  "dark": "Dark",
+  "savings": "Savings",
+  "copyLink": "Copy link",
+  "noPressure": "No pressure",
+  "openPockito": "Open Pockito",
+  "spaceInvitation": "Space invitation",
+  "l4People": "4 people",
+  "invitedBy": "Invited by",
+  "joinSpace": "Join space",
+  "decline": "Decline",
+  "cashFlow": "Cash flow",
+  "yourSpending": "Your spending",
+  "defaultLabel": "Default",
+  "continueLabel": "Continue",
+  "home": "Home",
+  "trip": "Trip",
+  "couple": "Couple",
+  "or": "or",
+  "tryAgain": "Try again",
+  "prototypeMarketSnapshot": "Prototype market snapshot",
+  "cancel": "Cancel",
+  "notNow": "Not now",
+  "onTrackForX0ByTheEndOfTheX1": "On track for {p0} by the end of the {p1}.",
+  "theSelectedAccount": "the selected account",
+  "expiresToday": "expires today",
+  "expiresInX0Days": "expires in {p0} days",
+  "resentX0Times": " · resent {p0}×",
+  "@onTrackForX0ByTheEndOfTheX1": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      },
+      "p1": {
+        "type": "Object"
+      }
+    }
+  },
+  "@expiresInX0Days": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "@resentX0Times": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "periodNounWeek": "week",
+  "periodNounMonth": "month",
+  "periodNounQuarter": "quarter",
+  "periodNounYear": "year",
+  "periodNounPeriod": "period",
+  "awaitingYourConfirmation": "Awaiting your confirmation",
+  "awaitingTheirConfirmation": "Awaiting their confirmation",
+  "cancelled": "Cancelled",
+  "x0JoinedTheSpace": "{p0} joined the space",
+  "@x0JoinedTheSpace": {
+    "placeholders": {
+      "p0": {
+        "type": "Object"
+      }
+    }
+  },
+  "accountTypeBank": "Bank",
+  "accountTypeCard": "Card",
+  "accountTypeCash": "Cash",
+  "accountTypeSavings": "Savings",
+  "accountTypeDigital": "Digital",
+  "statusVoided": "Voided",
+  "statusDraft": "Draft",
+  "budgetsTitle": "Budgets",
+  "moreTitle": "More",
+  "notifUnread": "Unread",
+  "notifToday": "Today",
+  "notifEarlier": "Earlier",
+  "categoryLabel": "Category",
+  "addHintMoneyOut": "Money out",
+  "addHintMoneyIn": "Money in",
+  "accountLabel": "Account",
+  "spaceLabel": "Space",
+  "budgetLabel": "Budget",
+  "sharedExpenseLabel": "Shared expense",
+  "budgetDaysLeft": "Days left",
+  "budgetDailyAllowance": "Daily allowance",
+  "languageEnglish": "English",
+  "profileSampleCountry": "Germany",
+  "aboutVersion": "Prototype 0.1.0",
+  "budgetPace": "Pace",
+  "sampleMemberNames": "Kana, Fran",
+  "eventTypeExpense": "Expense",
+  "eventTypeIncome": "Income",
+  "eventTypeTransfer": "Transfer",
+  "eventTypeSettlement": "Settlement",
+  "eventTypeAdjustment": "Adjustment",
+  "quickAddExpense": "Quick expense",
+  "quickAddMoreOptions": "More options",
+  "quickAddSaved": "Added",
+  "budgetUsed": "used",
+  "subscriptionsOverdue": "Overdue",
+  "subscriptionsDueSoon": "Due soon",
+  "subscriptionsLater": "Later",
+  "dueX0": "Due {x0}",
+  "@dueX0": {
+    "placeholders": {
+      "x0": {
+        "type": "String"
+      }
+    }
+  },
+  "aiVerified": "Verified",
+  "onboardingStepX0OfX1": "Step {x0} of {x1}",
+  "@onboardingStepX0OfX1": {
+    "placeholders": {
+      "x0": {
+        "type": "int"
+      },
+      "x1": {
+        "type": "int"
+      }
+    }
+  },
+  "colourOptionX0": "Colour {x0}",
+  "@colourOptionX0": {
+    "placeholders": {
+      "x0": {
+        "type": "int"
+      }
+    }
+  },
+  "changeAvatar": "Change avatar",
+  "balanceHidden": "Balance hidden",
+  "privacyHideBalances": "Hide balances",
+  "privacyHideBalancesDetail": "Mask every amount without changing the layout."
+}

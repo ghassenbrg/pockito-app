@@ -1,0 +1,843 @@
+<title>Pockito Design System</title>
+<style>
+:root{
+  --pk-slate-50:#F8FAFC;--pk-slate-100:#F1F5F9;--pk-slate-200:#E2E8F0;--pk-slate-300:#CBD5E1;
+  --pk-slate-400:#94A3B8;--pk-slate-500:#64748B;--pk-slate-600:#475569;--pk-slate-700:#334155;
+  --pk-slate-800:#1E293B;--pk-slate-900:#0F172A;--pk-slate-950:#020617;
+  --pk-indigo-50:#EEF2FF;--pk-indigo-100:#E0E7FF;--pk-indigo-200:#C7D2FE;--pk-indigo-300:#A5B4FC;
+  --pk-indigo-400:#818CF8;--pk-indigo-500:#6366F1;--pk-indigo-600:#4F46E5;--pk-indigo-700:#4338CA;
+  --pk-indigo-800:#3730A3;--pk-indigo-900:#312E81;--pk-indigo-950:#1E1B4B;
+  --pk-cyan-400:#22D3EE;--pk-cyan-500:#06B6D4;--pk-cyan-600:#0891B2;
+  --pk-amber-50:#FFFBEB;--pk-amber-100:#FEF3C7;--pk-amber-200:#FDE68A;--pk-amber-300:#FCD34D;
+  --pk-amber-400:#FBBF24;--pk-amber-500:#F59E0B;--pk-amber-600:#D97706;--pk-amber-700:#B45309;
+  --pk-emerald-400:#34D399;--pk-emerald-600:#059669;--pk-emerald-700:#047857;
+  --pk-rose-400:#FB7185;--pk-rose-500:#F43F5E;--pk-rose-600:#E11D48;
+
+  --pk-brand-primary:var(--pk-indigo-600);--pk-brand-accent:var(--pk-amber-400);
+  --pk-brand-secondary:var(--pk-cyan-500);--pk-brand-ink:var(--pk-slate-900);
+  --pk-brand-gradient:linear-gradient(135deg,#4F46E5 0%,#06B6D4 100%);
+
+  --pk-bg-page:var(--pk-slate-50);--pk-bg-surface:#fff;--pk-bg-sunken:var(--pk-slate-100);
+  --pk-bg-hero:var(--pk-indigo-600);
+  --pk-text-primary:var(--pk-slate-900);--pk-text-secondary:var(--pk-slate-600);
+  --pk-text-tertiary:var(--pk-slate-500);--pk-text-link:var(--pk-indigo-600);
+  --pk-text-on-hero:#fff;--pk-text-on-hero-muted:rgba(255,255,255,.72);
+  --pk-border-subtle:var(--pk-slate-200);--pk-border-default:var(--pk-slate-300);
+  --pk-shared:var(--pk-amber-400);--pk-shared-strong:var(--pk-amber-700);
+  --pk-shared-surface:var(--pk-amber-50);--pk-shared-border:var(--pk-amber-200);
+  --pk-balance-owed:var(--pk-emerald-700);--pk-balance-owing:var(--pk-amber-700);
+  --pk-balance-settled:var(--pk-slate-500);
+  --pk-danger:var(--pk-rose-600);
+  --pk-font-sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  --pk-font-mono:"SF Mono",ui-monospace,"Roboto Mono",Menlo,monospace;
+  --pk-radius-sm:8px;--pk-radius-md:12px;--pk-radius-lg:16px;--pk-radius-xl:20px;--pk-radius-full:9999px;
+  --pk-elevation-sm:0 1px 2px 0 rgba(15,23,42,.05);
+  --pk-elevation-md:0 4px 12px -2px rgba(15,23,42,.08),0 2px 4px -2px rgba(15,23,42,.04);
+  --pk-elevation-lg:0 12px 24px -6px rgba(15,23,42,.12),0 4px 8px -4px rgba(15,23,42,.06);
+  --pk-elevation-fab:0 8px 20px -4px rgba(251,191,36,.44);
+}
+:root[data-theme="dark"]{
+  --pk-bg-page:var(--pk-slate-950);--pk-bg-surface:var(--pk-slate-900);--pk-bg-sunken:var(--pk-slate-950);
+  --pk-text-primary:var(--pk-slate-50);--pk-text-secondary:var(--pk-slate-400);
+  --pk-text-tertiary:var(--pk-slate-400);--pk-text-link:var(--pk-indigo-400);
+  --pk-border-subtle:var(--pk-slate-800);--pk-border-default:var(--pk-slate-700);
+  --pk-shared-strong:var(--pk-amber-300);--pk-shared-surface:#3E2E0B;--pk-shared-border:#78500B;
+  --pk-balance-owed:var(--pk-emerald-400);--pk-balance-owing:var(--pk-amber-300);
+  --pk-balance-settled:var(--pk-slate-400);--pk-danger:var(--pk-rose-400);
+  --pk-elevation-sm:0 1px 2px 0 rgba(0,0,0,.4);
+  --pk-elevation-md:0 4px 12px -2px rgba(0,0,0,.5);
+  --pk-elevation-lg:0 12px 24px -6px rgba(0,0,0,.6);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --pk-bg-page:var(--pk-slate-950);--pk-bg-surface:var(--pk-slate-900);--pk-bg-sunken:var(--pk-slate-950);
+    --pk-text-primary:var(--pk-slate-50);--pk-text-secondary:var(--pk-slate-400);
+    --pk-text-tertiary:var(--pk-slate-400);--pk-text-link:var(--pk-indigo-400);
+    --pk-border-subtle:var(--pk-slate-800);--pk-border-default:var(--pk-slate-700);
+    --pk-shared-strong:var(--pk-amber-300);--pk-shared-surface:#3E2E0B;--pk-shared-border:#78500B;
+    --pk-balance-owed:var(--pk-emerald-400);--pk-balance-owing:var(--pk-amber-300);
+    --pk-balance-settled:var(--pk-slate-400);--pk-danger:var(--pk-rose-400);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--pk-bg-page);color:var(--pk-text-primary);
+  font-family:var(--pk-font-sans);font-size:15px;line-height:1.55;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:0 24px 96px}
+.money{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+
+/* header */
+header{padding:56px 0 40px;border-bottom:1px solid var(--pk-border-subtle);margin-bottom:48px}
+.brand{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+.mark{width:56px;height:56px;border-radius:12px;background:var(--pk-brand-gradient);
+  position:relative;flex:none}
+.mark::before{content:"";position:absolute;left:15.6%;top:31.25%;width:68.75%;height:37.5%;
+  background:rgba(255,255,255,.95);border-radius:9.4%/17%}
+.mark::after{content:"";position:absolute;left:64.8%;top:43%;width:14%;height:14%;
+  background:var(--pk-amber-400);border-radius:50%}
+h1{font-size:32px;line-height:1.15;font-weight:800;letter-spacing:-.025em;margin:0}
+.sub{color:var(--pk-text-secondary);font-size:15px;max-width:62ch;margin:0}
+.vtag{display:inline-block;font-family:var(--pk-font-mono);font-size:11px;
+  background:var(--pk-bg-sunken);border:1px solid var(--pk-border-subtle);
+  padding:3px 8px;border-radius:6px;color:var(--pk-text-secondary);margin-left:10px;vertical-align:6px}
+
+/* sections */
+section{margin-bottom:64px;scroll-margin-top:24px}
+h2{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--pk-text-tertiary);margin:0 0 6px}
+h3{font-size:22px;font-weight:700;letter-spacing:-.015em;margin:0 0 10px}
+h4{font-size:15px;font-weight:600;margin:32px 0 12px}
+p{margin:0 0 16px;color:var(--pk-text-secondary);max-width:68ch}
+p.lead{color:var(--pk-text-primary);font-size:16px}
+code{font-family:var(--pk-font-mono);font-size:.86em;background:var(--pk-bg-sunken);
+  padding:2px 6px;border-radius:5px;border:1px solid var(--pk-border-subtle);
+  color:var(--pk-text-primary)}
+.rule{border:0;border-top:1px solid var(--pk-border-subtle);margin:0 0 28px}
+
+/* swatches */
+.ramp{display:grid;grid-template-columns:repeat(11,1fr);gap:0;border-radius:var(--pk-radius-md);
+  overflow:hidden;border:1px solid var(--pk-border-subtle);margin-bottom:8px}
+.ramp div{height:56px;display:flex;align-items:flex-end;justify-content:center;
+  padding-bottom:5px;font-size:9.5px;font-family:var(--pk-font-mono)}
+.ramp-l{font-size:12px;color:var(--pk-text-tertiary);margin-bottom:20px;
+  display:flex;justify-content:space-between}
+
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.tok{background:var(--pk-bg-surface);border:1px solid var(--pk-border-subtle);
+  border-radius:var(--pk-radius-md);overflow:hidden}
+.tok-c{height:64px}
+.tok-b{padding:10px 12px}
+.tok-n{font-family:var(--pk-font-mono);font-size:11.5px;color:var(--pk-text-primary)}
+.tok-v{font-family:var(--pk-font-mono);font-size:10.5px;color:var(--pk-text-tertiary);margin-top:2px}
+.tok-d{font-size:11.5px;color:var(--pk-text-secondary);margin-top:6px;line-height:1.45}
+
+/* type specimens */
+.spec{display:flex;align-items:baseline;gap:20px;padding:14px 0;
+  border-bottom:1px solid var(--pk-border-subtle)}
+.spec:last-child{border-bottom:0}
+.spec-m{font-family:var(--pk-font-mono);font-size:10.5px;color:var(--pk-text-tertiary);
+  width:190px;flex:none;line-height:1.5}
+
+/* component demos */
+.demo{background:var(--pk-bg-surface);border:1px solid var(--pk-border-subtle);
+  border-radius:var(--pk-radius-lg);padding:24px;margin-bottom:12px}
+.demo-lbl{font-family:var(--pk-font-mono);font-size:10.5px;color:var(--pk-text-tertiary);
+  margin-bottom:14px;letter-spacing:.04em}
+
+/* app primitives */
+.card{background:var(--pk-bg-surface);border:1px solid var(--pk-border-subtle);
+  border-radius:var(--pk-radius-lg)}
+.hero{background:var(--pk-bg-hero);color:var(--pk-text-on-hero);
+  border-radius:var(--pk-radius-xl);padding:20px}
+.hero-l{font-size:15px;color:var(--pk-text-on-hero-muted);margin-bottom:6px}
+.hero-a{font-size:40px;line-height:44px;font-weight:800;letter-spacing:-.02em}
+.hero-s{font-size:15px;color:var(--pk-text-on-hero-muted);margin-top:6px}
+
+.btn{border:0;border-radius:var(--pk-radius-md);font-family:var(--pk-font-sans);
+  font-size:15px;font-weight:600;height:44px;padding:0 20px;cursor:pointer;
+  transition:background 150ms cubic-bezier(.4,0,.2,1)}
+.btn-p{background:var(--pk-brand-primary);color:#fff}
+.btn-p:hover{background:var(--pk-indigo-700)}
+.btn-s{background:var(--pk-indigo-50);color:var(--pk-brand-primary)}
+.btn-t{background:transparent;color:var(--pk-brand-primary)}
+.btn-a{background:var(--pk-brand-accent);color:var(--pk-slate-900)}
+.btn-d{background:var(--pk-danger);color:#fff}
+:root[data-theme="dark"] .btn-s{background:var(--pk-indigo-950);color:var(--pk-indigo-300)}
+
+.row{display:flex;align-items:center;gap:12px;padding:12px 16px;
+  border-bottom:1px solid var(--pk-border-subtle)}
+.row:last-child{border-bottom:0}
+.gl{width:40px;height:40px;border-radius:var(--pk-radius-full);display:grid;
+  place-items:center;font-size:17px;flex:none}
+.rb{flex:1;min-width:0}
+.rt{font-size:15px;font-weight:500}
+.rs{font-size:13px;color:var(--pk-text-tertiary);margin-top:2px}
+.ra{text-align:right;flex:none}
+.rv{font-size:15px;font-weight:600}
+.rn{font-size:11.5px;color:var(--pk-text-tertiary);margin-top:3px}
+
+.track{height:8px;background:var(--pk-bg-sunken);border-radius:var(--pk-radius-full);overflow:hidden}
+.fill{height:100%;border-radius:var(--pk-radius-full)}
+
+.sr{height:2px;background:var(--pk-border-subtle);border-radius:2px;overflow:hidden;display:flex}
+.sr-m{height:100%;background:var(--pk-shared);min-width:4%}
+
+.pill{display:inline-flex;align-items:center;font-size:11px;font-weight:600;
+  padding:3px 8px;border-radius:6px;letter-spacing:.02em}
+.chip{display:inline-flex;align-items:center;height:32px;padding:0 14px;
+  border-radius:var(--pk-radius-full);border:1px solid var(--pk-border-default);
+  background:transparent;color:var(--pk-text-secondary);font-size:13px;
+  font-family:var(--pk-font-sans);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--pk-brand-accent);border-color:var(--pk-brand-accent);
+  color:var(--pk-slate-900);font-weight:600}
+
+.nudge{background:var(--pk-shared-surface);border:1px solid var(--pk-shared-border);
+  border-radius:var(--pk-radius-lg);padding:14px 16px;display:flex;align-items:center;gap:12px}
+
+/* phone */
+.phone-wrap{display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap}
+.phone{width:340px;flex:none;background:var(--pk-bg-page);border:1px solid var(--pk-border-default);
+  border-radius:28px;overflow:hidden;box-shadow:var(--pk-elevation-lg)}
+.ph-top{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px}
+.ph-brand{display:flex;align-items:center;gap:10px}
+.ph-mark{width:32px;height:32px;border-radius:8px;background:var(--pk-brand-gradient);
+  position:relative;flex:none}
+.ph-mark::before{content:"";position:absolute;left:15.6%;top:31.25%;width:68.75%;height:37.5%;
+  background:rgba(255,255,255,.95);border-radius:2px}
+.ph-mark::after{content:"";position:absolute;left:64.8%;top:43%;width:14%;height:14%;
+  background:var(--pk-amber-400);border-radius:50%}
+.ph-body{padding:0 16px 16px}
+.ph-sec{font-size:15px;font-weight:700;margin:20px 0 8px;display:flex;
+  justify-content:space-between;align-items:baseline}
+.ph-link{font-size:13px;color:var(--pk-text-link);font-weight:500}
+.ph-nav{display:flex;align-items:center;border-top:1px solid var(--pk-border-subtle);
+  padding:8px 0 12px;background:var(--pk-bg-surface)}
+.ph-nv{flex:1;text-align:center;font-size:10px;color:var(--pk-text-tertiary)}
+.ph-nv.on{color:var(--pk-brand-primary);font-weight:600}
+.ph-nv span{display:block;font-size:17px;margin-bottom:3px}
+.fab{width:48px;height:48px;border-radius:50%;background:var(--pk-brand-accent);
+  color:var(--pk-slate-900);display:grid;place-items:center;font-size:24px;
+  margin:-18px auto 0;box-shadow:var(--pk-elevation-fab)}
+
+.notes{background:var(--pk-bg-surface);border:1px solid var(--pk-border-subtle);
+  border-left:3px solid var(--pk-brand-accent);border-radius:0 var(--pk-radius-md) var(--pk-radius-md) 0;
+  padding:16px 18px}
+.notes p:last-child{margin-bottom:0}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-weight:600;padding:9px 12px;border-bottom:1px solid var(--pk-border-default);
+  color:var(--pk-text-secondary);font-size:12px;letter-spacing:.03em;text-transform:uppercase}
+td{padding:9px 12px;border-bottom:1px solid var(--pk-border-subtle);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.n{font-family:var(--pk-font-mono);font-size:12px;white-space:nowrap}
+.ok{color:var(--pk-balance-owed);font-weight:600}
+.no{color:var(--pk-danger);font-weight:600}
+
+/* icons */
+.pk-icon{width:24px;height:24px;display:inline-block;vertical-align:middle;flex:none;
+  fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pk-icon--sm{width:20px;height:20px;stroke-width:2.1}
+.pk-icon--xs{width:16px;height:16px;stroke-width:2.3}
+.pk-icon--lg{width:28px;height:28px;stroke-width:1.9}
+.pk-icon--fill{fill:currentColor;stroke:currentColor;stroke-width:1.4;stroke-linejoin:round}
+.icon-cell{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;
+  border:1px solid var(--pk-border-subtle);border-radius:var(--pk-radius-md);
+  background:var(--pk-bg-surface);text-align:center}
+.icon-cell code{font-size:10px;background:none;border:0;padding:0;color:var(--pk-text-tertiary);
+  word-break:break-all;line-height:1.3}
+.icon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+
+.theme-btn{position:fixed;top:20px;right:20px;z-index:10;height:36px;padding:0 14px;
+  border-radius:var(--pk-radius-full);border:1px solid var(--pk-border-default);
+  background:var(--pk-bg-surface);color:var(--pk-text-primary);font-size:12.5px;
+  font-family:var(--pk-font-sans);cursor:pointer;box-shadow:var(--pk-elevation-sm)}
+:where(button):focus-visible{outline:2px solid var(--pk-brand-primary);outline-offset:2px}
+@media (max-width:820px){
+  .g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(2,1fr)}
+  .ramp{grid-template-columns:repeat(6,1fr)}
+  .spec{flex-direction:column;gap:4px}.spec-m{width:auto}
+  .wrap{padding:0 16px 64px}
+}
+</style>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+<!--
+  Pockito icon set — 24×24 grid, 2px stroke, round caps and joins.
+  Style follows Material Symbols Rounded, matching life-os-mobile's Flutter `Icons.*` usage
+  (outlined for objects, rounded for chrome). Drawn as strokes so one set serves every
+  size and colour; `.pk-icon--fill` variants exist only where a filled mark is required
+  (active nav, category circles).
+
+  Usage:  <svg class="pk-icon"><use href="icons.svg#i-home"/></svg>
+-->
+
+<!-- ── navigation ─────────────────────────────────────────── -->
+<symbol id="i-home" viewBox="0 0 24 24">
+  <path d="M3.5 10.6 12 4l8.5 6.6V19a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/>
+  <path d="M9.5 21v-5.5h5V21"/>
+</symbol>
+<symbol id="i-wallet" viewBox="0 0 24 24">
+  <path d="M3.5 8.5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/>
+  <path d="M20.5 10.5h-3.75a2.5 2.5 0 0 0 0 5h3.75"/>
+</symbol>
+<symbol id="i-spaces" viewBox="0 0 24 24">
+  <circle cx="9" cy="8.5" r="3.2"/>
+  <path d="M3.2 19.5a5.8 5.8 0 0 1 11.6 0"/>
+  <path d="M16.2 6.1a3.2 3.2 0 0 1 0 6.2"/>
+  <path d="M17.6 14.3a5.8 5.8 0 0 1 3.2 5.2"/>
+</symbol>
+<symbol id="i-activity" viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="8.5"/>
+  <path d="M12 7.2V12l3.2 2"/>
+</symbol>
+<symbol id="i-plus" viewBox="0 0 24 24">
+  <path d="M12 5.5v13M5.5 12h13"/>
+</symbol>
+
+<!-- ── chrome ─────────────────────────────────────────────── -->
+<symbol id="i-bell" viewBox="0 0 24 24">
+  <path d="M18 9.5a6 6 0 1 0-12 0c0 4.6-1.8 6-1.8 6h15.6s-1.8-1.4-1.8-6"/>
+  <path d="M13.8 19a2.1 2.1 0 0 1-3.6 0"/>
+</symbol>
+<symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9.5 5.5 6.5 6.5-6.5 6.5"/></symbol>
+<symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m5.5 9.5 6.5 6.5 6.5-6.5"/></symbol>
+<symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M20 12H4.5M11 5.5 4.5 12l6.5 6.5"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m4.5 12.5 5 5 10-11"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.4-4.4"/></symbol>
+<symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6.5h16M7 12h10M10 17.5h4"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24">
+  <circle cx="12" cy="5" r="1.4" fill="currentColor" stroke="none"/>
+  <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/>
+  <circle cx="12" cy="19" r="1.4" fill="currentColor" stroke="none"/>
+</symbol>
+<symbol id="i-tune" viewBox="0 0 24 24">
+  <path d="M4 8h8M17.5 8H20M4 16h3.5M13 16h7"/>
+  <circle cx="14.5" cy="8" r="2.4"/><circle cx="10" cy="16" r="2.4"/>
+</symbol>
+<symbol id="i-info" viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5"/>
+  <circle cx="12" cy="7.9" r="1.1" fill="currentColor" stroke="none"/>
+</symbol>
+<symbol id="i-warning" viewBox="0 0 24 24">
+  <path d="M12 3.8 2.8 19.6a1 1 0 0 0 .87 1.5h16.66a1 1 0 0 0 .87-1.5z"/>
+  <path d="M12 9.5v4.4"/><circle cx="12" cy="17.4" r="1.05" fill="currentColor" stroke="none"/>
+</symbol>
+<symbol id="i-trash" viewBox="0 0 24 24">
+  <path d="M4.5 6.5h15M9.5 6.5V4.8a1.3 1.3 0 0 1 1.3-1.3h2.4a1.3 1.3 0 0 1 1.3 1.3v1.7"/>
+  <path d="M6.5 6.5 7.4 20a1.5 1.5 0 0 0 1.5 1.4h6.2a1.5 1.5 0 0 0 1.5-1.4l.9-13.5"/>
+</symbol>
+<symbol id="i-edit" viewBox="0 0 24 24">
+  <path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14.5 5.5l4 4"/>
+</symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24">
+  <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"/>
+  <path d="M3.5 10.5h17M8 3.5v4M16 3.5v4"/>
+</symbol>
+<symbol id="i-link" viewBox="0 0 24 24">
+  <path d="M10.5 13.5a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.6 1.6"/>
+  <path d="M13.5 10.5a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.6-1.6"/>
+</symbol>
+<symbol id="i-shield" viewBox="0 0 24 24">
+  <path d="M12 3.2 4.5 6v6.4c0 4.4 3.1 7.6 7.5 8.9 4.4-1.3 7.5-4.5 7.5-8.9V6z"/>
+  <path d="m9 12 2.2 2.2L15.2 10"/>
+</symbol>
+<symbol id="i-sparkle" viewBox="0 0 24 24">
+  <path d="M12 3.5 13.9 9 19.5 11l-5.6 2L12 18.5 10.1 13 4.5 11 10.1 9z"/>
+  <path d="M18.5 16.5 19.3 18.7 21.5 19.5 19.3 20.3 18.5 22.5 17.7 20.3 15.5 19.5 17.7 18.7z"/>
+</symbol>
+
+<!-- ── finance ────────────────────────────────────────────── -->
+<symbol id="i-receipt" viewBox="0 0 24 24">
+  <path d="M5.5 3.5h13v17.2l-2.2-1.5-2.2 1.5-2.1-1.5-2.2 1.5-2.3-1.5z"/>
+  <path d="M9 8.5h6M9 12.5h6"/>
+</symbol>
+<symbol id="i-transfer" viewBox="0 0 24 24">
+  <path d="M4 8.5h15M16 5.5l3 3-3 3"/>
+  <path d="M20 15.5H5M8 12.5l-3 3 3 3"/>
+</symbol>
+<symbol id="i-settle" viewBox="0 0 24 24">
+  <rect x="2.5" y="6.5" width="14.5" height="9" rx="2"/>
+  <circle cx="9.75" cy="11" r="2.2"/>
+  <path d="M21.5 9.5v7a2 2 0 0 1-2 2H6.5"/>
+</symbol>
+<symbol id="i-budget" viewBox="0 0 24 24">
+  <path d="M12 3.6v8.4h8.4"/>
+  <path d="M20.3 14.6A8.6 8.6 0 1 1 9.4 3.9"/>
+</symbol>
+<symbol id="i-repeat" viewBox="0 0 24 24">
+  <path d="M4 9.5V8a2.5 2.5 0 0 1 2.5-2.5H18M15 2.5l3 3-3 3"/>
+  <path d="M20 14.5V16a2.5 2.5 0 0 1-2.5 2.5H6M9 21.5l-3-3 3-3"/>
+</symbol>
+<symbol id="i-card" viewBox="0 0 24 24">
+  <rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/>
+  <path d="M6.5 14.5h3"/>
+</symbol>
+<symbol id="i-bank" viewBox="0 0 24 24">
+  <path d="M3 9.5 12 4l9 5.5"/>
+  <path d="M5.5 9.8V19M10 9.8V19M14 9.8V19M18.5 9.8V19"/>
+  <path d="M3 19h18"/>
+</symbol>
+<symbol id="i-cash" viewBox="0 0 24 24">
+  <rect x="2.5" y="6" width="19" height="12" rx="2"/>
+  <circle cx="12" cy="12" r="2.6"/><path d="M6 12h.01M18 12h.01"/>
+</symbol>
+<symbol id="i-savings" viewBox="0 0 24 24">
+  <path d="M19.5 11.8c0-3.7-3.4-6.6-7.6-6.6S4.3 8.1 4.3 11.8c0 2 1 3.8 2.6 5v2.4a1 1 0 0 0 1 1h1.5a1 1 0 0 0 1-1v-.7c.5.07 1 .1 1.6.1s1.1-.03 1.6-.1v.7a1 1 0 0 0 1 1H16a1 1 0 0 0 1-1v-2.4c1.5-1.2 2.5-3 2.5-5z"/>
+  <circle cx="8.4" cy="11.2" r=".9" fill="currentColor" stroke="none"/>
+  <path d="M19.6 10.2h1.9M11 5.3l1.6-2.1"/>
+</symbol>
+<symbol id="i-currency" viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="8.5"/>
+  <path d="M3.5 12h17"/>
+  <path d="M12 3.5c2.2 2.4 3.4 5.4 3.4 8.5s-1.2 6.1-3.4 8.5c-2.2-2.4-3.4-5.4-3.4-8.5S9.8 5.9 12 3.5z"/>
+</symbol>
+<symbol id="i-person" viewBox="0 0 24 24">
+  <circle cx="12" cy="8" r="3.6"/><path d="M5 20.2a7 7 0 0 1 14 0"/>
+</symbol>
+<symbol id="i-person-add" viewBox="0 0 24 24">
+  <circle cx="9.5" cy="8" r="3.6"/><path d="M3 20.2a6.6 6.6 0 0 1 13 0"/>
+  <path d="M18.5 7v6M21.5 10h-6"/>
+</symbol>
+
+<!-- ── categories ─────────────────────────────────────────── -->
+<symbol id="i-cart" viewBox="0 0 24 24">
+  <circle cx="9.6" cy="19.2" r="1.5"/><circle cx="17.4" cy="19.2" r="1.5"/>
+  <path d="M2.8 4h2.3l2.6 11.1a1.5 1.5 0 0 0 1.46 1.16h8.1a1.5 1.5 0 0 0 1.46-1.14L20.6 8.2H5.9"/>
+</symbol>
+<symbol id="i-restaurant" viewBox="0 0 24 24">
+  <path d="M7 3.2v5.6a2.2 2.2 0 0 0 4.4 0V3.2"/>
+  <path d="M9.2 11v9.8"/>
+  <path d="M16.6 3.2c1.9 1.9 1.9 6.3 0 8.2v9.4"/>
+</symbol>
+<symbol id="i-transit" viewBox="0 0 24 24">
+  <rect x="5" y="3.5" width="14" height="12.5" rx="3"/>
+  <path d="M5 10.5h14"/>
+  <circle cx="8.6" cy="13.2" r="1" fill="currentColor" stroke="none"/>
+  <circle cx="15.4" cy="13.2" r="1" fill="currentColor" stroke="none"/>
+  <path d="m7.5 16-1.8 4.5M16.5 16l1.8 4.5M8.8 3.5V2h6.4v1.5"/>
+</symbol>
+<symbol id="i-housing" viewBox="0 0 24 24">
+  <path d="M3.5 10.6 12 4l8.5 6.6V19a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/>
+  <path d="M9.5 21v-5.5h5V21"/>
+</symbol>
+<symbol id="i-utilities" viewBox="0 0 24 24">
+  <path d="M13.2 2.5 5 13.4h5.6L9.4 21.5 18 10.6h-5.6z"/>
+</symbol>
+<symbol id="i-health" viewBox="0 0 24 24">
+  <path d="M12 20.5S3.5 15.4 3.5 9.6A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 8.5 2.6c0 5.8-8.5 10.9-8.5 10.9z"/>
+</symbol>
+<symbol id="i-shopping" viewBox="0 0 24 24">
+  <path d="M5 8h14l-1 12.4a1.2 1.2 0 0 1-1.2 1.1H7.2A1.2 1.2 0 0 1 6 20.4z"/>
+  <path d="M9 8V6.2a3 3 0 0 1 6 0V8"/>
+</symbol>
+<symbol id="i-entertainment" viewBox="0 0 24 24">
+  <rect x="2.5" y="5" width="19" height="14" rx="2.5"/>
+  <path d="M10 9.2v5.6l4.6-2.8z"/>
+</symbol>
+<symbol id="i-travel" viewBox="0 0 24 24">
+  <path d="M10.5 19.5 12 21l1.5-1.5"/>
+  <path d="M21 13.5 13.8 11V5.2a1.8 1.8 0 0 0-3.6 0V11L3 13.5v2.2l7.2-2v4l-2 1.4v1.4l3.8-1 3.8 1v-1.4l-2-1.4v-4l7.2 2z"/>
+</symbol>
+<symbol id="i-education" viewBox="0 0 24 24">
+  <path d="M12 4 2.8 8.6 12 13.2l9.2-4.6z"/>
+  <path d="M6.6 10.8v4.9c0 1.8 2.4 3.3 5.4 3.3s5.4-1.5 5.4-3.3v-4.9"/>
+  <path d="M21.2 8.6v5.6"/>
+</symbol>
+<symbol id="i-gift" viewBox="0 0 24 24">
+  <rect x="3.5" y="9" width="17" height="11.5" rx="1.6"/>
+  <path d="M2.5 9h19M12 9v11.5"/>
+  <path d="M12 9S10.8 4 8.4 4a2.3 2.3 0 0 0 0 5zM12 9s1.2-5 3.6-5a2.3 2.3 0 0 1 0 5z"/>
+</symbol>
+<!-- Income and expense are drawn as direction, never as a currency glyph:
+     a "$" would be wrong in a multi-currency product. -->
+<symbol id="i-income" viewBox="0 0 24 24">
+  <path d="M12 3.5v10.8M8.1 10.4 12 14.3l3.9-3.9"/>
+  <path d="M4 15.5v3.2a1.8 1.8 0 0 0 1.8 1.8h12.4a1.8 1.8 0 0 0 1.8-1.8v-3.2"/>
+</symbol>
+<symbol id="i-expense" viewBox="0 0 24 24">
+  <path d="M12 20.5V9.7M15.9 13.6 12 9.7l-3.9 3.9"/>
+  <path d="M4 8.5V5.3a1.8 1.8 0 0 1 1.8-1.8h12.4A1.8 1.8 0 0 1 20 5.3v3.2"/>
+</symbol>
+</svg>
+
+<button class="theme-btn" onclick="tt()">Toggle theme</button>
+
+<div class="wrap">
+<header>
+  <div class="brand">
+    <div class="mark"></div>
+    <div>
+      <h1>Pockito Design System<span class="vtag">v0.1.0</span></h1>
+    </div>
+  </div>
+  <p class="sub">Derived from the hand-authored logo SVGs, which decode exactly onto Tailwind's palette —
+  <code>indigo-600</code>, <code>cyan-500</code>, <code>amber-400</code>, <code>slate-900</code>.
+  The flat proof is treated as direction, not source.</p>
+</header>
+
+<!-- ── FOUNDATION ─────────────────────────────────────────── -->
+<section>
+  <h2>Foundation</h2>
+  <h3>One idea carries the brand</h3>
+  <p class="lead">The mark is a wallet with a coin in it. That coin — <code>amber-400</code> — is the only
+  warm colour in the system, and it means one thing everywhere: <strong>this money involves someone else.</strong></p>
+  <div class="grid g3" style="margin-bottom:24px">
+    <div class="tok"><div class="tok-c" style="background:var(--pk-brand-gradient)"></div>
+      <div class="tok-b"><div class="tok-n">brand.gradient</div>
+      <div class="tok-v">#4F46E5 → #06B6D4</div>
+      <div class="tok-d">The mark only. Never behind body text.</div></div></div>
+    <div class="tok"><div class="tok-c" style="background:var(--pk-brand-primary)"></div>
+      <div class="tok-b"><div class="tok-n">brand.primary</div><div class="tok-v">#4F46E5 · indigo-600</div>
+      <div class="tok-d">Actions, links, active nav, the hero card.</div></div></div>
+    <div class="tok"><div class="tok-c" style="background:var(--pk-brand-accent)"></div>
+      <div class="tok-b"><div class="tok-n">brand.accent</div><div class="tok-v">#FBBF24 · amber-400</div>
+      <div class="tok-d">Shared money. Fills and marks only — never text.</div></div></div>
+  </div>
+  <div class="notes">
+    <p><strong>The amber rule.</strong> Amber marks that an amount belongs to more than one person: the share
+    rule, the owed nudge, space avatars, shared budget bars, the add button. It never carries
+    <em>direction</em> — whether you are owed or owing is always a separate colour and an explicit label.</p>
+    <p style="margin-bottom:0"><strong>Amber is never text.</strong> <code>#FBBF24</code> measures 1.67:1 on white.
+    Where amber-coloured words are needed, the system uses <code>shared.strong</code> (<code>amber-700</code>) at 4.84:1.</p>
+  </div>
+</section>
+
+<!-- ── COLOUR ─────────────────────────────────────────────── -->
+<section>
+  <h2>Colour</h2><h3>Primitives</h3><hr class="rule">
+  <div class="ramp-l"><span>Slate — surfaces and text</span><span>50 → 950</span></div>
+  <div class="ramp" id="r-slate"></div>
+  <div class="ramp-l"><span>Indigo — brand primary</span><span>50 → 950</span></div>
+  <div class="ramp" id="r-indigo"></div>
+  <div class="ramp-l"><span>Amber — shared money</span><span>50 → 700</span></div>
+  <div class="ramp" id="r-amber"></div>
+  <div class="ramp-l"><span>Cyan — gradient partner</span><span>400 → 600</span></div>
+  <div class="ramp" id="r-cyan"></div>
+
+  <h4>Balance direction</h4>
+  <p>Owing money is a normal state between people, not an error — so it is amber-warm, never danger-red.
+  Danger is reserved for destructive actions and genuine failures.</p>
+  <div class="grid g4">
+    <div class="tok"><div class="tok-c" style="background:var(--pk-balance-owed)"></div>
+      <div class="tok-b"><div class="tok-n">balance.owedToYou</div><div class="tok-v">emerald-700</div></div></div>
+    <div class="tok"><div class="tok-c" style="background:var(--pk-balance-owing)"></div>
+      <div class="tok-b"><div class="tok-n">balance.youOwe</div><div class="tok-v">amber-700</div></div></div>
+    <div class="tok"><div class="tok-c" style="background:var(--pk-balance-settled)"></div>
+      <div class="tok-b"><div class="tok-n">balance.settled</div><div class="tok-v">slate-500</div></div></div>
+    <div class="tok"><div class="tok-c" style="background:var(--pk-danger)"></div>
+      <div class="tok-b"><div class="tok-n">feedback.danger</div><div class="tok-v">rose-600</div></div></div>
+  </div>
+</section>
+
+<!-- ── TYPE ───────────────────────────────────────────────── -->
+<section>
+  <h2>Typography</h2><h3>Inter, with tabular figures for money</h3><hr class="rule">
+  <p>Inter is the brand face, stated in the logo SVGs. Every monetary figure sets
+  <code>tabular-nums</code> so columns align — a money value must never fall back to proportional numerals.</p>
+  <div class="demo">
+    <div class="spec"><div class="spec-m">display · 40/44 · 800</div>
+      <div class="money" style="font-size:40px;line-height:44px;font-weight:800;letter-spacing:-.02em">¥126,450</div></div>
+    <div class="spec"><div class="spec-m">h1 · 28/34 · 700</div>
+      <div style="font-size:28px;line-height:34px;font-weight:700;letter-spacing:-.02em">Accounts</div></div>
+    <div class="spec"><div class="spec-m">h2 · 22/28 · 700</div>
+      <div style="font-size:22px;line-height:28px;font-weight:700;letter-spacing:-.01em">Good morning, Ghassen</div></div>
+    <div class="spec"><div class="spec-m">h3 · 17/24 · 600</div>
+      <div style="font-size:17px;line-height:24px;font-weight:600">Spaces</div></div>
+    <div class="spec"><div class="spec-m">body · 15/22 · 400–500</div>
+      <div style="font-size:15px;line-height:22px">Rakuten Bank · row title at weight 500</div></div>
+    <div class="spec"><div class="spec-m">bodySmall · 13/18 · 400</div>
+      <div style="font-size:13px;line-height:18px;color:var(--pk-text-tertiary)">Today · Groceries · Revolut</div></div>
+    <div class="spec"><div class="spec-m">overline · 11/14 · 600 · .08em</div>
+      <div style="font-size:11px;line-height:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--pk-text-tertiary)">Spent this month</div></div>
+  </div>
+</section>
+
+<!-- ── THE SHARE RULE ─────────────────────────────────────── -->
+<section>
+  <h2>Signature</h2><h3>The share rule</h3><hr class="rule">
+  <p class="lead">A hairline beneath a shared amount, filled in amber to the proportion that is <strong>yours</strong>.
+  A 50/50 split fills half. A 60/40 fills 60%. You read the split without reading the numbers.</p>
+  <p>It is the one invented notation in the system, and it earns its place by encoding real data rather than
+  decorating. It scales: 64px under a list row, full-width under a hero, and segmented per person in the split editor.</p>
+  <div class="demo">
+    <div class="demo-lbl">SHARE RULE · three scales</div>
+    <div class="grid g3">
+      <div>
+        <div class="rn" style="margin-bottom:6px">Row · 50/50</div>
+        <div class="money" style="font-size:15px;font-weight:600">−¥5,000</div>
+        <div class="sr" style="width:64px;margin-top:4px"><div class="sr-m" style="width:50%"></div></div>
+        <div class="rn">Your share ¥2,500</div>
+      </div>
+      <div>
+        <div class="rn" style="margin-bottom:6px">Hero · 87% yours</div>
+        <div class="money" style="font-size:22px;font-weight:700">¥59,710</div>
+        <div class="sr" style="margin-top:6px"><div class="sr-m" style="width:87%"></div></div>
+        <div class="rn">of ¥68,930 that left your accounts</div>
+      </div>
+      <div>
+        <div class="rn" style="margin-bottom:6px">Split editor · segmented</div>
+        <div class="money" style="font-size:22px;font-weight:700">¥42,000</div>
+        <div class="sr" style="margin-top:6px;height:6px">
+          <div style="width:33.4%;background:var(--pk-amber-400);border-right:2px solid var(--pk-bg-surface)"></div>
+          <div style="width:33.3%;background:var(--pk-indigo-500);border-right:2px solid var(--pk-bg-surface)"></div>
+          <div style="width:33.3%;background:var(--pk-cyan-500)"></div>
+        </div>
+        <div class="rn">You · Mira · Sam — ¥14,000 each</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ICONS ──────────────────────────────────────────────── -->
+<section>
+  <h2>Iconography</h2><h3>Material Symbols Rounded, drawn as strokes</h3><hr class="rule">
+  <p class="lead">Geometry follows <strong>Material Symbols Rounded</strong> — the set life-os-mobile already
+  uses through Flutter's <code>Icons.*</code>, with outlined objects and rounded chrome.</p>
+  <p>Drawn on a 24px grid with a 2px stroke, round caps and joins, and <code>currentColor</code> throughout,
+  so one set serves every size and colour. Filled variants exist only where a solid mark is required:
+  the active nav item and category circles.</p>
+
+  <div class="demo"><div class="demo-lbl">SIZES · 16 / 20 / 24 / 28</div>
+    <div style="display:flex;align-items:center;gap:20px;color:var(--pk-text-primary)">
+      <svg class="pk-icon pk-icon--xs"><use href="#i-wallet"/></svg>
+      <svg class="pk-icon pk-icon--sm"><use href="#i-wallet"/></svg>
+      <svg class="pk-icon"><use href="#i-wallet"/></svg>
+      <svg class="pk-icon pk-icon--lg"><use href="#i-wallet"/></svg>
+      <span style="margin-left:12px;color:var(--pk-text-tertiary);font-size:13px">
+        Stroke weight compensates so optical density stays constant.</span>
+    </div></div>
+
+  <div class="demo"><div class="demo-lbl">STATE · outlined is default · filled marks the active item</div>
+    <div style="display:flex;align-items:center;gap:28px">
+      <div style="text-align:center;color:var(--pk-brand-primary)">
+        <svg class="pk-icon pk-icon--fill"><use href="#i-home"/></svg>
+        <div style="font-size:11px;font-weight:600;margin-top:4px">Home</div></div>
+      <div style="text-align:center;color:var(--pk-text-tertiary)">
+        <svg class="pk-icon"><use href="#i-wallet"/></svg>
+        <div style="font-size:11px;margin-top:4px">Accounts</div></div>
+      <div style="text-align:center;color:var(--pk-text-tertiary)">
+        <svg class="pk-icon"><use href="#i-spaces"/></svg>
+        <div style="font-size:11px;margin-top:4px">Spaces</div></div>
+    </div></div>
+
+  <h4>Navigation and chrome</h4>
+  <div class="icon-grid" id="ig-chrome"></div>
+  <h4>Finance</h4>
+  <div class="icon-grid" id="ig-finance"></div>
+  <h4>Categories</h4>
+  <p style="margin-bottom:12px">Category icons always sit in a circle tinted from
+  <code>color.semantic.category</code>, assigned by index rather than by meaning.</p>
+  <div class="icon-grid" id="ig-cat"></div>
+  <h4>On a category mark</h4>
+  <div class="demo"><div style="display:flex;gap:12px;flex-wrap:wrap" id="cat-marks"></div></div>
+</section>
+
+<!-- ── COMPONENTS ─────────────────────────────────────────── -->
+<section>
+  <h2>Components</h2><h3>The parts</h3><hr class="rule">
+
+  <div class="demo"><div class="demo-lbl">BUTTON · 5 variants · 44px</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-p">Save expense</button>
+      <button class="btn btn-s">Settle up</button>
+      <button class="btn btn-t">See all</button>
+      <button class="btn btn-a">Add</button>
+      <button class="btn btn-d">Delete</button>
+    </div></div>
+
+  <div class="demo"><div class="demo-lbl">HERO · the month's headline</div>
+    <div class="hero" style="max-width:400px">
+      <div class="hero-l">Spent this month</div>
+      <div class="hero-a money">¥126,450</div>
+      <div class="hero-s money">¥73,550 left</div>
+    </div></div>
+
+  <div class="demo"><div class="demo-lbl">NUDGE · shared surface</div>
+    <div class="nudge" style="max-width:420px">
+      <div class="gl" style="background:var(--pk-brand-accent);color:var(--pk-slate-900);width:32px;height:32px;font-size:14px">K</div>
+      <div style="flex:1;font-size:15px">Kana owes you <strong class="money">¥2,500</strong></div>
+      <div style="color:var(--pk-shared-strong);display:flex"><svg class="pk-icon pk-icon--sm"><use href="#i-chevron-right"/></svg></div>
+    </div></div>
+
+  <div class="demo"><div class="demo-lbl">LIST ROW · personal, shared, transfer</div>
+    <div class="card" style="max-width:440px">
+      <div class="row"><div class="gl" style="background:#10B98122;color:#047857"><svg class="pk-icon"><use href="#i-cart"/></svg></div>
+        <div class="rb"><div class="rt">Supermarket</div><div class="rs">Groceries · Revolut</div></div>
+        <div class="ra"><div class="rv money">−€38.40</div><div class="rn">Today</div></div></div>
+      <div class="row"><div class="gl" style="background:#4F46E522;color:#4F46E5"><svg class="pk-icon"><use href="#i-restaurant"/></svg></div>
+        <div class="rb"><div class="rt">Dinner</div><div class="rs">Restaurants · Revolut
+          <span class="pill" style="background:var(--pk-shared-surface);color:var(--pk-shared-strong);margin-left:4px">HOME</span></div></div>
+        <div class="ra"><div class="rv money">−€50.00</div>
+          <div class="rn money">Your share €25.00</div>
+          <div class="sr" style="width:64px;margin-left:auto;margin-top:3px"><div class="sr-m" style="width:50%"></div></div></div></div>
+      <div class="row"><div class="gl" style="background:var(--pk-bg-sunken);color:var(--pk-text-tertiary)"><svg class="pk-icon"><use href="#i-transfer"/></svg></div>
+        <div class="rb"><div class="rt">To Savings</div><div class="rs">Revolut → Savings</div></div>
+        <div class="ra"><div class="rv money" style="color:var(--pk-text-tertiary)">€500.00</div>
+          <div class="rn">11 Aug</div></div></div>
+    </div></div>
+
+  <div class="demo"><div class="demo-lbl">PROGRESS · personal is indigo · shared is amber · over is rose</div>
+    <div class="grid g3">
+      <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">
+        <span>Groceries</span><span class="money">€320 / €500</span></div>
+        <div class="track"><div class="fill" style="width:64%;background:var(--pk-brand-primary)"></div></div>
+        <div class="rn">€180 left · personal</div></div>
+      <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">
+        <span>Home · Restaurants</span><span class="money">€620 / €800</span></div>
+        <div class="track"><div class="fill" style="width:77.5%;background:var(--pk-brand-accent)"></div></div>
+        <div class="rn">€180 left · everyone's share</div></div>
+      <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">
+        <span>Transport</span><span class="money" style="color:var(--pk-danger)">€240 / €200</span></div>
+        <div class="track"><div class="fill" style="width:100%;background:var(--pk-danger)"></div></div>
+        <div class="rn" style="color:var(--pk-danger)">€40 over</div></div>
+    </div></div>
+
+  <div class="demo"><div class="demo-lbl">CHIP · space selector · amber marks the shared context</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="chip" aria-pressed="true">Home</button>
+      <button class="chip">Tokyo Trip</button>
+      <button class="chip">Flatshare</button>
+    </div></div>
+
+  <div class="demo"><div class="demo-lbl">BALANCE · direction always carries a label, never colour alone</div>
+    <div class="grid g3">
+      <div class="card" style="padding:14px"><div class="rs">You're owed</div>
+        <div class="money" style="font-size:22px;font-weight:700;color:var(--pk-balance-owed)">€92.20</div></div>
+      <div class="card" style="padding:14px"><div class="rs">You owe</div>
+        <div class="money" style="font-size:22px;font-weight:700;color:var(--pk-balance-owing)">€84.00</div></div>
+      <div class="card" style="padding:14px"><div class="rs">Settled</div>
+        <div style="color:var(--pk-balance-settled);height:28px;display:flex;align-items:center"><svg class="pk-icon pk-icon--lg"><use href="#i-check"/></svg></div></div>
+    </div></div>
+</section>
+
+<!-- ── COMPOSITION ────────────────────────────────────────── -->
+<section>
+  <h2>Composition</h2><h3>The parts assembled</h3><hr class="rule">
+  <p>Every value below comes from the token set — nothing is hand-tuned. This is the proof the system composes.</p>
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="ph-top">
+        <div class="ph-brand"><div class="ph-mark"></div>
+          <strong style="font-size:19px;letter-spacing:-.02em">Pockito</strong></div>
+        <div style="color:var(--pk-text-secondary);font-size:18px"><svg class="pk-icon"><use href="#i-bell"/></svg></div>
+      </div>
+      <div class="ph-body">
+        <div style="font-size:19px;font-weight:700;letter-spacing:-.01em;margin-bottom:14px">Good morning, Ghassen</div>
+        <div class="hero">
+          <div class="hero-l" style="font-size:14px">Spent this month</div>
+          <div class="hero-a money" style="font-size:34px;line-height:38px">€1,264.50</div>
+          <div class="sr" style="margin-top:10px;background:rgba(255,255,255,.28)">
+            <div class="sr-m" style="width:78%"></div></div>
+          <div class="hero-s" style="font-size:13px">of €1,620.00 that left your accounts</div>
+        </div>
+        <div style="height:12px"></div>
+        <div class="nudge" style="padding:12px 14px">
+          <div class="gl" style="background:var(--pk-brand-accent);color:var(--pk-slate-900);width:28px;height:28px;font-size:12px;font-weight:600">K</div>
+          <div style="flex:1;font-size:14px">Kana owes you <strong class="money">€25.00</strong></div>
+          <div style="color:var(--pk-shared-strong);display:flex"><svg class="pk-icon pk-icon--sm"><use href="#i-chevron-right"/></svg></div>
+        </div>
+        <div class="ph-sec">Spaces <span class="ph-link">View all</span></div>
+        <div class="card" style="padding:14px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <div class="gl" style="background:var(--pk-brand-accent);color:var(--pk-slate-900);width:32px;height:32px;font-size:15px"><svg class="pk-icon"><use href="#i-housing"/></svg></div>
+            <div style="flex:1"><div class="rt" style="font-size:14px">Home</div>
+              <div class="rs" style="font-size:12px">Monthly budget</div></div>
+            <div class="money" style="font-weight:700;font-size:14px">€800</div></div>
+          <div class="track"><div class="fill" style="width:77.5%;background:var(--pk-brand-accent)"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-top:7px;color:var(--pk-text-tertiary)">
+            <span>78% used</span><span class="money">€180 left</span></div>
+        </div>
+        <div class="ph-sec">Activity <span class="ph-link">View all</span></div>
+        <div class="card">
+          <div class="row" style="padding:11px 13px"><div class="gl" style="background:#10B98122;color:#047857;width:34px;height:34px;font-size:15px"><svg class="pk-icon"><use href="#i-cart"/></svg></div>
+            <div class="rb"><div class="rt" style="font-size:14px">Supermarket</div>
+              <div class="rs" style="font-size:12px">Today</div></div>
+            <div class="ra"><div class="rv money" style="font-size:14px">−€38.40</div></div></div>
+          <div class="row" style="padding:11px 13px"><div class="gl" style="background:#4F46E522;color:#4F46E5;width:34px;height:34px;font-size:15px"><svg class="pk-icon"><use href="#i-restaurant"/></svg></div>
+            <div class="rb"><div class="rt" style="font-size:14px">Dinner · Home</div>
+              <div class="rs" style="font-size:12px">Yesterday</div></div>
+            <div class="ra"><div class="rv money" style="font-size:14px">−€50.00</div>
+              <div class="sr" style="width:52px;margin-left:auto;margin-top:3px"><div class="sr-m" style="width:50%"></div></div></div></div>
+        </div>
+      </div>
+      <div class="ph-nav">
+        <div class="ph-nv on"><span><svg class="pk-icon"><use href="#i-housing"/></svg></span>Home</div>
+        <div class="ph-nv"><svg class="pk-icon pk-icon--sm"><use href="#i-wallet"/></svg>Accounts</div>
+        <div style="flex:1"><div class="fab"><svg class="pk-icon"><use href="#i-plus"/></svg></div></div>
+        <div class="ph-nv"><svg class="pk-icon pk-icon--sm"><use href="#i-spaces"/></svg>Spaces</div>
+        <div class="ph-nv"><svg class="pk-icon pk-icon--sm"><use href="#i-activity"/></svg>Activity</div>
+      </div>
+    </div>
+    <div style="flex:1;min-width:260px">
+      <h4 style="margin-top:0">What the composition proves</h4>
+      <p>The hero carries the month in <code>bg.hero</code> with a full-width share rule showing how much of
+      the cash that left the accounts was actually the user's own.</p>
+      <p>Amber appears exactly four times — the coin in the mark, the owed nudge, the shared budget bar, and
+      the add button. Each one means the same thing.</p>
+      <p>The account balances, the activity amounts and the budget figures all sit on the same tabular baseline,
+      so the columns line up down the screen.</p>
+      <p style="margin-bottom:0">Toggle the theme, top right — every surface, border and semantic colour flips
+      from one token set.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACCESSIBILITY ──────────────────────────────────────── -->
+<section>
+  <h2>Accessibility</h2><h3>Measured, not estimated</h3><hr class="rule">
+  <p>Every pair below was computed. Three primitives were <strong>rejected during this pass</strong> for failing
+  body text, and the token set carries the replacements.</p>
+  <div class="card" style="overflow:hidden">
+  <table>
+    <thead><tr><th>Foreground</th><th>On</th><th>Ratio</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td class="n">text.primary #0F172A</td><td class="n">bg.page</td><td class="n">17.06</td><td class="ok">Pass</td></tr>
+      <tr><td class="n">text.secondary #475569</td><td class="n">bg.surface</td><td class="n">7.58</td><td class="ok">Pass</td></tr>
+      <tr><td class="n">text.tertiary #64748B</td><td class="n">bg.surface</td><td class="n">4.76</td><td class="ok">Pass</td></tr>
+      <tr><td class="n">text.onHero #FFFFFF</td><td class="n">bg.hero</td><td class="n">6.29</td><td class="ok">Pass</td></tr>
+      <tr><td class="n">text.link #4F46E5</td><td class="n">bg.surface</td><td class="n">6.29</td><td class="ok">Pass</td></tr>
+      <tr><td class="n">balance.owedToYou #047857</td><td class="n">bg.surface</td><td class="n">5.48</td><td class="ok">Pass</td></tr>
+      <tr><td class="n">balance.youOwe #B45309</td><td class="n">bg.surface</td><td class="n">5.02</td><td class="ok">Pass</td></tr>
+      <tr><td class="n">shared.strong #B45309</td><td class="n">shared.surface</td><td class="n">4.84</td><td class="ok">Pass</td></tr>
+      <tr><td class="n">feedback.danger #E11D48</td><td class="n">bg.surface</td><td class="n">4.70</td><td class="ok">Pass</td></tr>
+      <tr style="background:var(--pk-danger-surface,#FFF1F2)"><td class="n">slate-400 as tertiary</td><td class="n">bg.surface</td><td class="n">2.56</td><td class="no">Rejected → slate-500</td></tr>
+      <tr style="background:var(--pk-danger-surface,#FFF1F2)"><td class="n">emerald-600 as owedToYou</td><td class="n">bg.surface</td><td class="n">3.77</td><td class="no">Rejected → emerald-700</td></tr>
+      <tr style="background:var(--pk-danger-surface,#FFF1F2)"><td class="n">amber-600 as shared.strong</td><td class="n">shared.surface</td><td class="n">3.07</td><td class="no">Rejected → amber-700</td></tr>
+      <tr><td class="n">amber-400 as text</td><td class="n">bg.surface</td><td class="n">1.67</td><td class="no">Never legal as text</td></tr>
+    </tbody>
+  </table></div>
+  <h4>Rules that follow</h4>
+  <p>Colour is never the only signal: balance direction always carries a label, budget status always carries a
+  value, and transaction direction always carries a sign. Minimum touch target is 44px. All motion degrades to
+  a cross-fade under <code>prefers-reduced-motion</code>.</p>
+</section>
+</div>
+
+<script>
+const R={slate:[50,100,200,300,400,500,600,700,800,900,950],
+         indigo:[50,100,200,300,400,500,600,700,800,900,950],
+         amber:[50,100,200,300,400,500,600,700],
+         cyan:[400,500,600]};
+for(const [name,steps] of Object.entries(R)){
+  const el=document.getElementById('r-'+name); if(!el) continue;
+  el.style.gridTemplateColumns=`repeat(${steps.length},1fr)`;
+  el.innerHTML=steps.map(s=>{
+    const v=getComputedStyle(document.documentElement).getPropertyValue(`--pk-${name}-${s}`).trim();
+    const dark=s>=500;
+    return `<div style="background:${v};color:${dark?'rgba(255,255,255,.82)':'rgba(15,23,42,.55)'}">${s}</div>`;
+  }).join('');
+}
+const SETS={
+ 'ig-chrome':['home','wallet','spaces','activity','plus','bell','chevron-right','chevron-down',
+   'arrow-left','close','check','search','filter','more','tune','info','warning','trash','edit',
+   'calendar','link','shield','sparkle'],
+ 'ig-finance':['receipt','transfer','settle','budget','repeat','card','bank','cash','savings',
+   'currency','person','person-add'],
+ 'ig-cat':['cart','restaurant','transit','housing','utilities','health','shopping',
+   'entertainment','travel','education','gift','income','expense']
+};
+for(const [id,names] of Object.entries(SETS)){
+  const el=document.getElementById(id); if(!el) continue;
+  el.innerHTML=names.map(n=>
+    `<div class="icon-cell"><svg class="pk-icon"><use href="#i-${n}"/></svg><code>${n}</code></div>`).join('');
+}
+const CATS=[['cart',1],['restaurant',2],['transit',3],['housing',4],['utilities',5],
+            ['health',6],['shopping',7],['entertainment',8],['travel',9],['income',11]];
+const cm=document.getElementById('cat-marks');
+if(cm) cm.innerHTML=CATS.map(([n,i])=>{
+  const c=getComputedStyle(document.documentElement).getPropertyValue(`--pk-cat-${i}`).trim();
+  return `<div style="width:40px;height:40px;border-radius:9999px;background:${c};color:#fff;
+    display:grid;place-items:center" title="${n}">
+    <svg class="pk-icon pk-icon--sm"><use href="#i-${n}"/></svg></div>`;
+}).join('');
+
+function tt(){
+  const r=document.documentElement;
+  const cur=r.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+  r.setAttribute('data-theme',cur==='dark'?'light':'dark');
+}
+</script>

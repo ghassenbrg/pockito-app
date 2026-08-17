@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Pockito</string>
+    <string name="widget_description">Net worth and this month, at a glance</string>
+</resources>

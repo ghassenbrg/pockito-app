@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pockito — Prototype</title>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<div class="stage-head">
+  <h1><span class="stage-mark"></span> Pockito</h1>
+  <p>A working prototype. Every figure is derived from one dataset — add an expense and watch it
+     land in balances, budgets and who-owes-whom.</p>
+</div>
+<div class="stage-tools">
+  <button onclick="PK.theme()">Toggle theme</button>
+  <button onclick="PK.onboarding()">Onboarding flow</button>
+  <button onclick="PK.consent()">AI consent screen</button>
+  <button onclick="PK.reset()">Reset data</button>
+</div>
+
+<div class="phone">
+  <div class="notch"></div>
+  <div class="statusbar"><span>9:41</span>
+    <span class="sb-r">▮▮▮<span class="sb-bat"></span></span></div>
+  <div class="viewport">
+    <div class="screen" id="screen"></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="scrim" id="scrim"></div>
+    <div class="sheet" id="sheet"></div>
+    <div class="sheet" id="sheet2" style="z-index:85"></div>
+    <div class="dialog-wrap" id="dialog"></div>
+    <div class="dialog-wrap" id="menu" style="z-index:94;align-items:flex-end;padding-bottom:96px"></div>
+    <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  </div>
+</div>
+
+<!-- icon sprite -->
+<div id="sprite" hidden></div>
+
+<!-- dev-only:start — build.py strips everything between these markers -->
+<script>
+/* Dev shell only: pull in the sprite so icons resolve when served over http.
+   From file:// fetch is blocked, so say so instead of rendering blank icons —
+   dist/pockito-prototype.html inlines the sprite and has no such dependency. */
+fetch('icons.svg')
+  .then(r => r.ok ? r.text() : Promise.reject(new Error(r.status)))
+  .then(t => { document.getElementById('sprite').innerHTML = t; })
+  .catch(() => {
+    var w = document.createElement('div');
+    w.className = 'stage-warn';
+    w.textContent = 'Icons could not load. Serve this folder over http (python3 -m http.server) ' +
+      'or open dist/pockito-prototype.html, which has everything inlined.';
+    document.body.insertBefore(w, document.body.firstChild);
+  });
+</script>
+<!-- dev-only:end -->
+<script src="js/data.js"></script>
+<script src="js/domain.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/screens-core.js"></script>
+<script src="js/screens-shared.js"></script>
+<script src="js/screens-manage.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

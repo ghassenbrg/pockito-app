@@ -1,0 +1,35 @@
+name: pockito
+description: High-fidelity, local-data Flutter prototype for Pockito.
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  provider: ^6.1.5+1
+  go_router: ^17.5.0
+  intl: ^0.20.2
+  freezed_annotation: ^3.1.0
+  flutter_svg: ^2.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.15.1
+  freezed: ^4.0.0-dev.3
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - assets/mascot/kito/runtime/
+    - assets/brand/

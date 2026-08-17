@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Two cells wide by two tall as a minimum, resizable up to the large
+     layout. The sizes mirror the in-app preview so the design is reviewed
+     once. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="180dp"
+    android:minHeight="110dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="2"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:description="@string/widget_description"
+    android:initialLayout="@layout/pockito_widget"
+    android:previewLayout="@layout/pockito_widget"
+    android:updatePeriodMillis="1800000" />

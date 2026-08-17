@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The foreground bitmap is already a square 108dp canvas with Kito sized into
+  the 66dp safe zone, so it is drawn at its natural aspect ratio with no inset.
+  Insetting a non-square bitmap with gravity="fill" used to stretch Kito.
+-->
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:antialias="true"
+    android:filter="true"
+    android:gravity="fill"
+    android:src="@drawable/kito_avatar_foreground" />

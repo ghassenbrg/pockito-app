@@ -1,0 +1,53 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "prototype",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8731",
+        "--directory",
+        "prototype"
+      ],
+      "port": 8731
+    },
+    {
+      "name": "pockito-mobile-before",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8741",
+        "--directory",
+        "/private/tmp/claude-501/-Users-ghassenbrg-git-pockito/b4857fbe-a656-48ba-81fd-c5c3558e531c/scratchpad/web-before"
+      ],
+      "port": 8741
+    },
+    {
+      "name": "pockito-mobile",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8742",
+        "--directory",
+        "/Users/ghassenbrg/git/pockito/pockito-mobile/build/web"
+      ],
+      "port": 8742
+    },
+    {
+      "name": "pockito-charts",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8753",
+        "--directory",
+        "/Users/ghassenbrg/git/pockito/pockito-mobile/build/web"
+      ],
+      "port": 8753
+    }
+  ]
+}

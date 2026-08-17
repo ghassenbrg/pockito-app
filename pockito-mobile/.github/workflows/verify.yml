@@ -1,0 +1,25 @@
+# The checks that have to pass before this UI can be called frozen.
+name: verify
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pockito-mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: flutter gen-l10n
+      - run: flutter analyze
+      # A localised app is one where a new hardcoded string cannot be added
+      # without someone noticing. This fails on anything past the baseline.
+      - run: dart run tool/check_hardcoded_strings.dart
+      - run: flutter test

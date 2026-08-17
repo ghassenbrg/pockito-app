@@ -1,0 +1,38 @@
+lib/ui/core/components/pk_components.dart:527: ${account.type.name[0].toUpperCase()}${account.type.name.substring(1)} · ${account.currency}${account.isDefault && constraints.maxWidth < 132 ? 
+lib/ui/core/components/pk_records.dart:637: ${change.pair.replaceAll(
+lib/ui/core/components/pk_states.dart:164: ${whoCanHelp.take(3).join(
+lib/ui/features/activity/views/activity_screens.dart:3617: ${PkFormat.money((widget.totalMinor - sum).abs(), widget.currency)} ${sum < widget.totalMinor ? 
+lib/ui/features/activity/views/activity_screens.dart:3780: ${allocated > widget.totalMinor ? 
+lib/ui/features/activity/views/activity_screens.dart:595: 1 ${transaction.currency} = ${transaction.exchangeRate!.toStringAsPrecision(7)} ${transaction.destinationCurrency} · ${transaction.fxRateMode?.name ?? 
+lib/ui/features/activity/views/activity_screens.dart:653: ${transaction.fxRateMode?.name ?? 
+lib/ui/features/activity/views/activity_screens.dart:654: ${transaction.rateUpdatedAt == null ? 
+lib/ui/features/home/views/home_screen.dart:1297: } · ${space?.type.labelIn(context.t) ?? 
+lib/ui/features/home/views/home_screen.dart:296: /accounts/${accounts[index].id}
+lib/ui/features/manage/views/ai_screens.dart:393: /ai/authorize?client=${Uri.encodeComponent(app.$1)}&verified=${app.$2}
+lib/ui/features/manage/views/ai_screens.dart:916: ${transaction.client ?? 
+lib/ui/features/manage/views/finance_management_screens.dart:1434: ${PkFormat.money(subscription.amountMinor, subscription.currency)} will be recorded from ${account?.name}.$conversion
+lib/ui/features/manage/views/finance_management_screens.dart:2129: ${subscription.status == SubscriptionStatus.paused ? 
+lib/ui/features/manage/views/finance_management_screens.dart:509: ${month.year}-${month.month.toString().padLeft(2, 
+lib/ui/features/manage/views/settings_screens.dart:567: 1 ${parts[0]} ≈ ${quote?.rate.toStringAsPrecision(6) ?? 
+lib/ui/features/onboarding/views/onboarding_screens.dart:532: pockito.app/invite/${_createdSpaceId ?? 
+lib/ui/features/onboarding/views/onboarding_screens.dart:599: ${_name.text.trim().toLowerCase().replaceAll(
+lib/ui/features/spaces/views/spaces_screens.dart:1120:  : repo.userById(item.userId)?.name ?? 
+lib/ui/features/spaces/views/spaces_screens.dart:1120: ${repo.userById(item.userId)?.isYou == true ? 
+lib/ui/features/spaces/views/spaces_screens.dart:1152: ${expense.exchangeRate == null ? 
+lib/ui/features/spaces/views/spaces_screens.dart:1153: ${expense.fxRateMode == null ? 
+lib/ui/features/spaces/views/spaces_screens.dart:1198:  : repo.userById(id)?.name ?? 
+lib/ui/features/spaces/views/spaces_screens.dart:1198: ${item.participantIds.map((id) => repo.userById(id)?.isYou == true ? 
+lib/ui/features/spaces/views/spaces_screens.dart:1592: pockito.app/invite/${_name.text.toLowerCase().replaceAll(
+lib/ui/features/spaces/views/spaces_screens.dart:1683: ${entry.$2.toLowerCase().replaceAll(
+lib/ui/features/spaces/views/spaces_screens.dart:2004: ${invite.name.toLowerCase().replaceAll(
+lib/ui/features/spaces/views/spaces_screens.dart:2850:  : repo.userById(member.userId)?.name} ${space.defaultPercentages[member.userId] ?? 0}%
+lib/ui/features/spaces/views/spaces_screens.dart:2850: ${repo.userById(member.userId)?.isYou == true ? 
+lib/ui/features/spaces/views/spaces_screens.dart:2857:  : repo.userById(member.userId)?.name} ${space.defaultAllocations[member.userId] ?? 1}
+lib/ui/features/spaces/views/spaces_screens.dart:2857: ${repo.userById(member.userId)?.isYou == true ? 
+lib/ui/features/spaces/views/spaces_screens.dart:4654: ${repo.userById(event.actorUserId)?.name ?? 
+lib/ui/features/spaces/views/spaces_screens.dart:4664: permission: ${event.permission}
+lib/ui/features/spaces/views/spaces_screens.dart:4665: outcome: ${event.outcome.name}
+lib/ui/features/spaces/views/spaces_screens.dart:484: /spaces/${space.id}/expenses/${expenses[index].id}
+lib/ui/features/spaces/views/spaces_screens.dart:698:  : repo.userById(item.fromUserId)?.name} → ${item.toUserId == repo.currentUserId ? 
+lib/ui/features/spaces/views/spaces_screens.dart:698:  : repo.userById(item.toUserId)?.name}
+lib/ui/features/spaces/views/spaces_screens.dart:698: ${item.fromUserId == repo.currentUserId ? 
