@@ -160,59 +160,75 @@ class _ActivityScreenState extends State<ActivityScreen> {
               ),
             )
           else ...[
-            for (final entry in groups.entries) ...[
-              // The day header stays put while its own rows scroll under it,
-              // so the date a row belongs to is never off-screen.
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _DayHeaderDelegate(
-                  label: PkFormat.shortDate(entry.key, repo.today, context.t),
-                  total: entry.value.fold<int>(
-                    0,
-                    (sum, item) =>
-                        sum +
-                        (item.type == MoneyEventType.income
-                            ? item.amountMinor
-                            : -item.amountMinor),
+            for (final entry in groups.entries)
+              // A pinned header pins to the *viewport*, not to its own rows, so
+              // one `SliverPersistentHeader` per day meant every day already
+              // scrolled past stayed stuck to the top: by late in a long
+              // ledger the reader had twenty stacked date bars and no
+              // transactions visible at all.
+              //
+              // `SliverMainAxisGroup` scopes the pinning to the group, which is
+              // what the behaviour was always meant to be — the header holds
+              // while its own rows pass under it, then leaves with them.
+              SliverMainAxisGroup(
+                slivers: [
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _DayHeaderDelegate(
+                      label: PkFormat.shortDate(
+                        entry.key,
+                        repo.today,
+                        context.t,
+                      ),
+                      total: entry.value.fold<int>(
+                        0,
+                        (sum, item) =>
+                            sum +
+                            (item.type == MoneyEventType.income
+                                ? item.amountMinor
+                                : -item.amountMinor),
+                      ),
+                      currency: entry.value.first.currency,
+                      background: context.pk.page,
+                      textStyle:
+                          Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color: context.pk.textSecondary,
+                          ) ??
+                          const TextStyle(),
+                      // Section 7.7: 28–32, growing with the reader's text size
+                      // so its own label always fits inside it.
+                      height: 30 * MediaQuery.textScalerOf(context).scale(1),
+                    ),
                   ),
-                  currency: entry.value.first.currency,
-                  background: context.pk.page,
-                  textStyle:
-                      Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: context.pk.textSecondary,
-                      ) ??
-                      const TextStyle(),
-                  // Section 7.7: 28–32, growing with the reader's text size so
-                  // its own label always fits inside it.
-                  height: 30 * MediaQuery.textScalerOf(context).scale(1),
-                ),
+                  // Section 7.7: a continuous ledger with inset separators, not
+                  // a rounded card around every day. The sticky header already
+                  // marks where one day ends and the next begins; a card per
+                  // day added a second boundary and cost a row of capacity
+                  // each time.
+                  SliverPadding(
+                    padding: EdgeInsetsDirectional.fromSTEB(
+                      context.gutter,
+                      0,
+                      context.gutter,
+                      PkSpacing.headerToContent,
+                    ),
+                    sliver: SliverList.separated(
+                      itemCount: entry.value.length,
+                      separatorBuilder: (context, _) => Divider(
+                        height: 1,
+                        thickness: 1,
+                        indent:
+                            PkSpacing.x4 + PkSize.iconTileDense + PkSpacing.x3,
+                        color: context.pk.borderSubtle,
+                      ),
+                      itemBuilder: (context, index) => _ActivityRow(
+                        transaction: entry.value[index],
+                        repository: repo,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              // Section 7.7: a continuous ledger with inset separators, not a
-              // rounded card around every day. The sticky header already marks
-              // where one day ends and the next begins; a card per day added a
-              // second boundary and cost a row of capacity each time.
-              SliverPadding(
-                padding: EdgeInsetsDirectional.fromSTEB(
-                  context.gutter,
-                  0,
-                  context.gutter,
-                  PkSpacing.headerToContent,
-                ),
-                sliver: SliverList.separated(
-                  itemCount: entry.value.length,
-                  separatorBuilder: (context, _) => Divider(
-                    height: 1,
-                    thickness: 1,
-                    indent: PkSpacing.x4 + PkSize.iconTileDense + PkSpacing.x3,
-                    color: context.pk.borderSubtle,
-                  ),
-                  itemBuilder: (context, index) => _ActivityRow(
-                    transaction: entry.value[index],
-                    repository: repo,
-                  ),
-                ),
-              ),
-            ],
             if (viewModel.hasMoreActivity)
               SliverPadding(
                 padding: const EdgeInsetsDirectional.fromSTEB(
@@ -330,11 +346,10 @@ class _ActivityScreenState extends State<ActivityScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           for (final view in viewModel.repository.savedViews)
-            ListTile(
+            PkLedgerRow.management(
               key: ValueKey('saved_view_${view.id}'),
-              contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.bookmark_rounded),
-              title: Text(view.name),
+              title: view.name,
               trailing: IconButton(
                 tooltip: context.t.deleteX0(view.name),
                 icon: const Icon(Icons.delete_outline_rounded),
@@ -571,13 +586,13 @@ class TransactionDetailScreen extends StatelessWidget {
               child: PkCard(
                 child: Column(
                   children: [
-                    _DetailRow(
+                    PkDetailRow(
                       label: context.t.type,
                       value:
                           transaction.type.name[0].toUpperCase() +
                           transaction.type.name.substring(1),
                     ),
-                    _DetailRow(
+                    PkDetailRow(
                       label: context.t.date,
                       value: PkFormat.longDate(
                         transaction.occurredOn,
@@ -585,22 +600,22 @@ class TransactionDetailScreen extends StatelessWidget {
                       ),
                     ),
                     if (transaction.type == MoneyEventType.transfer) ...[
-                      _DetailRow(
+                      PkDetailRow(
                         label: context.t.from,
                         value: account?.name ?? context.t.notTracked,
                       ),
-                      _DetailRow(
+                      PkDetailRow(
                         label: context.t.to,
                         value: destinationAccount?.name ?? context.t.notTracked,
                       ),
-                      _DetailRow(
+                      PkDetailRow(
                         label: context.t.sent,
                         value: PkFormat.money(
                           transaction.amountMinor,
                           transaction.currency,
                         ),
                       ),
-                      _DetailRow(
+                      PkDetailRow(
                         label: context.t.received,
                         value: PkFormat.money(
                           transaction.destinationAmountMinor ??
@@ -610,13 +625,13 @@ class TransactionDetailScreen extends StatelessWidget {
                         ),
                       ),
                       if (transaction.exchangeRate != null)
-                        _DetailRow(
+                        PkDetailRow(
                           label: context.t.exchangeRate,
                           value:
                               '1 ${transaction.currency} = ${transaction.exchangeRate!.toStringAsPrecision(7)} ${transaction.destinationCurrency} · ${transaction.fxRateMode?.name ?? 'captured'}',
                         ),
                       if (transaction.rateUpdatedAt != null)
-                        _DetailRow(
+                        PkDetailRow(
                           label: context.t.rateCaptured,
                           value: PkFormat.longDate(
                             transaction.rateUpdatedAt!,
@@ -624,7 +639,7 @@ class TransactionDetailScreen extends StatelessWidget {
                           ),
                         ),
                       if (transaction.feeMinor > 0)
-                        _DetailRow(
+                        PkDetailRow(
                           label: context.t.fee,
                           value: PkFormat.money(
                             transaction.feeMinor,
@@ -632,35 +647,35 @@ class TransactionDetailScreen extends StatelessWidget {
                           ),
                         ),
                     ] else
-                      _DetailRow(
+                      PkDetailRow(
                         label: context.t.accountLabel,
                         value: account?.name ?? context.t.notTracked,
                       ),
-                    _DetailRow(
+                    PkDetailRow(
                       label: context.t.categoryLabel,
                       value: category?.name ?? context.t.none,
                     ),
                     if (split != null)
-                      _DetailRow(
+                      PkDetailRow(
                         label: context.t.sharedSpace,
                         value:
                             repo.spaceById(split.spaceId)?.name ??
                             context.t.shared,
                       ),
                     if (transaction.source == 'mcp')
-                      _DetailRow(
+                      PkDetailRow(
                         label: context.t.addedVia,
                         value: transaction.client ?? context.t.aiConnection,
                       ),
                     if (paymentMethod != null)
-                      _DetailRow(
+                      PkDetailRow(
                         label: context.t.paidWith,
                         value: paymentMethod.last4 == null
                             ? paymentMethod.name
                             : '${paymentMethod.name} ····${paymentMethod.last4}',
                       ),
                     if (transaction.sourceCurrency != null) ...[
-                      _DetailRow(
+                      PkDetailRow(
                         label: context.t.originalAmount,
                         value: PkFormat.money(
                           transaction.sourceAmountMinor!,
@@ -670,7 +685,7 @@ class TransactionDetailScreen extends StatelessWidget {
                       // A converted figure without its rate is a number the
                       // user cannot check.
                       if (transaction.exchangeRate != null)
-                        _DetailRow(
+                        PkDetailRow(
                           label: context.t.rateUsed,
                           value:
                               '1 ${transaction.sourceCurrency} = '
@@ -681,7 +696,7 @@ class TransactionDetailScreen extends StatelessWidget {
                         ),
                     ],
                     if (transaction.adjustmentReason != null)
-                      _DetailRow(
+                      PkDetailRow(
                         label: context.t.correctionReason,
                         value: transaction.adjustmentReason!,
                       ),
@@ -744,7 +759,9 @@ class TransactionDetailScreen extends StatelessWidget {
                       Chip(
                         avatar: CircleAvatar(
                           radius: 6,
-                          backgroundColor: PkPalette.categoryAt(tag.colorIndex),
+                          backgroundColor: PkPalette.categoryFillAt(
+                            tag.colorIndex,
+                          ),
                         ),
                         label: Text(tag.name),
                       ),
@@ -902,7 +919,25 @@ class AddMoneyEventScreen extends StatefulWidget {
   State<AddMoneyEventScreen> createState() => _AddMoneyEventScreenState();
 }
 
+/// The value the scope picker uses for "not a Space". A sentinel rather than
+/// `null` because the picker's selection is a single value, and `null` there
+/// already means "nothing chosen".
+const _personalScope = '__personal__';
+
 class _AddMoneyEventScreenState extends State<AddMoneyEventScreen> {
+  /// A card reads as its name plus the last four digits, which is the only
+  /// thing that tells two cards from the same bank apart.
+  String? _paymentMethodLabel(PockitoRepository repo, String? id) {
+    if (id == null) return null;
+    final method = repo.paymentMethods
+        .where((item) => item.id == id)
+        .firstOrNull;
+    if (method == null) return null;
+    return method.last4 == null
+        ? method.name
+        : '${method.name} ····${method.last4}';
+  }
+
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _amount;
   late final TextEditingController _merchant;
@@ -1042,7 +1077,6 @@ class _AddMoneyEventScreenState extends State<AddMoneyEventScreen> {
   @override
   Widget build(BuildContext context) {
     final repo = context.watch<PockitoAppViewModel>().repository;
-    final accounts = repo.accounts.where((item) => !item.archived).toList();
     final categories = repo.categories
         .where(
           (item) =>
@@ -1233,23 +1267,21 @@ class _AddMoneyEventScreenState extends State<AddMoneyEventScreen> {
                       },
                     ),
                     const SizedBox(height: PkSpacing.x4),
-                    TextFormField(
+                    PkTextField(
                       key: const ValueKey('transaction_merchant'),
                       controller: _merchant,
                       textCapitalization: TextCapitalization.sentences,
                       // Enter moves to the note rather than dismissing the
                       // keyboard halfway through the form.
                       textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        labelText: _type == MoneyEventType.transfer
-                            ? context.t.description
-                            : _type == MoneyEventType.income
-                            ? context.t.source
-                            : context.t.merchant,
-                        hintText: _type == MoneyEventType.expense
-                            ? context.t.whatWasThisFor
-                            : null,
-                      ),
+                      label: _type == MoneyEventType.transfer
+                          ? context.t.description
+                          : _type == MoneyEventType.income
+                          ? context.t.source
+                          : context.t.merchant,
+                      hint: _type == MoneyEventType.expense
+                          ? context.t.whatWasThisFor
+                          : null,
                       validator: (value) =>
                           value == null || value.trim().isEmpty
                           ? context.t.addAShortDescription
@@ -1258,7 +1290,7 @@ class _AddMoneyEventScreenState extends State<AddMoneyEventScreen> {
                     const SizedBox(height: PkSpacing.x4),
                     // The merchant says what it was. Months later the question
                     // is why, and that has nowhere else to live.
-                    TextFormField(
+                    PkTextField(
                       key: const ValueKey('transaction_note'),
                       controller: _note,
                       minLines: 1,
@@ -1266,43 +1298,30 @@ class _AddMoneyEventScreenState extends State<AddMoneyEventScreen> {
                       maxLength: 1000,
                       textCapitalization: TextCapitalization.sentences,
                       textInputAction: TextInputAction.newline,
-                      decoration: InputDecoration(
-                        labelText: context.t.noteOptional,
-                        hintText: context.t.whyThisHappenedOrAnything,
-                        alignLabelWithHint: true,
-                      ),
+                      label: context.t.noteOptional,
+                      hint: context.t.whyThisHappenedOrAnything,
                     ),
                     const SizedBox(height: PkSpacing.x4),
                     if (_type != MoneyEventType.expense || payerIsMe)
-                      DropdownButtonFormField<String>(
-                        key: const ValueKey('transaction_account'),
-                        isExpanded: true,
+                      PkSelectFormField<String>(
+                        key: ValueKey('transaction_account_$_accountId'),
+                        fieldKey: const ValueKey('transaction_account'),
+                        label: _type == MoneyEventType.income
+                            ? context.t.toAccount
+                            : context.t.fromAccount,
                         initialValue: _accountId,
-                        decoration: InputDecoration(
-                          labelText: _type == MoneyEventType.income
-                              ? context.t.toAccount
-                              : context.t.fromAccount,
+                        placeholder: context.t.chooseAnAccountX,
+                        display: (value) =>
+                            pkAccountLabel(context, repo, value),
+                        leading: (value) => pkAccountLeading(repo, value),
+                        pick: (context) => showPkAccountPicker(
+                          context,
+                          repo: repo,
+                          selectedId: _accountId,
+                          allowOutside:
+                              _type == MoneyEventType.expense && space != null,
+                          outsideLabel: context.t.paidOutsidePockitoNoWallet,
                         ),
-                        items: accounts
-                            .map(
-                              (item) => DropdownMenuItem(
-                                value: item.id,
-                                child: Text('${item.name} · ${item.currency}'),
-                              ),
-                            )
-                            .followedBy(
-                              _type == MoneyEventType.expense && space != null
-                                  ? [
-                                      DropdownMenuItem(
-                                        value: '__outside__',
-                                        child: Text(
-                                          context.t.paidOutsidePockitoNoWallet,
-                                        ),
-                                      ),
-                                    ]
-                                  : const <DropdownMenuItem<String>>[],
-                            )
-                            .toList(),
                         onChanged: (value) =>
                             setState(() => _accountId = value),
                         validator: (value) =>
@@ -1312,33 +1331,32 @@ class _AddMoneyEventScreenState extends State<AddMoneyEventScreen> {
                       PkCard(
                         color: context.pk.sharedSurface,
                         borderColor: context.pk.sharedBorder,
-                        child: ListTile(
-                          contentPadding: EdgeInsets.zero,
+                        child: PkLedgerRow.management(
                           leading: Icon(Icons.account_balance_wallet_outlined),
-                          title: Text(context.t.noAccountMovement),
-                          subtitle: Text(context.t.thePayerSAccountIs),
+                          title: context.t.noAccountMovement,
+                          subtitle: context.t.thePayerSAccountIs,
                         ),
                       ),
                     if (_type == MoneyEventType.transfer) ...[
                       const SizedBox(height: PkSpacing.x4),
-                      DropdownButtonFormField<String>(
-                        key: const ValueKey('transaction_to_account'),
-                        isExpanded: true,
+                      PkSelectFormField<String>(
+                        key: ValueKey('transaction_to_account_$_toAccountId'),
+                        fieldKey: const ValueKey('transaction_to_account'),
+                        label: context.t.toAccount,
                         initialValue: _toAccountId == _accountId
                             ? null
                             : _toAccountId,
-                        decoration: InputDecoration(
-                          labelText: context.t.toAccount,
+                        placeholder: context.t.chooseTheDestination,
+                        display: (value) =>
+                            pkAccountLabel(context, repo, value),
+                        leading: (value) => pkAccountLeading(repo, value),
+                        pick: (context) => showPkAccountPicker(
+                          context,
+                          repo: repo,
+                          selectedId: _toAccountId,
+                          // The source account cannot also be the destination.
+                          where: (item) => item.id != _accountId,
                         ),
-                        items: accounts
-                            .where((item) => item.id != _accountId)
-                            .map(
-                              (item) => DropdownMenuItem(
-                                value: item.id,
-                                child: Text('${item.name} · ${item.currency}'),
-                              ),
-                            )
-                            .toList(),
                         onChanged: (value) => setState(() {
                           _toAccountId = value;
                           _manualRate.clear();
@@ -1385,21 +1403,13 @@ class _AddMoneyEventScreenState extends State<AddMoneyEventScreen> {
                               ),
                               const SizedBox(height: PkSpacing.x3),
                               if (_fxRateMode == FxRateMode.manual)
-                                TextFormField(
+                                PkTextField(
                                   key: const ValueKey('transfer_manual_rate'),
                                   controller: _manualRate,
                                   keyboardType:
                                       const TextInputType.numberWithOptions(
                                         decimal: true,
                                       ),
-                                  decoration: InputDecoration(
-                                    labelText: context.t.l1X0InX1(
-                                      account.currency,
-                                      toAccount.currency,
-                                    ),
-                                    helperText:
-                                        context.t.capturedWithThisTransfer,
-                                  ),
                                   onChanged: (_) => setState(() {}),
                                   validator: (value) =>
                                       _fxRateMode == FxRateMode.manual &&
@@ -1407,6 +1417,11 @@ class _AddMoneyEventScreenState extends State<AddMoneyEventScreen> {
                                               0
                                       ? context.t.rateMustBeMoreThan
                                       : null,
+                                  label: context.t.l1X0InX1(
+                                    account.currency,
+                                    toAccount.currency,
+                                  ),
+                                  helper: context.t.capturedWithThisTransfer,
                                 )
                               else if (automaticQuote != null) ...[
                                 Text(
@@ -1435,18 +1450,11 @@ class _AddMoneyEventScreenState extends State<AddMoneyEventScreen> {
                                       ?.copyWith(color: context.pk.danger),
                                 ),
                               const SizedBox(height: PkSpacing.x4),
-                              TextFormField(
-                                key: const ValueKey('transfer_fee'),
+                              PkAmountField(
+                                fieldKey: const ValueKey('transfer_fee'),
                                 controller: _fee,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                decoration: InputDecoration(
-                                  labelText: context.t.feeOptional,
-                                  prefixText:
-                                      '${PockitoCurrencies.of(account.currency).symbol} ',
-                                ),
+                                currency: account.currency,
+                                label: context.t.feeOptional,
                                 onChanged: (_) => setState(() {}),
                               ),
                               const SizedBox(height: PkSpacing.x4),
@@ -1491,24 +1499,38 @@ class _AddMoneyEventScreenState extends State<AddMoneyEventScreen> {
                       ],
                     ] else ...[
                       const SizedBox(height: PkSpacing.x4),
-                      DropdownButtonFormField<String>(
-                        key: const ValueKey('transaction_category'),
-                        isExpanded: true,
+                      PkSelectFormField<String>(
+                        key: ValueKey('transaction_category_$_categoryId'),
+                        fieldKey: const ValueKey('transaction_category'),
+                        label: context.t.categoryLabel,
                         initialValue:
                             categories.any((item) => item.id == _categoryId)
                             ? _categoryId
                             : null,
-                        decoration: InputDecoration(
-                          labelText: context.t.categoryLabel,
+                        placeholder: context.t.chooseACategory,
+                        display: (value) =>
+                            repo.categoryById(value ?? '')?.name,
+                        leading: (value) {
+                          final category = repo.categoryById(value ?? '');
+                          if (category == null) return null;
+                          return PkIconTile(
+                            icon: PkIcons.named(category.icon),
+                            accent: PkPalette.categoryAt(category.colorIndex),
+                            size: PkSize.avatarCompact,
+                            iconSize: PkSize.iconSmall,
+                          );
+                        },
+                        // The sheet keeps the parent/child hierarchy and adds
+                        // search, which a flat menu of every category could
+                        // never do once a household passed a dozen of them.
+                        pick: (context) => showPkCategoryPicker(
+                          context,
+                          repo: repo,
+                          type: _type == MoneyEventType.income
+                              ? CategoryType.income
+                              : CategoryType.expense,
+                          selectedId: _categoryId,
                         ),
-                        items: categories
-                            .map(
-                              (item) => DropdownMenuItem(
-                                value: item.id,
-                                child: Text(item.name),
-                              ),
-                            )
-                            .toList(),
                         onChanged: (value) =>
                             setState(() => _categoryId = value),
                         validator: (value) =>
@@ -1537,31 +1559,30 @@ class _AddMoneyEventScreenState extends State<AddMoneyEventScreen> {
                       // Category answers "on what". This answers "with which
                       // card", which is the other question people ask of a
                       // ledger and could not ask before.
-                      DropdownButtonFormField<String>(
-                        key: const ValueKey('transaction_payment_method'),
-                        isExpanded: true,
+                      PkSelectFormField<String>(
+                        key: ValueKey('transaction_payment_$_paymentMethodId'),
+                        fieldKey: const ValueKey('transaction_payment_method'),
+                        label: context.t.paidWithOptional,
                         initialValue:
                             repo.paymentMethods.any(
                               (item) => item.id == _paymentMethodId,
                             )
                             ? _paymentMethodId
                             : null,
-                        decoration: InputDecoration(
-                          labelText: context.t.paidWithOptional,
-                        ),
-                        items: [
-                          DropdownMenuItem(child: Text(context.t.notRecorded)),
-                          ...repo.paymentMethods.map(
-                            (item) => DropdownMenuItem(
-                              value: item.id,
-                              child: Text(
-                                item.last4 == null
-                                    ? item.name
-                                    : '${item.name} ····${item.last4}',
+                        placeholder: context.t.notRecorded,
+                        display: (value) => _paymentMethodLabel(repo, value),
+                        pick: (context) => showPkOptionPicker<String>(
+                          context,
+                          title: context.t.paidWithOptional,
+                          selected: _paymentMethodId,
+                          options: [
+                            for (final item in repo.paymentMethods)
+                              PkOption(
+                                value: item.id,
+                                label: _paymentMethodLabel(repo, item.id)!,
                               ),
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                         onChanged: (value) =>
                             setState(() => _paymentMethodId = value),
                       ),
@@ -1588,103 +1609,151 @@ class _AddMoneyEventScreenState extends State<AddMoneyEventScreen> {
                             : context.pk.sharedBorder,
                         child: Column(
                           children: [
-                            SwitchListTile.adaptive(
-                              key: const ValueKey('share_transaction'),
-                              contentPadding: EdgeInsets.zero,
-                              title: Text(context.t.shareThisExpense),
-                              subtitle: Text(
-                                _spaceId == null
-                                    ? context.t.personalSpendingOnly
-                                    : context.t.updatesTheAccountAndEveryone,
-                              ),
-                              value: _spaceId != null,
-                              onChanged: (value) => setState(() {
-                                _spaceId = value
-                                    ? (widget.spaceId ??
-                                          repo.spaces
-                                              .firstWhere(
-                                                (item) =>
-                                                    item.status ==
-                                                    SpaceStatus.active,
-                                              )
-                                              .id)
-                                    : null;
-                                _payerUserId = repo.currentUserId;
-                                _shares = {};
-                              }),
-                            ),
-                            if (_spaceId != null) ...[
-                              const Divider(),
-                              DropdownButtonFormField<String>(
-                                key: const ValueKey('transaction_space'),
-                                isExpanded: true,
-                                initialValue: _spaceId,
-                                decoration: InputDecoration(
-                                  labelText: context.t.spaceLabel,
-                                ),
-                                items: repo.spaces
+                            // C-10 / A-8: scope is one field, not a switch that
+                            // reveals a second field. "Personal" is a value in
+                            // the same list as the Spaces, so changing your mind
+                            // costs the same one tap in either direction — and
+                            // the field states the current answer rather than
+                            // making the reader infer it from a toggle.
+                            PkSelectField(
+                              key: const ValueKey('transaction_scope'),
+                              label: context.t.scope,
+                              value: space == null
+                                  ? context.t.personal
+                                  : '${space.name} · ${space.currency}',
+                              leading: space == null
+                                  ? PkIconTile(
+                                      icon: Icons.person_rounded,
+                                      accent: PkAccent.ink(
+                                        context.pk.textSecondary,
+                                      ),
+                                      size: PkSize.avatarCompact,
+                                      iconSize: PkSize.iconSmall,
+                                    )
+                                  : PkIconTile(
+                                      icon: PkIcons.named(space.icon),
+                                      accent: PkPalette.categoryAt(
+                                        space.colorIndex,
+                                      ),
+                                      size: PkSize.avatarCompact,
+                                      iconSize: PkSize.iconSmall,
+                                    ),
+                              onTap: () async {
+                                final active = repo.spaces
                                     .where(
                                       (item) =>
                                           item.status == SpaceStatus.active,
                                     )
-                                    .map(
-                                      (item) => DropdownMenuItem(
+                                    .toList();
+                                final chosen = await showPkOptionPicker<String>(
+                                  context,
+                                  title: context.t.scope,
+                                  selected: _spaceId ?? _personalScope,
+                                  options: [
+                                    PkOption(
+                                      value: _personalScope,
+                                      label: context.t.personal,
+                                      hint: context.t.personalSpendingOnly,
+                                      icon: Icons.person_rounded,
+                                    ),
+                                    for (final item in active)
+                                      PkOption(
                                         value: item.id,
-                                        child: Text(
-                                          '${item.name} · ${item.currency}',
+                                        label: item.name,
+                                        hint: item.currency,
+                                        icon: PkIcons.named(item.icon),
+                                        accent: PkPalette.categoryAt(
+                                          item.colorIndex,
                                         ),
                                       ),
-                                    )
-                                    .toList(),
-                                onChanged: (value) => setState(() {
-                                  _spaceId = value;
-                                  final selectedSpace = repo.spaceById(
-                                    value ?? '',
-                                  );
-                                  if (selectedSpace?.members.any(
+                                  ],
+                                );
+                                if (chosen == null) return;
+                                setState(() {
+                                  _spaceId = chosen == _personalScope
+                                      ? null
+                                      : chosen;
+                                  final selected = repo.spaceById(chosen);
+                                  // Changing scope can strand the payer: the
+                                  // person who paid may not be in the Space
+                                  // just chosen.
+                                  if (selected?.members.any(
                                         (member) =>
                                             member.userId == _payerUserId,
                                       ) !=
                                       true) {
                                     _payerUserId = repo.currentUserId;
                                   }
+                                  // The split always belongs to one scope, so
+                                  // it is re-derived rather than carried over.
                                   _shares = {};
-                                }),
-                              ),
-                              const SizedBox(height: PkSpacing.x3),
-                              DropdownButtonFormField<String>(
-                                key: const ValueKey('transaction_payer'),
-                                isExpanded: true,
-                                initialValue:
-                                    space?.members.any(
-                                          (member) =>
-                                              member.userId == _payerUserId,
-                                        ) ==
-                                        true
-                                    ? _payerUserId
-                                    : repo.currentUserId,
-                                decoration: InputDecoration(
-                                  labelText: context.t.paidBy,
+                                });
+                              },
+                            ),
+                            // The consequence of the choice, stated once,
+                            // rather than a second toggle subtitle.
+                            const SizedBox(height: PkSpacing.x2),
+                            Align(
+                              alignment: AlignmentDirectional.centerStart,
+                              child: Text(
+                                _spaceId == null
+                                    ? context.t.personalSpendingOnly
+                                    : context.t.updatesTheAccountAndEveryone,
+                                style: context.pkText.supporting.copyWith(
+                                  color: context.pk.textSecondary,
                                 ),
-                                items: space?.members
-                                    .map(
-                                      (member) => DropdownMenuItem(
-                                        value: member.userId,
-                                        child: Text(
-                                          member.userId == repo.currentUserId
-                                              ? context.t.you
-                                              : repo
-                                                        .userById(member.userId)
-                                                        ?.name ??
-                                                    'Member',
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                                onChanged: (value) => setState(() {
-                                  _payerUserId = value;
-                                  _shares = {};
-                                }),
+                              ),
+                            ),
+                            if (_spaceId != null) ...[
+                              const SizedBox(height: PkSpacing.x3),
+                              Builder(
+                                builder: (context) {
+                                  String nameOf(String id) =>
+                                      id == repo.currentUserId
+                                      ? context.t.you
+                                      : repo.userById(id)?.name ??
+                                            context.t.member;
+                                  final current =
+                                      space?.members.any(
+                                            (member) =>
+                                                member.userId == _payerUserId,
+                                          ) ==
+                                          true
+                                      ? _payerUserId!
+                                      : repo.currentUserId;
+                                  return PkSelectField(
+                                    key: const ValueKey('transaction_payer'),
+                                    label: context.t.paidBy,
+                                    value: nameOf(current),
+                                    leading: PkAvatar(
+                                      label:
+                                          repo.userById(current)?.initials ??
+                                          '?',
+                                      size: PkSize.avatarCompact,
+                                    ),
+                                    onTap: () async {
+                                      final chosen =
+                                          await showPkOptionPicker<String>(
+                                            context,
+                                            title: context.t.paidBy,
+                                            selected: current,
+                                            options: [
+                                              for (final member
+                                                  in space?.members ?? const [])
+                                                PkOption(
+                                                  value: member.userId,
+                                                  label: nameOf(member.userId),
+                                                ),
+                                            ],
+                                          );
+                                      if (chosen == null) return;
+                                      setState(() {
+                                        _payerUserId = chosen;
+                                        _shares = {};
+                                      });
+                                    },
+                                  );
+                                },
                               ),
                               // "We both put money in" is one of the most common
                               // shapes a real bill takes, and a single payer
@@ -1702,14 +1771,13 @@ class _AddMoneyEventScreenState extends State<AddMoneyEventScreen> {
                                       setState(() => _payers = value),
                                 ),
                               const SizedBox(height: PkSpacing.x3),
-                              ListTile(
+                              PkLedgerRow.management(
                                 key: const ValueKey('edit_split'),
-                                contentPadding: EdgeInsets.zero,
                                 leading: const Icon(
                                   Icons.pie_chart_outline_rounded,
                                 ),
-                                title: Text(context.t.split),
-                                subtitle: Text(_splitLabel(repo)),
+                                title: context.t.split,
+                                subtitle: _splitLabel(repo),
                                 trailing: const Icon(
                                   Icons.chevron_right_rounded,
                                 ),
@@ -1753,20 +1821,18 @@ class _AddMoneyEventScreenState extends State<AddMoneyEventScreen> {
                                 ),
                                 const SizedBox(height: PkSpacing.x3),
                                 if (_fxRateMode == FxRateMode.manual)
-                                  TextFormField(
+                                  PkTextField(
                                     key: const ValueKey('shared_manual_rate'),
                                     controller: _manualRate,
                                     keyboardType:
                                         const TextInputType.numberWithOptions(
                                           decimal: true,
                                         ),
-                                    decoration: InputDecoration(
-                                      labelText: context.t.l1X0InX1(
-                                        space.currency,
-                                        account.currency,
-                                      ),
-                                    ),
                                     onChanged: (_) => setState(() {}),
+                                    label: context.t.l1X0InX1(
+                                      space.currency,
+                                      account.currency,
+                                    ),
                                   )
                                 else if (sharedAutomaticQuote != null)
                                   Text(
@@ -2477,10 +2543,7 @@ class _ReceiptScannerScreenState extends State<_ReceiptScannerScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const KitoImage.sized(
-            asset: KitoAsset.thinking,
-            size: KitoSize.inline,
-          ),
+          const KitoThinking(),
           SizedBox(height: PkSpacing.x3),
           SizedBox.square(
             dimension: 32,
@@ -2968,14 +3031,14 @@ class _TransactionHero extends StatelessWidget {
   final Category? category;
   @override
   Widget build(BuildContext context) {
-    final color = positive
-        ? context.pk.owed
+    final accent = positive
+        ? PkAccent.ink(context.pk.owed)
         : PkPalette.categoryAt(category?.colorIndex ?? 2);
     return Column(
       children: [
         PkIconTile(
           icon: positive ? Icons.south_west_rounded : Icons.north_east_rounded,
-          color: color,
+          accent: accent,
           size: 64,
           iconSize: 30,
         ),
@@ -2998,39 +3061,6 @@ class _TransactionHero extends StatelessWidget {
       ],
     );
   }
-}
-
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({required this.label, required this.value});
-  final String label;
-  final String value;
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: PkSpacing.x3),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: context.pk.textSecondary),
-          ),
-        ),
-        const SizedBox(width: PkSpacing.x4),
-        Flexible(
-          child: Text(
-            value,
-            textAlign: TextAlign.right,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-          ),
-        ),
-      ],
-    ),
-  );
 }
 
 class _SplitResult {
@@ -3200,7 +3230,7 @@ class _SplitEditorState extends State<_SplitEditor> {
                       children: [
                         PkAvatar(
                           label: user.initials,
-                          color: PkPalette.categoryAt(index + 2),
+                          color: PkPalette.categoryFillAt(index + 2),
                         ),
                         const SizedBox(width: PkSpacing.x3),
                         Expanded(
@@ -3224,6 +3254,10 @@ class _SplitEditorState extends State<_SplitEditor> {
                                     context,
                                   ).textTheme.titleMedium,
                                 )
+                              // pk-exempt: an inline cell in a per-member
+                              // split row, end-aligned against its neighbours.
+                              // `PkTextField` carries a floating label and a
+                              // 48 px box; neither fits a table cell.
                               : TextField(
                                   controller: _values[member.userId],
                                   textAlign: TextAlign.right,
@@ -3248,10 +3282,14 @@ class _SplitEditorState extends State<_SplitEditor> {
                 ),
               ),
             PkCard(
-              color: valid ? context.pk.sharedSurface : PkPalette.rose50,
-              borderColor: valid
-                  ? context.pk.sharedBorder
-                  : context.pk.danger.withValues(alpha: .3),
+              color: pkStatusSurface(
+                context,
+                valid ? PkStatusTone.shared : PkStatusTone.danger,
+              ),
+              borderColor: pkStatusBorder(
+                context,
+                valid ? PkStatusTone.shared : PkStatusTone.danger,
+              ),
               child: Row(
                 children: [
                   Expanded(
@@ -3494,40 +3532,72 @@ class _SplitEditorState extends State<_SplitEditor> {
               ),
             ],
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (final member in widget.space.members)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: PkSpacing.x2),
-                  child: Row(
-                    children: [
-                      PkAvatar(
-                        label: repo.userById(member.userId)?.initials ?? '?',
-                        size: 32,
-                      ),
-                      const SizedBox(width: PkSpacing.x3),
-                      Expanded(
-                        child: Text(
-                          repo.userById(member.userId)?.isYou == true
-                              ? context.t.you
-                              : repo.userById(member.userId)?.name ?? 'Member',
-                        ),
-                      ),
-                      PkAmountText(
-                        amountMinor: shares[member.userId] ?? 0,
-                        currency: widget.currency,
-                      ),
-                    ],
+          child: Builder(
+            builder: (context) {
+              String nameOf(String id) => repo.userById(id)?.isYou == true
+                  ? context.t.you
+                  : repo.userById(id)?.name ?? context.t.member;
+              // C-5: colour-keyed to the rows beneath it, so the bar and the
+              // list read as one answer rather than two.
+              final segments = [
+                for (final (index, member) in widget.space.members.indexed)
+                  PkSplitSegment(
+                    id: member.userId,
+                    label: nameOf(member.userId),
+                    amountMinor: shares[member.userId] ?? 0,
+                    accent: PkPalette.categoryAt(index + 1),
                   ),
-                ),
-              const SizedBox(height: PkSpacing.x3),
-              Text(
-                context.t.nothingIsSavedYetGoing,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
+              ];
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  PkSplitBar(segments: segments, currency: widget.currency),
+                  const SizedBox(height: PkSpacing.x4),
+                  for (final segment in segments)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: PkSpacing.x2),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: PkSize.avatarCompact,
+                            height: PkSize.avatarCompact,
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                PkAvatar(
+                                  label:
+                                      repo.userById(segment.id)?.initials ??
+                                      '?',
+                                  size: PkSize.avatarCompact,
+                                ),
+                                PositionedDirectional(
+                                  end: -2,
+                                  bottom: -2,
+                                  child: PkSplitLegendDot(
+                                    accent: segment.accent,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: PkSpacing.x3),
+                          Expanded(child: Text(segment.label)),
+                          PkAmountText(
+                            amountMinor: segment.amountMinor,
+                            currency: widget.currency,
+                          ),
+                        ],
+                      ),
+                    ),
+                  const SizedBox(height: PkSpacing.x3),
+                  Text(
+                    context.t.nothingIsSavedYetGoing,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              );
+            },
           ),
         ),
       );
@@ -3792,6 +3862,9 @@ class _PayersEditorState extends State<_PayersEditor> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
+                    // pk-exempt: an inline 118 px cell inside a member row, not
+                    // a form field. `PkAmountField` is a centred 32 px input
+                    // with its own label and preview and does not fit here.
                     decoration: InputDecoration(
                       prefixText: PockitoCurrencies.of(widget.currency).symbol,
                       isDense: true,
@@ -4017,38 +4090,34 @@ class _ActivityRow extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(
-            contentPadding: EdgeInsets.zero,
+          PkLedgerRow.management(
             leading: const Icon(Icons.open_in_new_rounded),
-            title: Text(context.t.open),
+            title: context.t.open,
             onTap: () {
               Navigator.pop(sheetContext);
               context.push('/activity/${transaction.id}');
             },
           ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
+          PkLedgerRow.management(
             leading: const Icon(Icons.edit_outlined),
-            title: Text(context.t.edit),
+            title: context.t.edit,
             onTap: () {
               Navigator.pop(sheetContext);
               context.push('/add?transaction=${transaction.id}');
             },
           ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
+          PkLedgerRow.management(
             leading: const Icon(Icons.copy_outlined),
-            title: Text(context.t.duplicate),
+            title: context.t.duplicate,
             onTap: () {
               Navigator.pop(sheetContext);
               context.push('/add?duplicate=${transaction.id}');
             },
           ),
           if (transaction.isDraft)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
+            PkLedgerRow.management(
               leading: const Icon(Icons.check_circle_outline_rounded),
-              title: Text(context.t.actionConfirm),
+              title: context.t.actionConfirm,
               onTap: () {
                 Navigator.pop(sheetContext);
                 PkGuardedAction.run(

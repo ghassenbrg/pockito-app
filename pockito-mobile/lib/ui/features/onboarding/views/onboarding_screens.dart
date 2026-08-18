@@ -125,12 +125,10 @@ class SignInScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              TextField(
+              PkTextField(
                 keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: context.t.email,
-                  hintText: context.t.youExampleCom,
-                ),
+                label: context.t.email,
+                hint: context.t.youExampleCom,
               ),
               const SizedBox(height: PkSpacing.x3),
               FilledButton.tonal(
@@ -330,52 +328,66 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
               ),
               const SizedBox(height: PkSpacing.x4),
-              TextFormField(
+              PkTextField(
                 key: const ValueKey('onboarding_name'),
                 controller: _name,
                 textCapitalization: TextCapitalization.words,
-                decoration: InputDecoration(labelText: context.t.name),
                 onChanged: (_) => setState(() {}),
+                label: context.t.name,
               ),
               const SizedBox(height: PkSpacing.x4),
-              DropdownButtonFormField<String>(
+              PkSelectField(
                 key: const ValueKey('onboarding_language'),
-                isExpanded: true,
-                initialValue: _language,
-                decoration: InputDecoration(labelText: context.t.language),
-                items: [
-                  DropdownMenuItem(
-                    value: 'English',
-                    child: Text(context.t.languageEnglish),
-                  ),
-                  const DropdownMenuItem(
-                    value: 'Japanese',
-                    child: Text('日本語'), // i18n-exempt: a language endonym
-                  ),
-                ],
-                onChanged: (value) => setState(() => _language = value!),
+                label: context.t.language,
+                value: _language == 'Japanese'
+                    ? '日本語' // i18n-exempt: a language endonym
+                    : context.t.languageEnglish,
+                onTap: () async {
+                  final chosen = await showPkOptionPicker<String>(
+                    context,
+                    title: context.t.language,
+                    selected: _language,
+                    options: [
+                      PkOption(
+                        value: 'English',
+                        label: context.t.languageEnglish,
+                      ),
+                      // A language is always offered in its own words.
+                      const PkOption(
+                        value: 'Japanese',
+                        label: '日本語', // i18n-exempt: a language endonym
+                      ),
+                    ],
+                  );
+                  if (chosen != null) setState(() => _language = chosen);
+                },
               ),
               const SizedBox(height: PkSpacing.x4),
-              DropdownButtonFormField<ThemeMode>(
-                key: const ValueKey('onboarding_theme'),
-                isExpanded: true,
-                initialValue: _themeMode,
-                decoration: InputDecoration(labelText: context.t.appearance),
-                items: [
-                  DropdownMenuItem(
-                    value: ThemeMode.system,
-                    child: Text(context.t.useDeviceSetting),
-                  ),
-                  DropdownMenuItem(
-                    value: ThemeMode.light,
-                    child: Text(context.t.light),
-                  ),
-                  DropdownMenuItem(
-                    value: ThemeMode.dark,
-                    child: Text(context.t.dark),
-                  ),
-                ],
-                onChanged: (value) => setState(() => _themeMode = value!),
+              Builder(
+                builder: (context) {
+                  String themeLabel(ThemeMode mode) => switch (mode) {
+                    ThemeMode.system => context.t.useDeviceSetting,
+                    ThemeMode.light => context.t.light,
+                    ThemeMode.dark => context.t.dark,
+                  };
+                  return PkSelectField(
+                    key: const ValueKey('onboarding_theme'),
+                    label: context.t.appearance,
+                    value: themeLabel(_themeMode),
+                    onTap: () async {
+                      final chosen = await showPkOptionPicker<ThemeMode>(
+                        context,
+                        title: context.t.appearance,
+                        selected: _themeMode,
+                        options: [
+                          for (final mode in ThemeMode.values)
+                            PkOption(value: mode, label: themeLabel(mode)),
+                        ],
+                      );
+                      if (chosen != null) setState(() => _themeMode = chosen);
+                    },
+                  );
+                },
               ),
               if (_language == 'Japanese') ...[
                 const SizedBox(height: PkSpacing.x3),
@@ -397,49 +409,56 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           message: context.t.thisOnlyControlsReportingEvery,
           visual: Column(
             children: [
-              DropdownButtonFormField<String>(
-                isExpanded: true,
-                initialValue: _country,
-                decoration: InputDecoration(labelText: context.t.country),
-                items:
-                    const [
-                          'Japan',
-                          'Germany',
-                          'Luxembourg',
-                          'Tunisia',
-                          'United Kingdom',
-                          'United States',
-                        ]
-                        .map(
-                          (item) =>
-                              DropdownMenuItem(value: item, child: Text(item)),
-                        )
-                        .toList(),
-                onChanged: (value) => setState(() {
-                  _country = value!;
-                  _currency = switch (value) {
-                    'Japan' => 'JPY',
-                    'Tunisia' => 'TND',
-                    'United Kingdom' => 'GBP',
-                    'United States' => 'USD',
-                    _ => 'EUR',
-                  };
-                }),
+              PkSelectField(
+                key: const ValueKey('onboarding_country'),
+                label: context.t.country,
+                value: _countryLabel(context, _country),
+                onTap: () async {
+                  final chosen = await showPkOptionPicker<String>(
+                    context,
+                    title: context.t.country,
+                    selected: _country,
+                    options: [
+                      for (final country in const [
+                        'Japan',
+                        'Germany',
+                        'Luxembourg',
+                        'Tunisia',
+                        'United Kingdom',
+                        'United States',
+                      ])
+                        PkOption(
+                          value: country,
+                          label: _countryLabel(context, country),
+                        ),
+                    ],
+                  );
+                  if (chosen == null) return;
+                  setState(() {
+                    _country = chosen;
+                    _currency = switch (chosen) {
+                      'Japan' => 'JPY',
+                      'Tunisia' => 'TND',
+                      'United Kingdom' => 'GBP',
+                      'United States' => 'USD',
+                      _ => 'EUR',
+                    };
+                  });
+                },
               ),
               const SizedBox(height: PkSpacing.x4),
-              DropdownButtonFormField<String>(
-                isExpanded: true,
-                initialValue: _currency,
-                decoration: InputDecoration(
-                  labelText: context.t.reportingCurrency,
-                ),
-                items: PockitoCurrencies.all.keys
-                    .map(
-                      (item) =>
-                          DropdownMenuItem(value: item, child: Text(item)),
-                    )
-                    .toList(),
-                onChanged: (value) => setState(() => _currency = value!),
+              PkSelectField(
+                key: const ValueKey('onboarding_currency'),
+                label: context.t.reportingCurrency,
+                value: '$_currency · ${PockitoCurrencies.of(_currency).name}',
+                onTap: () async {
+                  final chosen = await showPkCurrencyPicker(
+                    context,
+                    repo: context.read<PockitoAppViewModel>().repository,
+                    selectedCode: _currency,
+                  );
+                  if (chosen != null) setState(() => _currency = chosen);
+                },
               ),
             ],
           ),
@@ -453,38 +472,39 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           message: context.t.givePockitoOnePlaceWhere,
           visual: Column(
             children: [
-              TextField(
+              PkTextField(
                 key: const ValueKey('onboarding_account_name'),
                 controller: _accountName,
                 textCapitalization: TextCapitalization.words,
-                decoration: InputDecoration(labelText: context.t.accountName),
+                label: context.t.accountName,
               ),
               const SizedBox(height: PkSpacing.x4),
-              DropdownButtonFormField<AccountType>(
-                isExpanded: true,
-                initialValue: _accountType,
-                decoration: InputDecoration(labelText: context.t.type),
-                items: AccountType.values
-                    .map(
-                      (item) => DropdownMenuItem(
-                        value: item,
-                        child: Text(_accountTypeLabel(context, item)),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (value) => setState(() => _accountType = value!),
+              PkSelectField(
+                key: const ValueKey('onboarding_account_type'),
+                label: context.t.type,
+                value: _accountTypeLabel(context, _accountType),
+                onTap: () async {
+                  final chosen = await showPkOptionPicker<AccountType>(
+                    context,
+                    title: context.t.type,
+                    selected: _accountType,
+                    options: [
+                      for (final item in AccountType.values)
+                        PkOption(
+                          value: item,
+                          label: _accountTypeLabel(context, item),
+                        ),
+                    ],
+                  );
+                  if (chosen != null) setState(() => _accountType = chosen);
+                },
               ),
               const SizedBox(height: PkSpacing.x4),
-              TextField(
-                key: const ValueKey('onboarding_account_balance'),
+              PkAmountField(
+                fieldKey: const ValueKey('onboarding_account_balance'),
                 controller: _accountBalance,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                decoration: InputDecoration(
-                  labelText: context.t.currentBalance,
-                  prefixText: '${PockitoCurrencies.of(_currency).symbol} ',
-                ),
+                currency: _currency,
+                label: context.t.currentBalance,
               ),
             ],
           ),
@@ -510,9 +530,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     const SizedBox(width: PkSpacing.x3),
                     Expanded(child: Text(context.t.yesCreateASharedSpace)),
                     if (_share)
-                      const Icon(
+                      Icon(
                         Icons.check_circle_rounded,
-                        color: PkPalette.amber700,
+                        color: context.pk.sharedStrong,
                       ),
                   ],
                 ),
@@ -526,9 +546,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     const SizedBox(width: PkSpacing.x3),
                     Expanded(child: Text(context.t.notRightNow)),
                     if (!_share)
-                      const Icon(
+                      Icon(
                         Icons.check_circle_rounded,
-                        color: PkPalette.indigo600,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                   ],
                 ),
@@ -736,7 +756,7 @@ class IncomingInviteReviewScreen extends StatelessWidget {
                   children: [
                     PkIconTile(
                       icon: Icons.menu_book_rounded,
-                      color: context.pk.sharedStrong,
+                      accent: PkAccent.ink(context.pk.sharedStrong),
                       size: 72,
                       iconSize: 34,
                     ),
@@ -875,7 +895,9 @@ class _OnboardingPage extends StatelessWidget {
                         children: [
                           PkIconTile.feature(
                             icon: icon,
-                            color: Theme.of(context).colorScheme.primary,
+                            accent: PkAccent.ink(
+                              Theme.of(context).colorScheme.primary,
+                            ),
                           ),
                           if (mascot != null) ...[
                             const Spacer(),
@@ -945,7 +967,7 @@ class _LensVisual extends StatelessWidget {
           children: [
             const PkIconTile(
               icon: Icons.account_balance_wallet_outlined,
-              color: PkPalette.indigo600,
+              accent: PkPalette.brand,
             ),
             const SizedBox(width: PkSpacing.x3),
             Expanded(
@@ -975,7 +997,7 @@ class _LensVisual extends StatelessWidget {
           children: [
             PkIconTile(
               icon: Icons.group_outlined,
-              color: context.pk.sharedStrong,
+              accent: PkAccent.ink(context.pk.sharedStrong),
             ),
             const SizedBox(width: PkSpacing.x3),
             Expanded(
@@ -1022,7 +1044,10 @@ class _ReadyVisual extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
-            const Icon(Icons.check_circle_rounded, color: PkPalette.indigo600),
+            Icon(
+              Icons.check_circle_rounded,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ],
         ),
         const SizedBox(height: PkSpacing.x3),
@@ -1052,6 +1077,18 @@ class _InviteRow extends StatelessWidget {
     ),
   );
 }
+
+/// The country the reader picked, in their language. The stored value stays the
+/// English name: it is a key the currency mapping and the seeded fixtures use,
+/// not a label.
+String _countryLabel(BuildContext context, String country) => switch (country) {
+  'Japan' => context.t.countryJapan,
+  'Germany' => context.t.countryGermany,
+  'Luxembourg' => context.t.countryLuxembourg,
+  'Tunisia' => context.t.countryTunisia,
+  'United Kingdom' => context.t.countryUnitedKingdom,
+  _ => context.t.countryUnitedStates,
+};
 
 String _accountTypeLabel(BuildContext context, AccountType type) =>
     switch (type) {

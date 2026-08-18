@@ -1,12 +1,15 @@
 # Pockito mobile UI/UX programme — completion record
 
 **Date:** 17 August 2026
-**Programme:** [`docs/pockito-mobile-ui-ux-audit.md`](pockito-mobile-ui-ux-audit.md), tasks UI-001 → UI-016
+**Date of last revision:** 18 August 2026
+**Programme:** [`docs/pockito-mobile-ui-ux-audit.md`](pockito-mobile-ui-ux-audit.md), tasks UI-001 → UI-016;
+[`docs/pockito-component-adoption-roadmap.md`](pockito-component-adoption-roadmap.md), tasks UI-017 → UI-023;
+UI-024 from a screenshot review of the dark theme; UI-025 closing the roadmap's exit gates
 **Companion:** [`docs/prototype-completion-audit.md`](prototype-completion-audit.md) — landed before this
 programme began; none of its work was recreated or overwritten.
 
-> **Status: complete.** `flutter analyze` clean, `dart format` clean, 166 tests
-> passing including 60 golden baselines, and both debug and release APKs build.
+> **Status: complete.** `flutter analyze` clean, `dart format` clean, 215 tests
+> passing including the golden baselines, and both debug and release APKs build.
 
 This document records where each task landed, what the acceptance criteria are
 checked *by*, and the two places the audit's own numbers had to be reconciled.
@@ -114,6 +117,80 @@ instead of being seven coloured bars.
 implemented (it did not exist), and the consistency rules asserted directly so a
 failure names the rule rather than the pixels.
 
+### The adoption programme, UI-017 → UI-023
+
+The comparison against LifeOS found that the design system was ahead of the
+benchmark on every structural axis and was being *bypassed by the screens*.
+These seven tasks closed that gap and added the gates that keep it closed.
+
+**UI-017 · Accent and contrast.** `PkAccent` splits a category's *fill* from its
+*ink*, per brightness, and `PkIconTile` will no longer accept a bare `Color` —
+the defect is unrepresentable rather than merely fixed. Six of twelve category
+colours were failing 3:1 as glyph ink; `_SpaceHero` was drawing a saturated fill
+as ink on white at 1.75:1.
+
+**UI-018 · Field migration.** 24 `DropdownButtonFormField` and 20 raw
+`TextField` moved onto `PkAmountField` / `PkSelectField` / `PkSelectFormField` /
+`PkDateField` / `PkNoteField`, with a currency control inside the amount field.
+Settle Up went first: the most consequential number in the product was a bare
+`TextField` styled `displayLarge`.
+
+**UI-019 · Row and detail consolidation.** `PkDetailRow` replaced four private
+copies. `pkStatusInk` became the single source of status colour.
+
+**UI-020 · Home composition.** The hero reached its 148–168 px budget for the
+first time (199 → 165) without touching `PkWelcomeBanner`, which is a fixed
+product decision.
+
+**UI-021 · Shared money.** `PkSplitBar` with a legend, `PkBalanceImpact`'s
+before-and-after statement.
+
+**UI-022 · Icons and search reach.** A 27-line icon switch became a ~60-entry
+catalogue with namespaced ids, a legacy compatibility map so records saved
+before it keep their mark, and search that reaches destinations through
+translator-owned ARB synonyms.
+
+**UI-023 · Polish and proof.** `PkRecordTimeline` on the shared-expense detail,
+provenance badges on AI-written and receipt-backed rows, scope as a single
+field, an RTL locale in the golden matrix, and a container ceiling on Home.
+
+### UI-024 · The dark theme, from screenshots
+
+A review of five dark-mode screenshots found a family of defects that every
+prior audit had missed, because each one is invisible in light mode. See §3.
+
+### UI-025 · Closing the roadmap's open items
+
+A re-read of the roadmap against the code found five phases that had shipped
+their substance but not their exit gate. Closing them is what turned the
+programme from "done" into "enforced".
+
+**The two missing gates.** `PkTextField` was added — the plain-text case the
+plan never named — and 24 raw `TextField`/`TextFormField` migrated onto it,
+leaving three inline numeric cells that say in a marker why a table cell cannot
+carry a floating label and a 48 px box. 40 `ListTile`s became
+`PkLedgerRow.management`, including four destructive rows that were each
+colouring their own title by hand and now ask for `destructive: true`. Both
+rules are source gates; a `PopupMenuItem`'s child is exempt by shape, because
+there `ListTile` *is* the Material convention.
+
+**Home, as §5 actually specified it.** The brand header floats and snaps
+(−76 px of permanent height). Accounts, Upcoming, Spending trend and Where it
+went are one grouped surface of four rows, each carrying its own summary value
+— the same height as the four section headers they replace, four answers
+instead of four headings, and four redundant "See all" buttons gone.
+
+**One substitution, stated.** Collapsing the two charts into rows would have
+deleted them: neither had a destination. `/home/insights` now holds both
+charts, both comparison labels and both accessible data tables, and the two
+rows lead there. The acceptance journey follows the row rather than reading the
+chart on Home, which is a stronger assertion than the one it replaced.
+
+**`PkMotion.ambient` earned its place.** It had been added as a token with no
+call sites, which is worse than no token. `KitoThinking` is the assistant's
+waiting state — a three-second breath, reduced-motion gated so the ticker never
+starts rather than merely being invisible.
+
 ---
 
 ## 3. Defects found and fixed
@@ -134,6 +211,43 @@ These were not in either audit's findings list. They were found by measuring.
 | Five `IconButton`s had no tooltip | Labelled |
 | ~45 user-facing English literals in `lib/ui` | Moved to ARB; a source gate now fails on new ones |
 | Three test harnesses resized the render view without updating `MediaQuery`, so they measured a 390×844 view against an 800×600 `MediaQuery` | Harnesses aligned; this is what made a correctly-sized sheet appear to overflow |
+
+### Found by the adoption programme (UI-017 → UI-023)
+
+| Finding | Fix |
+|---|---|
+| Six of twelve category colours failed 3:1 **as glyph ink**. `meetsGuideline(textContrastGuideline)` checks text, not icons, so no prior gate could see it | `PkAccent` splits fill from per-brightness ink; `PkIconTile` cannot take a bare colour |
+| `_SpaceHero` drew the saturated category fill as ink on a white button — **1.75:1** | `accent.inkOn(Brightness.light)` |
+| The Home hero's month control was white 12 px on `white .14` over the gradient — **4.39:1** | A navy scrim at .22 plus a white .28 hairline (~7:1); the same fix on `_SpaceHero`'s segmented control |
+
+### Found by the dark-theme screenshot review (UI-024)
+
+Every one of these renders correctly in light mode. That is why they survived
+fifteen tasks of auditing: the light half of a frozen colour is the half that
+gets looked at.
+
+| Finding | Fix |
+|---|---|
+| **Unread notifications were a near-white card with near-white text on it.** `PkPalette.indigo50` was painted as the row background — the light end of a ramp with no dark counterpart — while the text on it followed the theme | `pkStatusSurface(context, tone)` derives the wash from the tone's own ink over the *current* surface. Same fix on the currency notice, the FX notice, the blocked-invite card and the allocation warning |
+| **The unread dot, every verified tick and three notice icons were dark blue on dark blue.** The other half of the same defect: `indigo600` read on `indigo50` only because the background was frozen too | Ink routed through `pkStatusInk`, `colorScheme.primary` or `context.pk.*`. A second source gate now fails on a light-only tier used as a mark |
+| **Twenty stacked date headers and no transactions.** A pinned `SliverPersistentHeader` pins to the *viewport*, so one per day meant every day already scrolled past stayed stuck at the top | Each day wrapped in `SliverMainAxisGroup`, which scopes the pinning to the group. A test now asserts that rows, not date bars, fill a deeply-scrolled viewport |
+| **"Approval requested" rendered as "Appro…" beside a badge with room to spare.** `Row` divides free space by flex factor, so a title and a badge both at `Flexible(flex: 1)` each took half the line whatever they needed | The badge is measured at its own width and capped; the title takes the remainder |
+| **"Household · EUR · 2 members" clipped beside an amount with slack.** The same trap one level up — `Expanded` and `Flexible` are both flex 1 | The amount column sizes to its content, capped at 55%. `PkDetailRow` had the identical bug and got the identical fix |
+| The dark shared-money wash read as olive rather than gold at hero size | `sharedSurface` #362A12 → #241C0D, `sharedBorder` #755313 → #6B4C12. Large areas take the low-chroma end; the amber ink and hairline carry the signal |
+| `PkAvatar` put a pale disc in the middle of a dark row | Fill and initials both follow the theme |
+
+### Found while closing the roadmap (UI-025)
+
+All three were exposed by giving content its own screen: on Home the charts sat
+far enough down that a lazily-built sliver never rendered them into the checked
+tree.
+
+| Finding | Fix |
+|---|---|
+| The category donut's legend rows are tappable and were **24 px tall** — the smallest tap target in the app, on the one control that navigates into a filtered ledger | A legend that only labels the ring may stay tight; one that navigates gets `PkSize.touch`. Above 1.2× the percentage and amount move under the name rather than overflowing |
+| `PkSectionHeader`'s action was inflexible and pushed the header past the gutter at 2.0× | The title is what the section *is*; the way in may ellipsize |
+| `PkWelcomeBanner` inks its greeting navy to sit on the artwork, with nothing guaranteeing the artwork is there. An image that has not decoded leaves navy text on a navy page | The artwork's own pale field is painted beneath the image, so the ink always has the surface it was designed for |
+| An unlabelled, full-screen tappable node sat above every route — the app-level tap-to-dismiss-the-keyboard gesture, advertised to screen readers as a button the size of the display | `excludeFromSemantics: true`. It is a convenience for a pointer, not a control |
 
 ---
 
@@ -171,6 +285,17 @@ form factor becomes a target device.
   surfaces in both themes.
 - **Integration tests** need an attached device; the same journey runs headlessly
   in `test/pockito_acceptance_ui_test.dart`, which is what CI executes.
+- **`/home/insights` is a new screen, not a moved one.** The spending trend and
+  the category breakdown left Home because their section headers were the part
+  competing with the hero, not because the charts were unwanted. Both are on
+  the new screen in full, with their comparison labels and their accessible
+  data tables. Nothing was dropped.
+- **P2-14, Kito's pose by time of day, is not achievable as specified.**
+  `welcome-header.png` is a single composed raster with Kito baked into it, so
+  changing the pose is an artwork request, not a code change. It is reported
+  here rather than approximated with an overlay, which would have put a second
+  Kito on top of the first. **Owner:** design. **Unblocked by:** a set of poses
+  delivered as separate assets, or the banner recomposed as art plus a sprite.
 
 ---
 
@@ -179,7 +304,7 @@ form factor becomes a target device.
 ```
 dart format lib test integration_test   # clean
 flutter analyze                         # No issues found
-flutter test                            # 166 passed
+flutter test                            # 215 passed
 flutter build apk --debug               # ok
 flutter build apk --release             # ok, 69.6 MB
 ```

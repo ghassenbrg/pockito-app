@@ -87,7 +87,9 @@ class TagsScreen extends StatelessWidget {
                       semanticIdentifier: 'tag_${tag.id}',
                       leading: CircleAvatar(
                         radius: PkSize.avatarCompact / 2,
-                        backgroundColor: PkPalette.categoryAt(tag.colorIndex),
+                        backgroundColor: PkPalette.categoryFillAt(
+                          tag.colorIndex,
+                        ),
                       ),
                       title: tag.name,
                       subtitle: usage(tag) == 0
@@ -136,29 +138,24 @@ class TagsScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ListTile(
-              contentPadding: EdgeInsets.zero,
+            PkLedgerRow.management(
               leading: const Icon(Icons.edit_outlined),
-              title: Text(context.t.rename),
+              title: context.t.rename,
               onTap: () => Navigator.pop(context, 'edit'),
             ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
+            PkLedgerRow.management(
               leading: const Icon(Icons.filter_alt_outlined),
-              title: Text(context.t.seeEverythingTaggedWithThis),
+              title: context.t.seeEverythingTaggedWithThis,
               onTap: () => Navigator.pop(context, 'filter'),
             ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
+            PkLedgerRow.management(
               leading: Icon(
                 Icons.delete_outline_rounded,
                 color: context.pk.danger,
               ),
-              title: Text(
-                context.t.delete,
-                style: TextStyle(color: context.pk.danger),
-              ),
-              subtitle: Text(context.t.recordsKeepTheirOtherTags),
+              title: context.t.delete,
+              destructive: true,
+              subtitle: context.t.recordsKeepTheirOtherTags,
               onTap: () => Navigator.pop(context, 'delete'),
             ),
           ],
@@ -235,7 +232,7 @@ class PaymentMethodsScreen extends StatelessWidget {
                       semanticIdentifier: 'payment_method_${method.id}',
                       leading: PkIconTile(
                         icon: PkIcons.named(method.icon),
-                        color: PkPalette.categoryAt(method.colorIndex),
+                        accent: PkPalette.categoryAt(method.colorIndex),
                         size: PkSize.avatarCompact,
                       ),
                       title: method.last4 == null
@@ -687,16 +684,14 @@ class _ReconcileAccountScreenState extends State<ReconcileAccountScreen> {
                     ),
                   ),
                 const SizedBox(height: PkSpacing.x4),
-                TextField(
+                PkTextField(
                   key: const ValueKey('reconcile_reason'),
                   controller: _reason,
                   maxLength: 140,
                   textCapitalization: TextCapitalization.sentences,
-                  decoration: InputDecoration(
-                    labelText: context.t.whyDoesItDiffer,
-                    hintText: context.t.eGCountedTheWallet,
-                  ),
                   onChanged: (_) => setState(() {}),
+                  label: context.t.whyDoesItDiffer,
+                  hint: context.t.eGCountedTheWallet,
                 ),
                 const SizedBox(height: PkSpacing.x4),
                 PkSubmitButton(

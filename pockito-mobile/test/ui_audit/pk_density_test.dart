@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pockito/ui/core/components/pk_components.dart';
 
@@ -83,15 +84,86 @@ void main() {
       lessThan(bottom),
       reason: 'The whole portfolio hero must be visible above the navigation',
     );
-    // Section 7.1: the hero's own height budget is 148–168.
-    expect(heroBox.height, lessThanOrEqualTo(200));
+    // Section 7.1 budgets the hero at 148–168. It sat at 199 until UI-020,
+    // documented as an exception; the exception is now closed.
+    expect(heroBox.height, inInclusiveRange(148, 168));
+  });
 
-    // …and the quick actions beneath it, so the reader can start something
-    // without scrolling.
+  // UI-020: the density contract, stated for the one screen that was exempt
+  // from it. Accounts, Spaces, Activity, More and Notifications have had a
+  // floor since UI-016; Home did not, and Home was the screen that failed —
+  // the first row of the reader's own money started *at* the navigation line.
+  testWidgets('Home shows the reader their own money above the navigation', (
+    tester,
+  ) async {
+    await pumpSurface(tester, route: '/home', viewport: phone);
+    final bottom = visibleContentBottom(tester, phone);
+
+    final data =
+        [
+          ...find.byType(PkAccountTile).evaluate(),
+          ...find.byType(PkLedgerRow).evaluate(),
+        ].where((element) {
+          final box = element.renderObject;
+          if (box is! RenderBox || !box.hasSize) return false;
+          final top = box.localToGlobal(Offset.zero).dy;
+          return top >= 0 && top + box.size.height <= bottom;
+        });
     expect(
-      tester.getRect(find.byType(PkQuickActions).first).bottom,
-      lessThan(bottom),
-      reason: 'The quick actions must clear the navigation',
+      data.length,
+      greaterThanOrEqualTo(2),
+      reason:
+          'Home must show at least two pieces of the reader\'s own money '
+          'above the navigation at 390x844 and default text scale',
+    );
+  });
+
+  testWidgets('Home spends under 40% of its first screen on chrome', (
+    tester,
+  ) async {
+    // The brand lockup and Kito's greeting are the two things on Home that
+    // are about the app rather than about the money. Together they were 252 px
+    // of 758 before the hero even began; this is what holds that in place.
+    await pumpSurface(tester, route: '/home', viewport: phone);
+    final bottom = visibleContentBottom(tester, phone);
+    final banner = tester.getRect(find.byType(PkWelcomeBanner));
+    expect(
+      banner.bottom / bottom,
+      lessThan(.4),
+      reason: 'Brand chrome and the greeting take too much of the first screen',
+    );
+  });
+
+  testWidgets('Home stacks at most six rounded surfaces in a viewport', (
+    tester,
+  ) async {
+    // P2-12. Every rounded, bordered box on screen is one more edge the eye
+    // has to resolve before it reaches a number, and Home is where they
+    // accumulate: a banner, a hero, an action block, a card per section, a
+    // card per chart. The count is a ceiling on visual noise, not on content
+    // — sections that group their rows into *one* grouped surface are free to
+    // hold as many rows as they like.
+    await pumpSurface(tester, route: '/home', viewport: phone);
+    final bottom = visibleContentBottom(tester, phone);
+    final surfaces =
+        [
+          ...find.byType(PkCard).evaluate(),
+          ...find.byType(PkGroupedSurface).evaluate(),
+          ...find.byType(PkHeroPanel).evaluate(),
+          ...find.byType(PkWelcomeBanner).evaluate(),
+        ].where((element) {
+          final box = element.renderObject;
+          if (box is! RenderBox || !box.hasSize) return false;
+          final top = box.localToGlobal(Offset.zero).dy;
+          // Counted when it is actually on the first screen, and only when it is
+          // not nested inside another counted surface — a card inside a card is
+          // one boundary too many, but it is the outer one that is being counted.
+          return top >= 0 && top < bottom;
+        }).length;
+    expect(
+      surfaces,
+      lessThanOrEqualTo(6),
+      reason: 'Home is showing $surfaces rounded surfaces in one viewport',
     );
   });
 

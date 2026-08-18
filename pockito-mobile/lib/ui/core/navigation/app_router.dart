@@ -163,6 +163,11 @@ final GoRouter appRouter = GoRouter(
       ),
     ),
     GoRoute(
+      path: '/home/insights',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const HomeInsightsScreen(),
+    ),
+    GoRoute(
       path: '/home/net-worth',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const NetWorthBreakdownScreen(),

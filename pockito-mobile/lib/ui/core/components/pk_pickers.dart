@@ -118,8 +118,11 @@ class PkSheetScaffold extends StatelessWidget {
         top: Radius.circular(PkRadius.sheet),
       ),
       clipBehavior: Clip.antiAlias,
+      // Safe on both hosts: a real modal bottom sheet (`showPkSheet`) already
+      // zeroes the top inset via its own `useSafeArea`, so this is a no-op
+      // there, while a full-screen `_sheetPage` route has no other ancestor
+      // to keep the header out from under the status bar/notch.
       child: SafeArea(
-        top: false,
         child: Padding(
           padding: EdgeInsets.only(
             bottom: MediaQuery.viewInsetsOf(context).bottom,
@@ -437,6 +440,7 @@ class PkAmountField extends StatefulWidget {
     this.negative = false,
     this.onSignChanged,
     this.fieldKey,
+    this.onCurrencyTap,
   });
 
   final TextEditingController controller;
@@ -456,6 +460,16 @@ class PkAmountField extends StatefulWidget {
   final bool negative;
   final ValueChanged<bool>? onSignChanged;
   final Key? fieldKey;
+
+  /// Opens the currency picker from inside the field.
+  ///
+  /// Pockito is multi-currency everywhere else — an account carries one, a
+  /// Space carries one, and `PkFxDisclosure` explains the difference — but the
+  /// amount field used to take whatever the caller decided upstream, so the
+  /// one moment the reader is actually thinking about the number was the one
+  /// moment they could not change its currency. Leave it null where the
+  /// currency genuinely is not the reader's to choose.
+  final VoidCallback? onCurrencyTap;
 
   @override
   State<PkAmountField> createState() => _PkAmountFieldState();
@@ -538,6 +552,13 @@ class _PkAmountFieldState extends State<PkAmountField> {
                 ),
               ),
             ),
+            if (widget.onCurrencyTap != null) ...[
+              const SizedBox(width: PkSpacing.x2),
+              _PkCurrencyControl(
+                code: widget.currency,
+                onTap: widget.onCurrencyTap!,
+              ),
+            ],
           ],
         ),
         if (widget.quickAmounts.isNotEmpty) ...[
@@ -584,6 +605,66 @@ class _PkAmountFieldState extends State<PkAmountField> {
   }
 }
 
+/// The currency the amount beside it is being entered in.
+///
+/// Deliberately the ISO code and not a flag: a flag names a country, and the
+/// euro, the dollar and the franc each belong to several. The visible pill is
+/// [PkSize.chip] tall inside the full [PkSize.touch] region.
+class _PkCurrencyControl extends StatelessWidget {
+  const _PkCurrencyControl({required this.code, required this.onTap});
+
+  final String code;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: '${context.t.currency}, $code',
+    identifier: 'amount_currency',
+    excludeSemantics: true,
+    child: InkWell(
+      onTap: () {
+        PkHaptics.selection();
+        onTap();
+      },
+      borderRadius: BorderRadius.circular(PkRadius.full),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minWidth: PkSize.touch,
+          minHeight: PkSize.touch,
+        ),
+        child: Center(
+          child: Container(
+            height: PkSize.chip,
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              PkSpacing.x3,
+              0,
+              PkSpacing.x2,
+              0,
+            ),
+            decoration: BoxDecoration(
+              color: context.pk.sunken,
+              borderRadius: BorderRadius.circular(PkRadius.full),
+              border: Border.all(color: context.pk.borderSubtle),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(code, style: context.pkText.label),
+                Icon(
+                  Icons.expand_more_rounded,
+                  size: PkSize.iconSmall,
+                  color: context.pk.textSecondary,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 /// Keeps a typed amount inside the currency's precision.
 class _DecimalLimitFormatter extends TextInputFormatter {
   const _DecimalLimitFormatter(this.decimals);
@@ -619,6 +700,111 @@ class _DecimalLimitFormatter extends TextInputFormatter {
 /// its icon or colour, has no search once the list passes eight, and clips
 /// rather than wraps at large text sizes. This shows the current value with its
 /// identity intact and opens a sheet to change it.
+/// A single line of typed text: a name, an email, a merchant, a short reason.
+///
+/// The last raw primitive the field system was missing. `PkAmountField` owns
+/// money, `PkSelectField` owns a choice, `PkDateField` owns a date and
+/// `PkNoteField` owns prose — but twenty screens were still reaching straight
+/// for `TextField`/`TextFormField` for the plain case, each deciding for itself
+/// whether to validate, whether to capitalize, and whether to be a `TextField`
+/// (no validation possible) or a `TextFormField` (validation possible but
+/// usually unused).
+///
+/// It is a `TextFormField` underneath in every case, so a [validator] works
+/// whether or not the caller remembered to ask for one, and `Form.validate()`
+/// reaches it.
+class PkTextField extends StatelessWidget {
+  const PkTextField({
+    super.key,
+    required this.label,
+    this.controller,
+    this.hint,
+    this.validator,
+    this.keyboardType,
+    this.textCapitalization = TextCapitalization.none,
+    this.textInputAction,
+    this.autofocus = false,
+    this.maxLines = 1,
+    this.minLines,
+    this.maxLength,
+    this.helper,
+    this.suffix,
+    this.textAlign = TextAlign.start,
+    this.onChanged,
+    this.onSubmitted,
+    this.enabled = true,
+    this.autofillHints,
+    this.fieldKey,
+  });
+
+  /// Null lets the field hold its own value, which is what an uncontrolled
+  /// `TextField` did and is still right for a field nothing else reads.
+  final TextEditingController? controller;
+  final String label;
+  final String? hint;
+  final String? Function(String?)? validator;
+  final TextInputType? keyboardType;
+  final TextCapitalization textCapitalization;
+  final TextInputAction? textInputAction;
+  final bool autofocus;
+
+  /// Above 1 the field grows into a box. Prose that wants real room belongs in
+  /// [PkNoteField] instead — this is for the two- or three-line case.
+  final int maxLines;
+  final int? minLines;
+  final int? maxLength;
+
+  /// A standing explanation of the field, always visible. A message that only
+  /// applies when the value is wrong is a [validator], not this.
+  final String? helper;
+
+  /// A unit that belongs to the value — a currency code on a rate, a percent
+  /// sign on a share. Money's own symbol belongs to `PkAmountField`.
+  final String? suffix;
+
+  /// End-aligned for a numeric cell that sits in a column with others.
+  final TextAlign textAlign;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
+  final bool enabled;
+  final List<String>? autofillHints;
+
+  /// A stable handle for tests, kept separate from [key] so the caller can
+  /// rebuild the widget without the handle moving.
+  final Key? fieldKey;
+
+  @override
+  Widget build(BuildContext context) => TextFormField(
+    key: fieldKey,
+    controller: controller,
+    validator: validator,
+    keyboardType: keyboardType,
+    textCapitalization: textCapitalization,
+    textInputAction: textInputAction,
+    autofocus: autofocus,
+    maxLines: maxLines,
+    minLines: minLines,
+    maxLength: maxLength,
+    textAlign: textAlign,
+    onChanged: onChanged,
+    onFieldSubmitted: onSubmitted,
+    enabled: enabled,
+    autofillHints: autofillHints,
+    decoration: InputDecoration(
+      labelText: label,
+      hintText: hint,
+      helperText: helper,
+      suffixText: suffix,
+      // A floating label centres itself against a single-line field. On a box
+      // that is four lines tall it ends up floating in the middle of the
+      // writing area, which is why every multiline caller was passing this by
+      // hand — so the field decides it from the shape it already knows.
+      alignLabelWithHint: maxLines > 1,
+      enabled: enabled,
+    ),
+  );
+}
+
 class PkSelectField extends StatelessWidget {
   const PkSelectField({
     super.key,
@@ -688,6 +874,387 @@ class PkSelectField extends StatelessWidget {
           ],
         ),
       ),
+    ),
+  );
+}
+
+/// A [PkSelectField] that takes part in a [Form].
+///
+/// Most of the dropdowns this replaces carried a `validator`, so swapping them
+/// for a plain tappable row would have quietly dropped their validation on the
+/// floor. This keeps `Form.validate()` working: the field owns the value, the
+/// error text renders in the same slot `InputDecorator` already had, and the
+/// picker is whatever future the caller hands over.
+class PkSelectFormField<T> extends FormField<T> {
+  PkSelectFormField({
+    super.key,
+    required String label,
+    required Future<T?> Function(BuildContext context) pick,
+    required String? Function(T? value) display,
+    super.initialValue,
+    super.validator,
+    super.onSaved,
+    String? placeholder,
+    Widget? Function(T? value)? leading,
+    ValueChanged<T?>? onChanged,
+    super.enabled = true,
+
+    /// Stable handle for tests and automation. The outer key may have to
+    /// change when the value does — a [FormField] keeps its own state and
+    /// ignores a new `initialValue` otherwise — so the thing a test looks for
+    /// lives on the row instead.
+    Key? fieldKey,
+  }) : super(
+         builder: (state) => PkSelectField(
+           key: fieldKey,
+           label: label,
+           value: display(state.value),
+           placeholder: placeholder,
+           leading: leading?.call(state.value),
+           errorText: state.errorText,
+           enabled: enabled,
+           onTap: () async {
+             final chosen = await pick(state.context);
+             if (chosen == null) return;
+             state.didChange(chosen);
+             onChanged?.call(chosen);
+           },
+         ),
+       );
+}
+
+/// One choice from a short, fixed set — a type, a period, a theme.
+///
+/// The rich pickers above are for entities that carry an icon, a colour and a
+/// balance. This is for the other half of what `DropdownButtonFormField` was
+/// doing: a handful of named options where the only thing to show is the name
+/// and, where it helps, one line saying what choosing it means.
+@immutable
+class PkOption<T> {
+  const PkOption({
+    required this.value,
+    required this.label,
+    this.hint,
+    this.icon,
+    this.accent,
+  });
+
+  final T value;
+  final String label;
+
+  /// What this choice actually does. A dropdown had nowhere to put this, so
+  /// the consequence of picking "Shares" over "Exact" lived in a help article.
+  final String? hint;
+  final IconData? icon;
+  final PkAccent? accent;
+}
+
+Future<T?> showPkOptionPicker<T>(
+  BuildContext context, {
+  required String title,
+  required List<PkOption<T>> options,
+  T? selected,
+  String? subtitle,
+}) => showPkSheet<T>(
+  context,
+  size: options.length <= 4 ? PkSheetSize.compact : PkSheetSize.standard,
+  builder: (context) => PkSheetScaffold(
+    title: title,
+    subtitle: subtitle,
+    child: PkGroupedSurface(
+      indent: options.any((option) => option.icon != null)
+          ? PkSpacing.x4 + PkSize.iconTileDense + PkSpacing.x3
+          : PkSpacing.x4,
+      children: [
+        for (final option in options)
+          PkLedgerRow.management(
+            key: ValueKey('option_${option.value}'),
+            semanticIdentifier: 'option_${option.value}',
+            leading: option.icon == null
+                ? null
+                : PkIconTile(
+                    icon: option.icon!,
+                    accent:
+                        option.accent ??
+                        PkAccent.ink(Theme.of(context).colorScheme.primary),
+                  ),
+            title: option.label,
+            subtitle: option.hint,
+            // Selection is stated, not only ticked: the row announces itself
+            // as the current choice rather than leaving a bare check glyph to
+            // carry it.
+            trailing: option.value == selected
+                ? Icon(
+                    Icons.check_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                  )
+                : null,
+            semanticLabel: option.value == selected
+                ? '${option.label}, ${context.t.selected}'
+                : null,
+            onTap: () => Navigator.pop(context, option.value),
+          ),
+      ],
+    ),
+  ),
+);
+
+// -----------------------------------------------------------------------------
+// Icons
+// -----------------------------------------------------------------------------
+
+/// Choose the mark an account, category, Space or budget wears.
+///
+/// A grid rather than a list: an icon is recognised, not read, and a column of
+/// rows would show eight where a grid shows thirty. The groups are named so the
+/// reader can go to a neighbourhood instead of scanning everything, and the
+/// search covers the group's name in their own language as well as the entry's
+/// own words.
+Future<String?> showPkIconPicker(
+  BuildContext context, {
+  String? selectedId,
+  PkAccent? accent,
+  String? title,
+}) => showPkSheet<String>(
+  context,
+  builder: (context) => _PkIconPicker(
+    selectedId: selectedId,
+    accent: accent ?? PkAccent.ink(Theme.of(context).colorScheme.primary),
+    title: title,
+  ),
+);
+
+class _PkIconPicker extends StatefulWidget {
+  const _PkIconPicker({
+    required this.selectedId,
+    required this.accent,
+    this.title,
+  });
+
+  final String? selectedId;
+  final PkAccent accent;
+  final String? title;
+
+  @override
+  State<_PkIconPicker> createState() => _PkIconPickerState();
+}
+
+class _PkIconPickerState extends State<_PkIconPicker> {
+  String _query = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t;
+    final matches = PkIconCatalog.entries
+        .where((entry) => entry.matches(_query.trim(), t))
+        .toList();
+    final grouped = <PkIconGroup, List<PkIconDef>>{};
+    for (final entry in matches) {
+      grouped.putIfAbsent(entry.group, () => []).add(entry);
+    }
+    final resolved = PkIconCatalog.find(widget.selectedId ?? '')?.id;
+    return PkSheetScaffold(
+      title: widget.title ?? t.chooseAnIcon,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          PkSearchField(
+            value: _query,
+            hintText: t.searchIcons,
+            resultCount: _query.trim().isEmpty ? null : matches.length,
+            onChanged: (value) => setState(() => _query = value),
+          ),
+          const SizedBox(height: PkSpacing.x4),
+          if (matches.isEmpty)
+            PkListState.empty(
+              icon: Icons.search_off_rounded,
+              title: t.searchNoMatchTitle(_query.trim()),
+              message: t.searchNoMatchBody,
+              actionLabel: t.actionClearSearch,
+              onAction: () => setState(() => _query = ''),
+            )
+          else
+            for (final group in PkIconGroup.values)
+              if (grouped[group] != null) ...[
+                PkGroupLabel(label: group.labelIn(t)),
+                Wrap(
+                  spacing: PkSpacing.x2,
+                  runSpacing: PkSpacing.x2,
+                  children: [
+                    for (final entry in grouped[group]!)
+                      _PkIconChoice(
+                        entry: entry,
+                        accent: widget.accent,
+                        selected: entry.id == resolved,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: PkSpacing.x4),
+              ],
+        ],
+      ),
+    );
+  }
+}
+
+class _PkIconChoice extends StatelessWidget {
+  const _PkIconChoice({
+    required this.entry,
+    required this.accent,
+    required this.selected,
+  });
+
+  final PkIconDef entry;
+  final PkAccent accent;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    selected: selected,
+    // An icon has no words of its own, so the group and the entry's first
+    // keyword are what a screen reader has to work with.
+    label:
+        '${entry.keywords.firstOrNull ?? entry.id}, '
+        '${entry.group.labelIn(context.t)}',
+    identifier: 'icon_${entry.id}',
+    excludeSemantics: true,
+    child: InkWell(
+      onTap: () => Navigator.pop(context, entry.id),
+      borderRadius: BorderRadius.circular(PkRadius.control),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minWidth: PkSize.touch,
+          minHeight: PkSize.touch,
+        ),
+        child: Center(
+          child: Container(
+            width: PkSize.iconTileFeature,
+            height: PkSize.iconTileFeature,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: selected ? accent.wash() : context.pk.sunken,
+              borderRadius: BorderRadius.circular(PkRadius.control),
+              border: Border.all(
+                color: selected ? accent.ink(context) : context.pk.borderSubtle,
+                width: selected ? 2 : 1,
+              ),
+            ),
+            child: Icon(
+              entry.icon,
+              size: 22,
+              color: selected ? accent.ink(context) : context.pk.textSecondary,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Long text
+// -----------------------------------------------------------------------------
+
+/// A note, entered where there is room to write it.
+///
+/// A multiline field sitting in the middle of a long scrolling form fights the
+/// keyboard for the viewport: the caret ends up behind it, and the form scrolls
+/// out from under the writer. This shows the note as one row and opens a sheet
+/// to edit it, which is the same trade `PkSelectField` makes for selection.
+class PkNoteField extends StatelessWidget {
+  const PkNoteField({
+    super.key,
+    required this.controller,
+    required this.onChanged,
+    this.label,
+    this.hint,
+    this.fieldKey,
+  });
+
+  final TextEditingController controller;
+
+  /// Called after the sheet closes with the committed text.
+  final ValueChanged<String> onChanged;
+  final String? label;
+  final String? hint;
+  final Key? fieldKey;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = controller.text.trim();
+    return PkSelectField(
+      key: fieldKey,
+      label: label ?? context.t.noteOptional,
+      value: text.isEmpty ? null : text,
+      placeholder: hint ?? context.t.addANote,
+      onTap: () async {
+        final result = await showPkSheet<String>(
+          context,
+          size: PkSheetSize.compact,
+          builder: (context) => _PkNoteSheet(
+            title: label ?? context.t.noteOptional,
+            hint: hint ?? context.t.addANote,
+            initial: controller.text,
+          ),
+        );
+        if (result == null) return;
+        controller.text = result;
+        onChanged(result);
+      },
+    );
+  }
+}
+
+class _PkNoteSheet extends StatefulWidget {
+  const _PkNoteSheet({
+    required this.title,
+    required this.hint,
+    required this.initial,
+  });
+
+  final String title;
+  final String hint;
+  final String initial;
+
+  @override
+  State<_PkNoteSheet> createState() => _PkNoteSheetState();
+}
+
+class _PkNoteSheetState extends State<_PkNoteSheet> {
+  late final _controller = TextEditingController(text: widget.initial);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => PkSheetScaffold(
+    title: widget.title,
+    scrollable: false,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextField(
+          key: const ValueKey('note_sheet_field'),
+          controller: _controller,
+          autofocus: true,
+          minLines: 3,
+          maxLines: 6,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: InputDecoration(hintText: widget.hint),
+        ),
+        const SizedBox(height: PkSpacing.x4),
+        FilledButton(
+          key: const ValueKey('note_sheet_done'),
+          onPressed: () => Navigator.pop(context, _controller.text.trim()),
+          child: Text(context.t.done),
+        ),
+      ],
     ),
   );
 }
@@ -812,7 +1379,7 @@ Future<String?> showPkAccountPicker(
           account.currency.toLowerCase().contains(query),
       leading: (context, account) => PkIconTile(
         icon: PkIcons.named(account.icon),
-        color: PkPalette.categoryAt(account.colorIndex),
+        accent: PkPalette.categoryAt(account.colorIndex),
         size: 40,
         iconSize: 19,
       ),
@@ -832,6 +1399,38 @@ Future<String?> showPkAccountPicker(
             )
           : null,
     ),
+  );
+}
+
+/// How a chosen account reads back in the field that chose it.
+///
+/// Name and currency together, because "Main" and "Main" in two currencies is
+/// exactly the pair a settlement must not confuse. Returns null when nothing is
+/// selected so the field falls through to its placeholder.
+String? pkAccountLabel(
+  BuildContext context,
+  PockitoRepository repo,
+  String? id, {
+  String? outsideLabel,
+}) {
+  if (id == null) return null;
+  if (id == PkAccountPicker.outside) {
+    return outsideLabel ?? context.t.outsidePockitoNoWalletMovement;
+  }
+  final account = repo.accountById(id);
+  return account == null ? null : '${account.name} · ${account.currency}';
+}
+
+/// The account's own mark, so the field keeps the identity the picker showed.
+Widget? pkAccountLeading(PockitoRepository repo, String? id) {
+  if (id == null || id == PkAccountPicker.outside) return null;
+  final account = repo.accountById(id);
+  if (account == null) return null;
+  return PkIconTile(
+    icon: PkIcons.named(account.icon),
+    accent: PkPalette.categoryAt(account.colorIndex),
+    size: PkSize.avatarCompact,
+    iconSize: PkSize.iconSmall,
   );
 }
 
@@ -865,7 +1464,7 @@ Future<String?> showPkCategoryPicker(
       indentOf: (category) => category.parentId == null ? 0 : 1,
       leading: (context, category) => PkIconTile(
         icon: PkIcons.named(category.icon),
-        color: PkPalette.categoryAt(category.colorIndex),
+        accent: PkPalette.categoryAt(category.colorIndex),
         size: 40,
         iconSize: 19,
       ),
@@ -1091,7 +1690,7 @@ class PkTagInput extends StatelessWidget {
               label: Text(tag.name),
               avatar: CircleAvatar(
                 radius: 6,
-                backgroundColor: PkPalette.categoryAt(tag.colorIndex),
+                backgroundColor: PkPalette.categoryFillAt(tag.colorIndex),
               ),
               selected: selectedIds.contains(tag.id),
               onSelected: (on) {
@@ -1391,7 +1990,7 @@ class _SearchableListState<T> extends State<_SearchableList<T>> {
                           key: ValueKey('picker_${widget.extra!.id}'),
                           leading: PkIconTile(
                             icon: widget.extra!.icon,
-                            color: context.pk.textTertiary,
+                            accent: PkAccent.ink(context.pk.textTertiary),
                             size: 40,
                             iconSize: 19,
                           ),

@@ -155,6 +155,11 @@ const List<PkSurface> pkSurfaceManifest = [
     route: '/home/net-worth',
     kind: PkSurfaceKind.pushed,
   ),
+  PkSurface(
+    id: 'home-insights',
+    route: '/home/insights',
+    kind: PkSurfaceKind.pushed,
+  ),
   PkSurface(id: 'search', route: '/search', kind: PkSurfaceKind.pushed),
 
   // ---- Accounts --------------------------------------------------------

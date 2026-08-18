@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pockito/data/repositories/mock_pockito_repository.dart';
 import 'package:pockito/ui/core/components/pk_components.dart';
 import 'package:pockito/ui/core/design_system/pk_theme.dart';
+import 'package:pockito/ui/core/design_system/pk_tokens.dart';
 
 import '../support/pk_surface_manifest.dart';
 import '../support/pk_test_harness.dart';
@@ -187,6 +188,46 @@ void main() {
     // the widget settles.
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the ambient loop stops under reduced motion too', (
+    tester,
+  ) async {
+    // P2-11. `KitoThinking` is the one loop in the app that runs on
+    // `PkMotion.ambient` — three seconds, repeating, nothing arriving at the
+    // end of it. That is the most irritating kind of movement to a reader who
+    // asked for none, so the ticker must never start rather than merely being
+    // invisible: a repeating controller leaves the tree permanently dirty and
+    // `pumpAndSettle` would time out.
+    await tester.binding.setSurfaceSize(pkPhone);
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(disableAnimations: true),
+        child: MaterialApp(
+          theme: PkTheme.light(),
+          home: const Scaffold(body: Center(child: KitoThinking())),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    // And with motion allowed it genuinely animates, or the token is decoration.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: PkTheme.light(),
+        home: const Scaffold(body: Center(child: KitoThinking())),
+      ),
+    );
+    await tester.pump();
+    final before = tester
+        .widget<Transform>(find.byType(Transform).first)
+        .transform
+        .clone();
+    await tester.pump(PkMotion.ambient ~/ 2);
+    final after = tester.widget<Transform>(find.byType(Transform).first);
+    expect(after.transform, isNot(before));
   });
 
   testWidgets('Japanese renders every surface without clipping', (

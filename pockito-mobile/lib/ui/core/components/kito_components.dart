@@ -372,3 +372,64 @@ class KitoCelebration extends StatelessWidget {
     ),
   );
 }
+
+/// Kito while the assistant is working.
+///
+/// P2-11. A `CircularProgressIndicator` says "a machine is busy"; this says
+/// "Kito is reading your receipt", which is the same fact in the product's own
+/// voice. The loop runs on [PkMotion.ambient] — three seconds, deliberately
+/// slower than any transition, because nothing arrives at the end of it.
+///
+/// Reduced motion removes the movement rather than hiding it: the ticker is
+/// never started, so there is no frame callback per waiting screen for a
+/// reader who asked for none.
+class KitoThinking extends StatefulWidget {
+  const KitoThinking({super.key, this.size = KitoSize.inline});
+
+  final KitoSize size;
+
+  @override
+  State<KitoThinking> createState() => _KitoThinkingState();
+}
+
+class _KitoThinkingState extends State<KitoThinking>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: PkMotion.ambient,
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reduced = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    if (reduced && _controller.isAnimating) {
+      _controller.stop();
+    } else if (!reduced && !_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final image = KitoImage.sized(asset: KitoAsset.thinking, size: widget.size);
+    if (MediaQuery.maybeOf(context)?.disableAnimations ?? false) return image;
+    return AnimatedBuilder(
+      animation: _controller,
+      // A breath, not a bounce: four percent of scale over three seconds is
+      // enough to read as alive and not enough to pull the eye off the text
+      // beside it.
+      builder: (context, child) => Transform.scale(
+        scale: 1 + Curves.easeInOut.transform(_controller.value) * .04,
+        child: child,
+      ),
+      child: image,
+    );
+  }
+}

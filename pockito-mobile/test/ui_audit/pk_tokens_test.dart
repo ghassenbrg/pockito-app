@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pockito/ui/core/components/pk_surfaces.dart';
 import 'package:pockito/ui/core/design_system/pk_theme.dart';
 import 'package:pockito/ui/core/design_system/pk_tokens.dart';
 
@@ -233,6 +234,107 @@ void main() {
             ratio(semantic.textTertiary, background.value),
             greaterThanOrEqualTo(3),
             reason: 'textTertiary on ${background.key} in $name is too low',
+          );
+        }
+      });
+
+      // UI-017. The suite used to check text and semantic status colours only,
+      // which is why `PkPalette.category` could be handed to `PkIconTile` as
+      // glyph ink for a year: six of the twelve measured between 1.75:1 and
+      // 2.77:1 on the page and nothing said so. A 20 px mark that carries
+      // which category a row belongs to is non-text meaning, so it holds to
+      // 3:1 — on the tile's own wash, which is what it is actually drawn on.
+      test('every category accent clears 3:1 as glyph ink in $name', () {
+        final brightness = name == 'light' ? Brightness.light : Brightness.dark;
+        for (var index = 1; index <= PkPalette.category.length; index++) {
+          final accent = PkPalette.categoryAt(index);
+          final ink = accent.inkOn(brightness);
+          for (final background in {
+            'page': semantic.page,
+            'surface': semantic.surface,
+            'sunken': semantic.sunken,
+          }.entries) {
+            // The tile paints the fill at 12% over whatever it sits on, so
+            // that composite — not the bare surface — is the real background.
+            final wash = Color.alphaBlend(accent.wash(), background.value);
+            expect(
+              ratio(ink, wash),
+              greaterThanOrEqualTo(3),
+              reason:
+                  'category $index ink on a tile over ${background.key} '
+                  'in $name is too low',
+            );
+          }
+        }
+      });
+
+      testWidgets('every tone wash keeps its text readable in $name', (
+        tester,
+      ) async {
+        // The defect this replaces: `PkPalette.indigo50` painted as the unread
+        // notification background. It is the light end of a ramp with no dark
+        // half, so in dark mode it stayed near-white while the text on it went
+        // near-white too — a card with invisible writing. `pkStatusSurface`
+        // derives the wash from the current surface, and this measures that it
+        // actually did.
+        late BuildContext captured;
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: name == 'light' ? PkTheme.light() : PkTheme.dark(),
+            home: Builder(
+              builder: (context) {
+                captured = context;
+                return const SizedBox();
+              },
+            ),
+          ),
+        );
+        for (final tone in PkStatusTone.values) {
+          final wash = pkStatusSurface(captured, tone);
+          expect(wash.a, 1.0, reason: '$tone in $name is see-through');
+          expect(
+            wash,
+            isNot(semantic.surface),
+            reason: '$tone in $name is invisible on its own surface',
+          );
+          expect(
+            ratio(semantic.textPrimary, wash),
+            greaterThanOrEqualTo(4.5),
+            reason: 'body text on the $tone wash in $name is too low',
+          );
+          // And the tone's own ink still has to read on it, or the icon and
+          // the border it pairs with disappear into the fill.
+          expect(
+            ratio(pkStatusInk(captured, tone), wash),
+            greaterThanOrEqualTo(3),
+            reason: '$tone ink on its own wash in $name is too low',
+          );
+        }
+      });
+
+      test('a category fill is never used as ink in $name', () {
+        // The point of splitting the roles: the fills stay saturated, and the
+        // test says so rather than leaving it to a reviewer to notice.
+        final brightness = name == 'light' ? Brightness.light : Brightness.dark;
+        final illegible = <int>[];
+        for (var index = 1; index <= PkPalette.category.length; index++) {
+          final accent = PkPalette.categoryAt(index);
+          if (ratio(accent.fill, semantic.surface) < 3) illegible.add(index);
+          expect(
+            ratio(accent.inkOn(brightness), semantic.surface),
+            greaterThanOrEqualTo(3),
+            reason: 'category $index has no legible ink in $name',
+          );
+        }
+        if (name == 'light') {
+          // Not a defect — evidence. These are exactly the fills that used to
+          // be drawn as glyphs, and the reason `PkAccent` exists.
+          expect(
+            illegible,
+            isNotEmpty,
+            reason:
+                'If every fill now clears 3:1 the palette changed; re-check '
+                'whether PkAccent is still earning its keep.',
           );
         }
       });

@@ -4,10 +4,15 @@ import 'package:provider/provider.dart';
 
 import '../../../../app/pockito_app_view_model.dart';
 import '../../../../domain/models/financial_models.dart';
+import '../../../../domain/repositories/pockito_repository.dart';
 import '../../../core/components/pk_components.dart';
 import '../../../core/design_system/pk_icons.dart';
 import '../../../core/design_system/pk_labels.dart';
 import '../../../core/design_system/pk_tokens.dart';
+
+/// Marks "Personal" in the scope picker below — the same sentinel the full
+/// editor uses, since a Space's own id is never this string.
+const _personalScope = '__personal__';
 
 /// Quick Add, section 7.9 and D-06.
 ///
@@ -15,7 +20,9 @@ import '../../../core/design_system/pk_tokens.dart';
 /// viewport with the keyboard open, in no more than six taps after opening. It
 /// deliberately does *not* grow — a multi-payer, multi-currency, receipt-backed
 /// shared expense is a different job, and "More options" hands the whole state
-/// over to the full editor rather than making this form carry both.
+/// over to the full editor rather than making this form carry both. Picking a
+/// Space here is a shortcut into that job, not an attempt to do it inline: it
+/// jumps straight to the full editor with everything already typed in.
 class QuickAddScreen extends StatefulWidget {
   const QuickAddScreen({super.key, this.initialType});
 
@@ -60,16 +67,51 @@ class _QuickAddScreenState extends State<QuickAddScreen> {
   }
 
   /// Hands the entered values to the full editor without losing them.
-  void _openAdvanced() {
+  ///
+  /// A [spaceId] is passed straight through rather than round-tripped via
+  /// `setState`: splitting a shared expense needs a payer and a split, which
+  /// this form has nowhere to ask for, so a Space choice always means "go
+  /// there now" rather than "record it here."
+  void _openAdvanced({String? spaceId}) {
     final query = <String, String>{
       'type': _type.name,
       'account': ?_accountId,
+      'space': ?spaceId,
       if (_amount.text.trim().isNotEmpty) 'amount': _amount.text.trim(),
       if (_merchant.text.trim().isNotEmpty) 'merchant': _merchant.text.trim(),
       'category': ?_categoryId,
     };
     Navigator.pop(context);
     context.push(Uri(path: '/add', queryParameters: query).toString());
+  }
+
+  Future<void> _pickSpace(PockitoRepository repo) async {
+    final active = repo.spaces
+        .where((item) => item.status == SpaceStatus.active)
+        .toList();
+    final chosen = await showPkOptionPicker<String>(
+      context,
+      title: context.t.scope,
+      selected: _personalScope,
+      options: [
+        PkOption(
+          value: _personalScope,
+          label: context.t.personal,
+          hint: context.t.personalSpendingOnly,
+          icon: Icons.person_rounded,
+        ),
+        for (final item in active)
+          PkOption(
+            value: item.id,
+            label: item.name,
+            hint: item.currency,
+            icon: PkIcons.named(item.icon),
+            accent: PkPalette.categoryAt(item.colorIndex),
+          ),
+      ],
+    );
+    if (chosen == null || chosen == _personalScope || !mounted) return;
+    _openAdvanced(spaceId: chosen);
   }
 
   Future<void> _save() async {
@@ -183,19 +225,17 @@ class _QuickAddScreenState extends State<QuickAddScreen> {
                   : null,
             ),
             const SizedBox(height: PkSpacing.x3),
-            TextFormField(
+            PkTextField(
               key: const ValueKey('quick_add_merchant'),
               controller: _merchant,
               textCapitalization: TextCapitalization.sentences,
               textInputAction: TextInputAction.done,
-              decoration: InputDecoration(
-                labelText: _type == MoneyEventType.income
-                    ? context.t.source
-                    : context.t.merchant,
-              ),
               validator: (value) => value == null || value.trim().isEmpty
                   ? context.t.addAShortDescription
                   : null,
+              label: _type == MoneyEventType.income
+                  ? context.t.source
+                  : context.t.merchant,
             ),
             const SizedBox(height: PkSpacing.x3),
             // Middle: the three selectors. Each is one tap to open and one to
@@ -209,7 +249,7 @@ class _QuickAddScreenState extends State<QuickAddScreen> {
                   ? null
                   : PkIconTile(
                       icon: PkIcons.named(account.icon),
-                      color: PkPalette.categoryAt(account.colorIndex),
+                      accent: PkPalette.categoryAt(account.colorIndex),
                       size: PkSize.avatarCompact,
                     ),
               onTap: () async {
@@ -231,7 +271,7 @@ class _QuickAddScreenState extends State<QuickAddScreen> {
                   ? null
                   : PkIconTile(
                       icon: PkIcons.named(category.icon),
-                      color: PkPalette.categoryAt(category.colorIndex),
+                      accent: PkPalette.categoryAt(category.colorIndex),
                       size: PkSize.avatarCompact,
                     ),
               onTap: () async {
@@ -246,6 +286,21 @@ class _QuickAddScreenState extends State<QuickAddScreen> {
                 if (picked != null) setState(() => _categoryId = picked);
               },
             ),
+            if (_type == MoneyEventType.expense) ...[
+              const SizedBox(height: PkSpacing.x3),
+              PkSelectField(
+                key: const ValueKey('quick_add_scope'),
+                label: context.t.scope,
+                value: context.t.personal,
+                leading: PkIconTile(
+                  icon: Icons.person_rounded,
+                  accent: PkAccent.ink(context.pk.textSecondary),
+                  size: PkSize.avatarCompact,
+                  iconSize: PkSize.iconSmall,
+                ),
+                onTap: () => _pickSpace(repo),
+              ),
+            ],
             const SizedBox(height: PkSpacing.x3),
             PkDateField(
               value: _date,

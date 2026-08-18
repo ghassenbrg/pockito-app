@@ -530,6 +530,9 @@ class _AccountEditorScreenState extends State<AccountEditorScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _name;
   late final TextEditingController _opening;
+
+  /// Whether the balance being entered is money owed rather than held.
+  bool _negative = false;
   late final TextEditingController _creditLimit;
   late final TextEditingController _goal;
   AccountType _type = AccountType.bank;
@@ -546,10 +549,13 @@ class _AccountEditorScreenState extends State<AccountEditorScreen> {
         ? null
         : repo.accountById(widget.accountId!);
     _name = TextEditingController(text: existing?.name ?? '');
+    // The field holds the magnitude; the direction is the sign control beside
+    // it, so a stored negative balance opens with that control already set.
+    _negative = (existing?.openingBalanceMinor ?? 0) < 0;
     _opening = TextEditingController(
       text: existing == null
           ? ''
-          : (existing.openingBalanceMinor /
+          : (existing.openingBalanceMinor.abs() /
                     PockitoCurrencies.of(existing.currency).minorUnitScale)
                 .toStringAsFixed(
                   PockitoCurrencies.of(existing.currency).decimals,
@@ -592,6 +598,7 @@ class _AccountEditorScreenState extends State<AccountEditorScreen> {
   @override
   Widget build(BuildContext context) {
     final editing = widget.accountId != null;
+    final repo = context.read<PockitoAppViewModel>().repository;
     return Scaffold(
       appBar: PkAppBar(
         title: Text(editing ? context.t.editAccount : context.t.addAccount),
@@ -605,68 +612,74 @@ class _AccountEditorScreenState extends State<AccountEditorScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(PkSpacing.screen),
                 children: [
-                  TextFormField(
+                  PkTextField(
                     key: const ValueKey('account_name'),
                     controller: _name,
                     textCapitalization: TextCapitalization.words,
                     autofocus: !editing,
-                    decoration: InputDecoration(
-                      labelText: context.t.accountName,
-                      hintText: context.t.eGRevolut,
-                    ),
                     validator: (value) => value == null || value.trim().isEmpty
                         ? context.t.giveThisAccountAName
                         : null,
+                    label: context.t.accountName,
+                    hint: context.t.eGRevolut,
                   ),
                   const SizedBox(height: PkSpacing.x4),
-                  DropdownButtonFormField<AccountType>(
+                  // The dropdown rendered `type.name` capitalised, which is
+                  // an English word built at runtime — it stayed English in
+                  // Japanese. The picker asks `labelIn` like everywhere else.
+                  PkSelectField(
                     key: const ValueKey('account_type'),
-                    initialValue: _type,
-                    decoration: InputDecoration(
-                      labelText: context.t.accountType,
-                    ),
-                    items: AccountType.values
-                        .map(
-                          (type) => DropdownMenuItem(
-                            value: type,
-                            child: Text(
-                              type.name[0].toUpperCase() +
-                                  type.name.substring(1),
+                    label: context.t.accountType,
+                    value: _type.labelIn(context.t),
+                    onTap: () async {
+                      final chosen = await showPkOptionPicker<AccountType>(
+                        context,
+                        title: context.t.accountType,
+                        selected: _type,
+                        options: [
+                          for (final type in AccountType.values)
+                            PkOption(
+                              value: type,
+                              label: type.labelIn(context.t),
                             ),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) => setState(() => _type = value!),
+                        ],
+                      );
+                      if (chosen != null) setState(() => _type = chosen);
+                    },
                   ),
                   const SizedBox(height: PkSpacing.x4),
-                  DropdownButtonFormField<String>(
+                  // A flat menu of every ISO code had no search and no names
+                  // in it; the picker has both, and puts recently used
+                  // currencies first.
+                  PkSelectField(
                     key: const ValueKey('account_currency'),
-                    initialValue: _currency,
-                    decoration: InputDecoration(labelText: context.t.currency),
-                    items: PockitoCurrencies.all.keys
-                        .map(
-                          (code) =>
-                              DropdownMenuItem(value: code, child: Text(code)),
-                        )
-                        .toList(),
-                    onChanged: editing
-                        ? null
-                        : (value) => setState(() => _currency = value!),
+                    label: context.t.currency,
+                    value:
+                        '$_currency · ${PockitoCurrencies.of(_currency).name}',
+                    enabled: !editing,
+                    onTap: () async {
+                      final chosen = await showPkCurrencyPicker(
+                        context,
+                        repo: repo,
+                        selectedCode: _currency,
+                      );
+                      if (chosen != null) setState(() => _currency = chosen);
+                    },
                   ),
                   const SizedBox(height: PkSpacing.x4),
-                  TextFormField(
-                    key: const ValueKey('account_balance'),
+                  // A card is usually in the red, so the balance keeps a
+                  // direction control rather than relying on a typed minus
+                  // sign the number pad does not always offer.
+                  PkAmountField(
+                    fieldKey: const ValueKey('account_balance'),
                     controller: _opening,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                      signed: true,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: editing
-                          ? context.t.openingBalance
-                          : context.t.currentBalance,
-                      prefixText: '${_symbol(_currency)} ',
-                    ),
+                    currency: _currency,
+                    label: editing
+                        ? context.t.openingBalance
+                        : context.t.currentBalance,
+                    signed: true,
+                    negative: _negative,
+                    onSignChanged: (value) => setState(() => _negative = value),
                     validator: (value) => double.tryParse(value ?? '') == null
                         ? context.t.enterAValidAmount
                         : null,
@@ -675,32 +688,20 @@ class _AccountEditorScreenState extends State<AccountEditorScreen> {
                   // account's is its progress. Neither exists without these.
                   if (_type == AccountType.card) ...[
                     const SizedBox(height: PkSpacing.x4),
-                    TextFormField(
-                      key: const ValueKey('account_credit_limit'),
+                    PkAmountField(
+                      fieldKey: const ValueKey('account_credit_limit'),
                       controller: _creditLimit,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: context.t.creditLimitOptional,
-                        helperText: context.t.letsPockitoShowWhatIs,
-                        prefixText: '${_symbol(_currency)} ',
-                      ),
+                      currency: _currency,
+                      label: context.t.creditLimitOptional,
                     ),
                   ],
                   if (_type == AccountType.savings) ...[
                     const SizedBox(height: PkSpacing.x4),
-                    TextFormField(
-                      key: const ValueKey('account_goal'),
+                    PkAmountField(
+                      fieldKey: const ValueKey('account_goal'),
                       controller: _goal,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: context.t.savingsGoalOptional,
-                        helperText: context.t.showsProgressOnTheAccount,
-                        prefixText: '${_symbol(_currency)} ',
-                      ),
+                      currency: _currency,
+                      label: context.t.savingsGoalOptional,
                     ),
                   ],
                   const SizedBox(height: PkSpacing.x4),
@@ -727,7 +728,7 @@ class _AccountEditorScreenState extends State<AccountEditorScreen> {
                   Wrap(
                     spacing: PkSpacing.x2,
                     runSpacing: PkSpacing.x2,
-                    children: List.generate(PkPalette.category.length, (index) {
+                    children: List.generate(PkPalette.categoryCount, (index) {
                       final selected = _color == index + 1;
                       const swatch = 40.0;
                       const inset = (PkSize.touch - swatch) / 2;
@@ -749,7 +750,7 @@ class _AccountEditorScreenState extends State<AccountEditorScreen> {
                               width: swatch,
                               height: swatch,
                               decoration: BoxDecoration(
-                                color: PkPalette.category[index],
+                                color: PkPalette.categoryFillAt(index + 1),
                                 shape: BoxShape.circle,
                                 border: Border.all(
                                   color: selected
@@ -793,8 +794,6 @@ class _AccountEditorScreenState extends State<AccountEditorScreen> {
     );
   }
 
-  String _symbol(String currency) => PockitoCurrencies.of(currency).symbol;
-
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     final repo = context.read<PockitoAppViewModel>().repository;
@@ -807,7 +806,9 @@ class _AccountEditorScreenState extends State<AccountEditorScreen> {
       name: _name.text.trim(),
       type: _type,
       currency: _currency,
-      openingBalanceMinor: (double.parse(_opening.text) * decimals).round(),
+      openingBalanceMinor:
+          (double.parse(_opening.text) * decimals).round() *
+          (_negative ? -1 : 1),
       isDefault: _default,
       archived: existing?.archived ?? false,
       colorIndex: _color,
@@ -873,7 +874,7 @@ class ArchivedAccountsScreen extends StatelessWidget {
                     children: [
                       PkIconTile(
                         icon: PkIcons.named(account.icon),
-                        color: PkPalette.categoryAt(account.colorIndex),
+                        accent: PkPalette.categoryAt(account.colorIndex),
                       ),
                       const SizedBox(width: PkSpacing.x3),
                       Expanded(
@@ -943,7 +944,7 @@ class _ReorderAccountsScreenState extends State<ReorderAccountsScreen> {
                 const SizedBox(width: PkSpacing.x3),
                 PkIconTile(
                   icon: PkIcons.named(account.icon),
-                  color: PkPalette.categoryAt(account.colorIndex),
+                  accent: PkPalette.categoryAt(account.colorIndex),
                   size: 40,
                 ),
                 const SizedBox(width: PkSpacing.x3),
@@ -1047,7 +1048,7 @@ class _AccountHero extends StatelessWidget {
   final FxQuote? quote;
   @override
   Widget build(BuildContext context) => PkHeroPanel(
-    color: PkPalette.categoryAt(account.colorIndex),
+    color: PkPalette.categoryFillAt(account.colorIndex),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

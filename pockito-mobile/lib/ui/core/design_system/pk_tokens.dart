@@ -87,6 +87,13 @@ abstract final class PkSize {
   static const double iconSmall = 16;
   static const double icon = 20;
   static const double iconLarge = 24;
+
+  /// The chevron a row draws to say it opens something.
+  ///
+  /// Deliberately smaller than [iconLarge]: it is repeated on every row of
+  /// every list, and at 24 it carried the same visual weight as the category
+  /// mark on the other side of the row.
+  static const double chevron = 20;
   static const double fab = 56;
   static const double compactWidth = 600;
   static const double contentMaxWidth = 760;
@@ -224,6 +231,15 @@ abstract final class PkMotion {
   static const Duration fast = Duration(milliseconds: 150);
   static const Duration standard = Duration(milliseconds: 250);
   static const Duration slow = Duration(milliseconds: 350);
+
+  /// The slow loop something alive runs on — Kito thinking, a scan waiting for
+  /// a receipt to settle. Not a transition: nothing arrives at the end of it,
+  /// which is why it needed a name of its own rather than a longer `slow`.
+  ///
+  /// Always gate it on `MediaQuery.disableAnimations`: an ambient loop is the
+  /// most annoying kind of movement to a reader who asked for none.
+  static const Duration ambient = Duration(seconds: 3);
+
   static const Curve curve = Curves.easeInOutCubic;
   static const Curve enter = Curves.easeOutCubic;
 }
@@ -382,6 +398,12 @@ abstract final class PkPalette {
   /// 4.5:1 an 11 px badge label needs.
   static const rose600 = Color(0xFFD01640);
 
+  /// The category *fills*: chart slices, colour swatches, hero tints.
+  ///
+  /// These are large-area colours and saturation is the point of them. They are
+  /// deliberately **not** legible as a 20 px glyph — six of the twelve measure
+  /// under 3:1 on the light page — so nothing may use one as ink. Ask
+  /// [categoryAt] for a [PkAccent] and take its ink from there.
   static const category = <Color>[
     Color(0xFF10B981),
     kitoBlue600,
@@ -397,8 +419,121 @@ abstract final class PkPalette {
     Color(0xFFA855F7),
   ];
 
-  static Color categoryAt(int index) =>
-      category[(index - 1).clamp(0, category.length - 1)];
+  /// The ink that pairs with each fill on a light page. Same hue, taken down to
+  /// a value that clears 3:1 against both the surface and the sunken tint.
+  static const _categoryInkLight = <Color>[
+    emerald700,
+    kitoBlue600,
+    kitoAqua700,
+    kitoGold600,
+    rose600,
+    Color(0xFF6D28D9),
+    Color(0xFFB45309),
+    Color(0xFF0369A1),
+    Color(0xFFBE185D),
+    slate600,
+    Color(0xFF0F766E),
+    Color(0xFF7E22CE),
+  ];
+
+  /// The same twelve on a dark page, where the correction runs the other way.
+  static const _categoryInkDark = <Color>[
+    emerald400,
+    kitoBlue300,
+    kitoAqua300,
+    kitoGold300,
+    rose400,
+    Color(0xFFA78BFA),
+    Color(0xFFFCD34D),
+    Color(0xFF38BDF8),
+    Color(0xFFF472B6),
+    slate400,
+    Color(0xFF2DD4BF),
+    Color(0xFFC084FC),
+  ];
+
+  /// How many category colours there are, for a swatch grid.
+  static int get categoryCount => category.length;
+
+  static int _categoryIndex(int index) =>
+      (index - 1).clamp(0, category.length - 1);
+
+  /// The accent for a category, account, Space or tag colour index.
+  static PkAccent categoryAt(int index) {
+    final at = _categoryIndex(index);
+    return PkAccent._(
+      fill: category[at],
+      inkLight: _categoryInkLight[at],
+      inkDark: _categoryInkDark[at],
+    );
+  }
+
+  /// Just the fill, for a swatch, a chart slice or a hero tint — somewhere the
+  /// colour is an area rather than a mark.
+  static Color categoryFillAt(int index) => category[_categoryIndex(index)];
+
+  /// The brand's own accent, for a tile that belongs to Pockito rather than to
+  /// a category — an onboarding illustration, a wallet summary, the "everything
+  /// else" tile in a picker.
+  ///
+  /// It exists because the alternative kept being written as
+  /// `PkAccent.ink(PkPalette.indigo600)`, which pins one tier for both themes
+  /// and puts a dark blue glyph on a dark navy card. `PkAccent.ink` is for a
+  /// colour that is *already* brightness-correct — a semantic one off
+  /// `context.pk` — not for a raw palette tier.
+  static const brand = PkAccent._(
+    fill: kitoBlue500,
+    inkLight: kitoBlue700,
+    inkDark: kitoBlue300,
+  );
+
+  /// The same, for something deliberately unremarkable: an uncategorised
+  /// record, a placeholder.
+  static const neutral = PkAccent._(
+    fill: slate500,
+    inkLight: slate600,
+    inkDark: slate400,
+  );
+}
+
+/// A colour in its three roles, so one of them cannot be used for another.
+///
+/// A finance list draws a category as a 20 px glyph on a wash of itself. Before
+/// this type, both came from [PkPalette.category] — a *fill* palette — and six
+/// of the twelve glyphs measured between 1.75:1 and 2.77:1 against the page,
+/// well under the 3:1 a mark carrying meaning has to hold. Splitting fill from
+/// ink is what makes that unrepresentable rather than merely fixed.
+@immutable
+final class PkAccent {
+  const PkAccent._({
+    required this.fill,
+    required this.inkLight,
+    required this.inkDark,
+  });
+
+  /// An accent whose ink is supplied directly.
+  ///
+  /// For the semantic colours — danger, success, warning, shared, ai, primary —
+  /// which are already corrected for both themes by [PkSemanticColors], so the
+  /// same value is the fill and the ink.
+  const PkAccent.ink(Color ink) : fill = ink, inkLight = ink, inkDark = ink;
+
+  /// Large areas: chart slices, swatches, hero tints, the tile wash.
+  final Color fill;
+
+  final Color inkLight;
+  final Color inkDark;
+
+  /// The ink this accent uses on the given page.
+  Color inkOn(Brightness brightness) =>
+      brightness == Brightness.light ? inkLight : inkDark;
+
+  /// The ink for the theme in scope.
+  Color ink(BuildContext context) => inkOn(Theme.of(context).brightness);
+
+  /// The wash a tile paints behind [ink]. Derived from the fill, so the
+  /// surface keeps the saturated hue while the mark on it stays legible.
+  Color wash() => fill.withValues(alpha: .12);
 }
 
 @immutable
@@ -481,8 +616,12 @@ class PkSemanticColors extends ThemeExtension<PkSemanticColors> {
     borderDefault: Color(0xFF31506D),
     shared: PkPalette.amber400,
     sharedStrong: PkPalette.amber300,
-    sharedSurface: Color(0xFF362A12),
-    sharedBorder: Color(0xFF755313),
+    // A wash this saturated is fine on a badge and wrong on a hero panel: at
+    // the size of the "Across all spaces" card it stopped reading as gold and
+    // started reading as olive. Large areas take the low-chroma end of the
+    // ramp; the amber ink and the hairline carry the signal instead.
+    sharedSurface: Color(0xFF241C0D),
+    sharedBorder: Color(0xFF6B4C12),
     owed: PkPalette.emerald400,
     owing: PkPalette.amber300,
     success: PkPalette.emerald400,

@@ -129,6 +129,35 @@ void main() {
     }
   });
 
+  testWidgets('scrolling deep does not stack the day headers', (tester) async {
+    // The bug this exists for: a pinned header pins to the *viewport*, so one
+    // `SliverPersistentHeader` per day meant every day already scrolled past
+    // stayed stuck at the top. Twenty days in, the reader had a wall of date
+    // bars and no transactions on screen at all — and the old assertion above
+    // still passed, because each header was individually correct.
+    final repo = await withTransactions(160);
+    await pumpSurface(
+      tester,
+      route: '/activity',
+      viewport: phone,
+      repository: repo,
+    );
+    final scrollable = find.byType(CustomScrollView).first;
+    for (var page = 0; page < 6; page++) {
+      await tester.drag(scrollable, const Offset(0, -700));
+      await tester.pump();
+    }
+    await tester.pumpAndSettle();
+
+    // The observable consequence is the one worth asserting: rows, not date
+    // bars, are what fills the viewport. Stacked headers ate the whole screen.
+    expect(
+      visibleRowCount(tester, find.byType(PkTransactionTile), viewport: phone),
+      greaterThanOrEqualTo(5),
+      reason: 'Day headers are accumulating and pushing the rows off screen',
+    );
+  });
+
   testWidgets('filtering does not leave the ledger in an inconsistent state', (
     tester,
   ) async {

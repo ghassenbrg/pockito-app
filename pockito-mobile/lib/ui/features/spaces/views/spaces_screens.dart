@@ -641,13 +641,23 @@ class _SpaceDetailScreenState extends State<SpaceDetailScreen> {
             ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/add?space=${space.id}'),
-        backgroundColor: context.pk.shared,
-        foregroundColor: PkPalette.slate900,
-        icon: const Icon(Icons.add_rounded),
-        label: Text(context.t.expense),
-      ),
+      // The Money tab's empty state already carries its own "Add expense"
+      // CTA, so a second, floating one would both duplicate it and sit right
+      // on top of its text on shorter screens.
+      floatingActionButton: _tab == 0 && expenses.isEmpty
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () => context.push('/add?space=${space.id}'),
+              backgroundColor: context.pk.shared,
+              foregroundColor: PkPalette.slate900,
+              // The app theme pins every FAB to a `CircleBorder` for the
+              // circular add buttons elsewhere; this is the one `.extended`
+              // FAB, and a circle clips its icon+label row instead of
+              // wrapping it in a pill.
+              shape: const StadiumBorder(),
+              icon: const Icon(Icons.add_rounded),
+              label: Text(context.t.expense),
+            ),
     );
   }
 
@@ -696,17 +706,12 @@ class _SpaceDetailScreenState extends State<SpaceDetailScreen> {
                             ?.amountMinor ??
                         0),
               );
-              return ListTile(
-                contentPadding: EdgeInsets.zero,
+              return PkLedgerRow.management(
                 leading: PkAvatar(label: user.initials),
-                title: Text(
-                  user.isYou ? context.t.x0You2(user.name) : user.name,
-                ),
-                subtitle: Text(
-                  context.t.paidX0ShareX1(
-                    PkFormat.money(paid, space.currency),
-                    PkFormat.money(responsibility, space.currency),
-                  ),
+                title: user.isYou ? context.t.x0You2(user.name) : user.name,
+                subtitle: context.t.paidX0ShareX1(
+                  PkFormat.money(paid, space.currency),
+                  PkFormat.money(responsibility, space.currency),
                 ),
                 trailing: PkBalanceLabel(
                   amountMinor: balance,
@@ -726,12 +731,10 @@ class _SpaceDetailScreenState extends State<SpaceDetailScreen> {
               ...repo
                   .settlementRecommendations(space.id)
                   .map(
-                    (item) => ListTile(
-                      contentPadding: EdgeInsets.zero,
+                    (item) => PkLedgerRow.management(
                       leading: const Icon(Icons.arrow_forward_rounded),
-                      title: Text(
-                        '${item.fromUserId == repo.currentUserId ? 'You' : repo.userById(item.fromUserId)?.name} → ${item.toUserId == repo.currentUserId ? 'You' : repo.userById(item.toUserId)?.name}',
-                      ),
+                      title:
+                          '${item.fromUserId == repo.currentUserId ? 'You' : repo.userById(item.fromUserId)?.name} → ${item.toUserId == repo.currentUserId ? 'You' : repo.userById(item.toUserId)?.name}',
                       trailing: PkAmountText(
                         amountMinor: item.amountMinor,
                         currency: item.currency,
@@ -825,49 +828,85 @@ class _SpaceDetailScreenState extends State<SpaceDetailScreen> {
                   if (paidByMeOnly) payerUserId = null;
                 }),
               ),
-              DropdownButtonFormField<String>(
-                initialValue: payerUserId ?? '__all__',
-                decoration: InputDecoration(labelText: context.t.paidByMember),
-                items: [
-                  DropdownMenuItem(
-                    value: '__all__',
-                    child: Text(context.t.allMembers),
-                  ),
-                  ...space.members.map((member) {
-                    final user = repo.userById(member.userId)!;
-                    return DropdownMenuItem(
-                      value: user.id,
-                      child: Text(user.isYou ? context.t.you : user.name),
-                    );
-                  }),
-                ],
-                onChanged: paidByMeOnly
-                    ? null
-                    : (value) => setSheetState(
-                        () => payerUserId = value == '__all__' ? null : value,
-                      ),
+              PkSelectField(
+                key: const ValueKey('filter_paid_by'),
+                label: context.t.paidByMember,
+                value: payerUserId == null
+                    ? context.t.allMembers
+                    : repo.userById(payerUserId!)?.isYou == true
+                    ? context.t.you
+                    : repo.userById(payerUserId!)?.name,
+                // Disabled rather than hidden: "paid by me" already answers
+                // this question, and hiding the control would make the reason
+                // it stopped responding invisible.
+                enabled: !paidByMeOnly,
+                onTap: () async {
+                  final chosen = await showPkOptionPicker<String>(
+                    context,
+                    title: context.t.paidByMember,
+                    selected: payerUserId ?? '__all__',
+                    options: [
+                      PkOption(value: '__all__', label: context.t.allMembers),
+                      for (final member in space.members)
+                        PkOption(
+                          value: member.userId,
+                          label: repo.userById(member.userId)!.isYou
+                              ? context.t.you
+                              : repo.userById(member.userId)!.name,
+                        ),
+                    ],
+                  );
+                  if (chosen == null) return;
+                  setSheetState(
+                    () => payerUserId = chosen == '__all__' ? null : chosen,
+                  );
+                },
               ),
               const SizedBox(height: PkSpacing.x3),
-              DropdownButtonFormField<String>(
-                initialValue: categoryId ?? '__all__',
-                decoration: InputDecoration(labelText: context.t.categoryLabel),
-                items: [
-                  DropdownMenuItem(
-                    value: '__all__',
-                    child: Text(context.t.allCategories),
-                  ),
-                  ...repo.categories
-                      .where((item) => item.type == CategoryType.expense)
-                      .map(
-                        (item) => DropdownMenuItem(
-                          value: item.id,
-                          child: Text(item.name),
+              PkSelectField(
+                key: const ValueKey('filter_category'),
+                label: context.t.categoryLabel,
+                value: categoryId == null
+                    ? context.t.allCategories
+                    : repo.categoryById(categoryId!)?.name,
+                leading: categoryId == null
+                    ? null
+                    : PkIconTile(
+                        icon: PkIcons.named(
+                          repo.categoryById(categoryId!)?.icon ?? 'receipt',
                         ),
+                        accent: PkPalette.categoryAt(
+                          repo.categoryById(categoryId!)?.colorIndex ?? 2,
+                        ),
+                        size: PkSize.avatarCompact,
+                        iconSize: PkSize.iconSmall,
                       ),
-                ],
-                onChanged: (value) => setSheetState(
-                  () => categoryId = value == '__all__' ? null : value,
-                ),
+                onTap: () async {
+                  final chosen = await showPkOptionPicker<String>(
+                    context,
+                    title: context.t.categoryLabel,
+                    selected: categoryId ?? '__all__',
+                    options: [
+                      PkOption(
+                        value: '__all__',
+                        label: context.t.allCategories,
+                      ),
+                      for (final item in repo.categories.where(
+                        (item) => item.type == CategoryType.expense,
+                      ))
+                        PkOption(
+                          value: item.id,
+                          label: item.name,
+                          icon: PkIcons.named(item.icon),
+                          accent: PkPalette.categoryAt(item.colorIndex),
+                        ),
+                    ],
+                  );
+                  if (chosen == null) return;
+                  setSheetState(
+                    () => categoryId = chosen == '__all__' ? null : chosen,
+                  );
+                },
               ),
               const SizedBox(height: PkSpacing.x3),
               FilledButton(
@@ -1079,7 +1118,7 @@ class SharedExpenseDetailScreen extends StatelessWidget {
                 children: [
                   PkIconTile(
                     icon: PkIcons.named(category?.icon ?? 'receipt'),
-                    color: PkPalette.categoryAt(category?.colorIndex ?? 2),
+                    accent: PkPalette.categoryAt(category?.colorIndex ?? 2),
                     size: 64,
                     iconSize: 30,
                   ),
@@ -1116,11 +1155,10 @@ class SharedExpenseDetailScreen extends StatelessWidget {
                 child: PkCard(
                   color: context.pk.sharedSurface,
                   borderColor: context.pk.sharedBorder,
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
+                  child: PkLedgerRow.management(
                     leading: Icon(Icons.lock_clock_outlined),
-                    title: Text(context.t.historicalExpense),
-                    subtitle: Text(context.t.thisClosedCycleRecordIs),
+                    title: context.t.historicalExpense,
+                    subtitle: context.t.thisClosedCycleRecordIs,
                   ),
                 ),
               ),
@@ -1131,7 +1169,7 @@ class SharedExpenseDetailScreen extends StatelessWidget {
               child: PkCard(
                 child: Column(
                   children: [
-                    _ExpenseDetailRow(
+                    PkDetailRow(
                       label: expense.hasMultiplePayers
                           ? context.t.paidBy
                           : context.t.paidBy,
@@ -1147,7 +1185,7 @@ class SharedExpenseDetailScreen extends StatelessWidget {
                           ? context.t.you
                           : payer?.name ?? 'Member',
                     ),
-                    _ExpenseDetailRow(
+                    PkDetailRow(
                       label: context.t.recordedBy,
                       value:
                           repo.userById(expense.createdByUserId)?.isYou == true
@@ -1155,11 +1193,11 @@ class SharedExpenseDetailScreen extends StatelessWidget {
                           : repo.userById(expense.createdByUserId)?.name ??
                                 context.t.someone,
                     ),
-                    _ExpenseDetailRow(
+                    PkDetailRow(
                       label: context.t.categoryLabel,
                       value: category?.name ?? context.t.uncategorised,
                     ),
-                    _ExpenseDetailRow(
+                    PkDetailRow(
                       label: context.t.splitMethod,
                       value:
                           expense.method.name[0].toUpperCase() +
@@ -1167,7 +1205,7 @@ class SharedExpenseDetailScreen extends StatelessWidget {
                     ),
                     if (expense.walletCurrency != null &&
                         expense.walletCurrency != expense.currency)
-                      _ExpenseDetailRow(
+                      PkDetailRow(
                         label: context.t.chargedToYourWallet,
                         value:
                             '${PkFormat.money(expense.walletAmountMinor ?? 0, expense.walletCurrency!)}'
@@ -1175,12 +1213,9 @@ class SharedExpenseDetailScreen extends StatelessWidget {
                             '${expense.fxRateMode == null ? '' : ' · ${expense.fxRateMode!.name}'}',
                       ),
                     if (expense.note.isNotEmpty)
-                      _ExpenseDetailRow(
-                        label: context.t.note,
-                        value: expense.note,
-                      ),
+                      PkDetailRow(label: context.t.note, value: expense.note),
                     if (expense.source == 'mcp')
-                      _ExpenseDetailRow(
+                      PkDetailRow(
                         label: context.t.addedVia,
                         value: expense.client ?? context.t.aiConnection,
                       ),
@@ -1291,6 +1326,32 @@ class SharedExpenseDetailScreen extends StatelessWidget {
                 ),
               ),
             ),
+          // C-8: how the record got here, not just what state it is in.
+          // `PkRecordStatusBanner` at the top says "voided"; this says who
+          // recorded it, that it has been revised, and who voided it — which
+          // is the question two people actually have when they disagree about
+          // a shared number.
+          SliverPadding(
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              PkSpacing.screen,
+              PkSpacing.x6,
+              PkSpacing.screen,
+              PkSpacing.x3,
+            ),
+            sliver: SliverToBoxAdapter(
+              child: PkSectionHeader(title: context.t.recordHistory),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: PkSpacing.screen),
+            sliver: SliverToBoxAdapter(
+              child: PkCard(
+                child: PkRecordTimeline(
+                  entries: _timeline(context, repo, space, expense),
+                ),
+              ),
+            ),
+          ),
           SliverPadding(
             padding: const EdgeInsetsDirectional.fromSTEB(
               PkSpacing.screen,
@@ -1336,6 +1397,63 @@ class SharedExpenseDetailScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// The record's own history, built only from what the record actually
+  /// stores. There is no audit log behind this — `version`, `voidedAt` and
+  /// `source` are what the model knows — so the rail says those things and
+  /// invents nothing else.
+  List<PkTimelineEntry> _timeline(
+    BuildContext context,
+    PockitoRepository repo,
+    SharedSpace space,
+    SharedExpense expense,
+  ) {
+    final author = repo.userById(expense.createdByUserId);
+    final name = author?.isYou == true
+        ? context.t.you
+        : author?.name ?? context.t.someone;
+    return [
+      PkTimelineEntry(
+        title: expense.source == 'mcp'
+            ? context.t.timelineAddedByAssistant(
+                expense.client ?? context.t.aiConnection,
+              )
+            : context.t.timelineRecorded,
+        detail: context.t.timelineByX0On(
+          name,
+          PkFormat.longDate(expense.occurredOn, context.t),
+        ),
+        tone: expense.source == 'mcp' ? PkStatusTone.ai : PkStatusTone.neutral,
+      ),
+      if (expense.version > 1)
+        PkTimelineEntry(
+          title: context.t.timelineEdited,
+          detail: context.t.timelineEditedDetail(expense.version - 1),
+          tone: PkStatusTone.info,
+        ),
+      if (expense.isDraft)
+        PkTimelineEntry(
+          title: context.t.timelineAwaitingConfirmation,
+          detail: context.t.timelineAwaitingDetail,
+          tone: PkStatusTone.warning,
+          done: false,
+        ),
+      if (expense.voidedAt != null)
+        PkTimelineEntry(
+          title: context.t.timelineVoided,
+          detail: expense.voidReason?.isNotEmpty == true
+              ? expense.voidReason!
+              : PkFormat.longDate(expense.voidedAt!, context.t),
+          tone: PkStatusTone.danger,
+        ),
+      if (expense.cycleId != space.currentCycleId)
+        PkTimelineEntry(
+          title: context.t.timelineSettled,
+          detail: context.t.timelineSettledDetail,
+          tone: PkStatusTone.success,
+        ),
+    ];
   }
 
   /// Voids the expense instead of removing it.
@@ -1466,71 +1584,78 @@ class _CreateSpaceScreenState extends State<CreateSpaceScreen> {
                 ),
                 const SizedBox(height: PkSpacing.x6),
                 if (_step == 0) ...[
-                  TextFormField(
+                  PkTextField(
                     key: const ValueKey('space_name'),
                     controller: _name,
                     autofocus: true,
                     textCapitalization: TextCapitalization.words,
-                    decoration: InputDecoration(
-                      labelText: context.t.spaceName,
-                      hintText: context.t.eGFlatOrTokyo,
-                    ),
                     validator: (value) => value == null || value.trim().isEmpty
                         ? context.t.nameYourSpace
                         : null,
+                    label: context.t.spaceName,
+                    hint: context.t.eGFlatOrTokyo,
                   ),
                   const SizedBox(height: PkSpacing.x4),
-                  DropdownButtonFormField<SpaceType>(
-                    initialValue: _type,
-                    decoration: InputDecoration(labelText: context.t.type),
-                    items: SpaceType.values
-                        .map(
-                          (item) => DropdownMenuItem(
-                            value: item,
-                            child: Text(
-                              item.name[0].toUpperCase() +
-                                  item.name.substring(1),
+                  // As with the account type: the menu built its labels from
+                  // the enum name, so a Japanese reader chose between English
+                  // words. `labelIn` is where those words already lived.
+                  PkSelectField(
+                    key: const ValueKey('space_type'),
+                    label: context.t.type,
+                    value: _type.labelIn(context.t),
+                    onTap: () async {
+                      final chosen = await showPkOptionPicker<SpaceType>(
+                        context,
+                        title: context.t.type,
+                        selected: _type,
+                        options: [
+                          for (final item in SpaceType.values)
+                            PkOption(
+                              value: item,
+                              label: item.labelIn(context.t),
                             ),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) => setState(() => _type = value!),
+                        ],
+                      );
+                      if (chosen != null) setState(() => _type = chosen);
+                    },
                   ),
                   const SizedBox(height: PkSpacing.x4),
-                  DropdownButtonFormField<String>(
+                  PkSelectField(
                     key: const ValueKey('space_currency'),
-                    initialValue: _currency,
-                    decoration: InputDecoration(
-                      labelText: context.t.spaceCurrency,
-                    ),
-                    items: PockitoCurrencies.all.keys
-                        .map(
-                          (item) =>
-                              DropdownMenuItem(value: item, child: Text(item)),
-                        )
-                        .toList(),
-                    onChanged: (value) => setState(() => _currency = value!),
+                    label: context.t.spaceCurrency,
+                    value:
+                        '$_currency · ${PockitoCurrencies.of(_currency).name}',
+                    onTap: () async {
+                      final chosen = await showPkCurrencyPicker(
+                        context,
+                        repo: context.read<PockitoAppViewModel>().repository,
+                        selectedCode: _currency,
+                      );
+                      if (chosen != null) setState(() => _currency = chosen);
+                    },
                   ),
                   const SizedBox(height: PkSpacing.x4),
-                  DropdownButtonFormField<String>(
+                  PkSelectField(
                     key: const ValueKey('space_icon'),
-                    initialValue: _icon,
-                    decoration: InputDecoration(labelText: context.t.icon),
-                    items:
-                        {
-                              'housing': context.t.home,
-                              'group': context.t.people,
-                              'travel': context.t.trip,
-                              'heart': context.t.couple,
-                            }.entries
-                            .map(
-                              (entry) => DropdownMenuItem(
-                                value: entry.key,
-                                child: Text(entry.value),
-                              ),
-                            )
-                            .toList(),
-                    onChanged: (value) => setState(() => _icon = value!),
+                    label: context.t.icon,
+                    // C-3: four hard-coded choices became the whole catalogue,
+                    // searchable, with the mark itself shown rather than only
+                    // its name.
+                    value: PkIconCatalog.find(_icon)?.group.labelIn(context.t),
+                    leading: PkIconTile(
+                      icon: PkIcons.named(_icon),
+                      accent: PkPalette.categoryAt(_colorIndex),
+                      size: PkSize.avatarCompact,
+                      iconSize: PkSize.iconSmall,
+                    ),
+                    onTap: () async {
+                      final chosen = await showPkIconPicker(
+                        context,
+                        selectedId: _icon,
+                        accent: PkPalette.categoryAt(_colorIndex),
+                      );
+                      if (chosen != null) setState(() => _icon = chosen);
+                    },
                   ),
                   const SizedBox(height: PkSpacing.x4),
                   Text(
@@ -1545,7 +1670,7 @@ class _CreateSpaceScreenState extends State<CreateSpaceScreen> {
                       return ChoiceChip(
                         key: ValueKey('space_color_$value'),
                         avatar: CircleAvatar(
-                          backgroundColor: PkPalette.categoryAt(value),
+                          backgroundColor: PkPalette.categoryFillAt(value),
                         ),
                         label: Text('$value'),
                         selected: _colorIndex == value,
@@ -1554,17 +1679,11 @@ class _CreateSpaceScreenState extends State<CreateSpaceScreen> {
                     }),
                   ),
                   const SizedBox(height: PkSpacing.x4),
-                  TextFormField(
-                    key: const ValueKey('space_budget'),
+                  PkAmountField(
+                    fieldKey: const ValueKey('space_budget'),
                     controller: _budget,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: context.t.monthlySpaceBudgetOptional,
-                      prefixText: '${PockitoCurrencies.of(_currency).symbol} ',
-                      helperText: context.t.resetsForANewMonth,
-                    ),
+                    currency: _currency,
+                    label: context.t.monthlySpaceBudgetOptional,
                     validator: (value) =>
                         value != null &&
                             value.isNotEmpty &&
@@ -1582,26 +1701,21 @@ class _CreateSpaceScreenState extends State<CreateSpaceScreen> {
                     child: Text(context.t.continueLabel),
                   ),
                 ] else ...[
-                  TextField(
+                  PkTextField(
                     key: const ValueKey('space_invite_names'),
                     controller: _inviteNames,
                     textCapitalization: TextCapitalization.words,
-                    decoration: InputDecoration(
-                      labelText: context.t.names,
-                      hintText: context.t.sampleMemberNames,
-                      helperText: context.t.separateMultiplePeopleWithCommas,
-                    ),
+                    label: context.t.names,
+                    hint: context.t.sampleMemberNames,
+                    helper: context.t.separateMultiplePeopleWithCommas,
                   ),
                   const SizedBox(height: PkSpacing.x4),
-                  TextField(
+                  PkTextField(
                     key: const ValueKey('space_invite_emails'),
                     controller: _inviteEmails,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: context.t.emails,
-                      hintText:
-                          'kana@example.com, fran@example.com', // i18n-exempt
-                    ),
+                    label: context.t.emails,
+                    hint: 'kana@example.com, fran@example.com', // i18n-exempt
                   ),
                   const SizedBox(height: PkSpacing.x4),
                   PkCard(
@@ -1980,7 +2094,7 @@ class _SpaceMembersScreenState extends State<SpaceMembersScreen> {
                 child: Column(
                   children: resolved.map((invitation) {
                     final status = invitation.effectiveStatus(repo.today);
-                    return ListTile(
+                    return PkLedgerRow.management(
                       leading: Icon(switch (status) {
                         InvitationStatus.accepted =>
                           Icons.check_circle_outline_rounded,
@@ -1988,12 +2102,10 @@ class _SpaceMembersScreenState extends State<SpaceMembersScreen> {
                         InvitationStatus.revoked => Icons.link_off_rounded,
                         _ => Icons.cancel_outlined,
                       }),
-                      title: Text(invitation.name),
-                      subtitle: Text(
-                        context.t.x0AsX1(
-                          invitation.email,
-                          invitation.role.labelIn(context.t),
-                        ),
+                      title: invitation.name,
+                      subtitle: context.t.x0AsX1(
+                        invitation.email,
+                        invitation.role.labelIn(context.t),
                       ),
                       trailing:
                           status == InvitationStatus.expired &&
@@ -2115,10 +2227,9 @@ class _SpaceMembersScreenState extends State<SpaceMembersScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ListTile(
-              contentPadding: EdgeInsets.zero,
+            PkLedgerRow.management(
               leading: const Icon(Icons.swap_horiz_rounded),
-              title: Text(context.t.viewBalances),
+              title: context.t.viewBalances,
               onTap: () {
                 Navigator.pop(context);
                 _showMemberBalance(context, repo, space, user);
@@ -2130,15 +2241,12 @@ class _SpaceMembersScreenState extends State<SpaceMembersScreen> {
                 title: context.t.youCanTChangeRoles,
                 reason: context.t.onlyTheOwnerCanChange,
                 whoCanHelp: repo.whoCanHelp(space.id, 'canChangeRoles'),
-                child: ListTile(
+                child: PkLedgerRow.management(
                   key: const ValueKey('member_change_role'),
-                  contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.admin_panel_settings_outlined),
-                  title: Text(context.t.changeRole),
-                  subtitle: Text(
-                    context.t.currentlyX0(
-                      member.role.labelIn(context.t).toLowerCase(),
-                    ),
+                  title: context.t.changeRole,
+                  subtitle: context.t.currentlyX0(
+                    member.role.labelIn(context.t).toLowerCase(),
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -2156,17 +2264,14 @@ class _SpaceMembersScreenState extends State<SpaceMembersScreen> {
                     ? context.t.theOwnerCannotBeRemoved
                     : context.t.onlyOwnersAndAdminsCan2,
                 whoCanHelp: repo.whoCanHelp(space.id, 'canRemoveMember'),
-                child: ListTile(
+                child: PkLedgerRow.management(
                   key: const ValueKey('member_remove'),
-                  contentPadding: EdgeInsets.zero,
                   leading: Icon(
                     Icons.person_remove_outlined,
                     color: context.pk.danger,
                   ),
-                  title: Text(
-                    context.t.removeFromSpace,
-                    style: TextStyle(color: context.pk.danger),
-                  ),
+                  title: context.t.removeFromSpace,
+                  destructive: true,
                   onTap: () {
                     Navigator.pop(context);
                     _removeMember(context, repo, space, user);
@@ -2180,14 +2285,11 @@ class _SpaceMembersScreenState extends State<SpaceMembersScreen> {
                 reason: owners <= 1 && member.role == SpaceRole.owner
                     ? context.t.youAreTheOnlyOwner
                     : context.t.thisSpaceCannotBeLeft,
-                child: ListTile(
+                child: PkLedgerRow.management(
                   key: const ValueKey('member_leave'),
-                  contentPadding: EdgeInsets.zero,
                   leading: Icon(Icons.logout_rounded, color: context.pk.danger),
-                  title: Text(
-                    context.t.leaveX0(space.name),
-                    style: TextStyle(color: context.pk.danger),
-                  ),
+                  title: context.t.leaveX0(space.name),
+                  destructive: true,
                   onTap: () {
                     Navigator.pop(context);
                     _leave(context, repo, space);
@@ -2274,7 +2376,7 @@ class _SpaceMembersScreenState extends State<SpaceMembersScreen> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _ExpenseDetailRow(
+          PkDetailRow(
             label: context.t.currentCycle,
             value: PkFormat.money(
               repo.memberBalance(space.id, user.id),
@@ -2282,7 +2384,7 @@ class _SpaceMembersScreenState extends State<SpaceMembersScreen> {
               sign: true,
             ),
           ),
-          _ExpenseDetailRow(
+          PkDetailRow(
             label: context.t.lifetime,
             value: PkFormat.money(
               repo.memberBalance(space.id, user.id, lifetime: true),
@@ -2429,20 +2531,20 @@ class _InviteMemberSheetState extends State<_InviteMemberSheet> {
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: PkSpacing.x4),
-        TextField(
+        PkTextField(
           key: const ValueKey('invite_name'),
           controller: _name,
           autofocus: true,
           textCapitalization: TextCapitalization.words,
-          decoration: InputDecoration(labelText: context.t.name),
           onChanged: (_) => setState(() {}),
+          label: context.t.name,
         ),
         const SizedBox(height: PkSpacing.x3),
-        TextField(
+        PkTextField(
           key: const ValueKey('invite_email'),
           controller: _email,
           keyboardType: TextInputType.emailAddress,
-          decoration: InputDecoration(labelText: context.t.email),
+          label: context.t.email,
         ),
         const SizedBox(height: PkSpacing.x4),
         // Naming the role at invite time is what makes the invitee's review
@@ -2461,10 +2563,12 @@ class _InviteMemberSheetState extends State<_InviteMemberSheet> {
             groupValue: _role,
             // ignore: deprecated_member_use
             onChanged: (value) => setState(() => _role = value ?? _role),
-            title: Text(role.label),
-            subtitle: Text(role.summary),
+            // `role.label` and `role.summary` are the English getters kept
+            // for logs and wire values; the screen asks for the reader's
+            // words. `dense` is gone with them: it shrank the target.
+            title: Text(role.labelIn(context.t)),
+            subtitle: Text(role.summaryIn(context.t)),
             contentPadding: EdgeInsets.zero,
-            dense: true,
           ),
         const SizedBox(height: PkSpacing.x3),
         Text(
@@ -2577,24 +2681,22 @@ class _SpaceSettingsScreenState extends State<SpaceSettingsScreen> {
                     allowed: canEdit,
                     reason: reason,
                     whoCanHelp: helpers,
-                    child: ListTile(
+                    child: PkLedgerRow.management(
                       key: const ValueKey('space_rename'),
                       leading: PkIconTile(
                         icon: PkIcons.named(space.icon),
-                        color: PkPalette.categoryAt(space.colorIndex),
-                        size: 40,
+                        accent: PkPalette.categoryAt(space.colorIndex),
+                        size: PkSize.avatarMember,
                       ),
-                      title: Text(space.name),
+                      title: space.name,
                       // Two Spaces can share a name; the type is what tells them
                       // apart, so it belongs wherever the name appears.
-                      subtitle: Text(
-                        context.t.members(
-                          space.type.label,
-                          space.currency,
-                          space.members.length,
-                        ),
+                      subtitle: context.t.members(
+                        space.type.label,
+                        space.currency,
+                        space.members.length,
                       ),
-                      trailing: const Icon(Icons.chevron_right_rounded),
+                      showChevron: true,
                       onTap: () => _rename(context, repo, space),
                     ),
                   ),
@@ -2602,35 +2704,33 @@ class _SpaceSettingsScreenState extends State<SpaceSettingsScreen> {
                     allowed: canEdit,
                     reason: reason,
                     whoCanHelp: helpers,
-                    child: ListTile(
+                    child: PkLedgerRow.management(
                       key: const ValueKey('space_default_split'),
                       leading: const Icon(Icons.pie_chart_outline_rounded),
-                      title: Text(context.t.defaultSplit),
-                      subtitle: Text(_defaultSplitLabel(repo, space)),
-                      trailing: const Icon(Icons.chevron_right_rounded),
+                      title: context.t.defaultSplit,
+                      subtitle: _defaultSplitLabel(repo, space),
                       onTap: () => _defaultSplit(context, repo, space),
+                      showChevron: true,
                     ),
                   ),
-                  ListTile(
+                  PkLedgerRow.management(
                     leading: const Icon(Icons.group_outlined),
-                    title: Text(context.t.membersInvites),
-                    subtitle: Text(
-                      context.t.youAreX0(
-                        permissions.role.labelIn(context.t).toLowerCase(),
-                      ),
+                    title: context.t.membersInvites,
+                    subtitle: context.t.youAreX0(
+                      permissions.role.labelIn(context.t).toLowerCase(),
                     ),
-                    trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () =>
                         context.push('/spaces/${widget.spaceId}/members'),
+                    showChevron: true,
                   ),
-                  ListTile(
+                  PkLedgerRow.management(
                     key: const ValueKey('space_activity_log'),
                     leading: const Icon(Icons.receipt_long_outlined),
-                    title: Text(context.t.activityLog),
-                    subtitle: Text(context.t.whoChangedWhatAndWhen),
-                    trailing: const Icon(Icons.chevron_right_rounded),
+                    title: context.t.activityLog,
+                    subtitle: context.t.whoChangedWhatAndWhen,
                     onTap: () =>
                         context.push('/spaces/${widget.spaceId}/activity'),
+                    showChevron: true,
                   ),
                 ],
               ),
@@ -2710,10 +2810,10 @@ class _SpaceSettingsScreenState extends State<SpaceSettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(context.t.renameSpace),
-        content: TextField(
+        content: PkTextField(
           controller: controller,
           autofocus: true,
-          decoration: InputDecoration(labelText: context.t.spaceName),
+          label: context.t.spaceName,
         ),
         actions: [
           TextButton(
@@ -2812,21 +2912,19 @@ class _SpaceSettingsScreenState extends State<SpaceSettingsScreen> {
                         final user = repo.userById(member.userId);
                         return Padding(
                           padding: const EdgeInsets.only(bottom: PkSpacing.x3),
-                          child: TextField(
+                          child: PkTextField(
                             key: ValueKey('default_value_${user?.name}'),
                             controller: values[member.userId],
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
-                            decoration: InputDecoration(
-                              labelText: user?.isYou == true
-                                  ? context.t.x0You2(user?.name)
-                                  : user?.name ?? context.t.roleMember,
-                              suffixText: method == SplitMethod.percentage
-                                  ? '%'
-                                  : context.t.shares,
-                            ),
                             onChanged: (_) => setSheetState(() {}),
+                            label: user?.isYou == true
+                                ? context.t.x0You2(user?.name)
+                                : user?.name ?? context.t.roleMember,
+                            suffix: method == SplitMethod.percentage
+                                ? '%'
+                                : context.t.shares,
                           ),
                         );
                       }).toList(),
@@ -3121,55 +3219,46 @@ class _SettleUpScreenState extends State<SettleUpScreen> {
                     ),
                   ),
                   const SizedBox(height: PkSpacing.x6),
-                  TextField(
-                    key: const ValueKey('settlement_amount'),
+                  // UI-018: this is the most consequential number in the
+                  // product and it used to be a bare `TextField` styled
+                  // `displayLarge` — no tabular figures, no currency-aware
+                  // precision, and a 32 px input that grew unbounded with the
+                  // reader's text scale.
+                  PkAmountField(
+                    fieldKey: const ValueKey('settlement_amount'),
                     controller: _amount,
-                    textAlign: TextAlign.center,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    style: Theme.of(context).textTheme.displayLarge,
-                    decoration: InputDecoration(
-                      prefixText: '${_symbol(space.currency)} ',
-                      labelText: context.t.amount,
-                      floatingLabelAlignment: FloatingLabelAlignment.center,
-                    ),
+                    currency: space.currency,
+                    onChanged: (_) => setState(() {}),
                   ),
                   const SizedBox(height: PkSpacing.x4),
-                  DropdownButtonFormField<String>(
-                    isExpanded: true,
-                    initialValue: _accountId,
-                    decoration: InputDecoration(
-                      labelText: _fromUserId == repo.currentUserId
-                          ? context.t.paidFrom
-                          : _toUserId == repo.currentUserId
-                          ? context.t.receivedIn
-                          : context.t.walletMovement,
-                    ),
-                    items: [
-                      DropdownMenuItem(
-                        value: '__outside__',
-                        child: Text(context.t.outsidePockitoNoWalletMovement),
-                      ),
-                      ...repo.accounts
-                          .where((item) => !item.archived)
-                          .map(
-                            (item) => DropdownMenuItem(
-                              value: item.id,
-                              child: Text('${item.name} · ${item.currency}'),
-                            ),
-                          ),
-                    ],
-                    onChanged: (value) => setState(() => _accountId = value),
+                  PkSelectField(
+                    key: const ValueKey('settlement_account'),
+                    label: _fromUserId == repo.currentUserId
+                        ? context.t.paidFrom
+                        : _toUserId == repo.currentUserId
+                        ? context.t.receivedIn
+                        : context.t.walletMovement,
+                    value: pkAccountLabel(context, repo, _accountId),
+                    placeholder: context.t.chooseAnAccountX,
+                    leading: pkAccountLeading(repo, _accountId),
+                    onTap: () async {
+                      final chosen = await showPkAccountPicker(
+                        context,
+                        repo: repo,
+                        selectedId: _accountId,
+                        allowOutside: true,
+                      );
+                      if (chosen != null) {
+                        setState(() => _accountId = chosen);
+                      }
+                    },
                   ),
                   const SizedBox(height: PkSpacing.x4),
-                  TextField(
+                  PkNoteField(
+                    fieldKey: const ValueKey('settlement_note'),
                     controller: _note,
-                    key: const ValueKey('settlement_note'),
-                    decoration: InputDecoration(
-                      labelText: context.t.noteOptional,
-                      hintText: context.t.eGAugustUtilities,
-                    ),
+                    hint: context.t.eGAugustUtilities,
+                    onChanged: (_) => setState(() {}),
                   ),
                   const SizedBox(height: PkSpacing.x8),
                   FilledButton(
@@ -3186,7 +3275,30 @@ class _SettleUpScreenState extends State<SettleUpScreen> {
     );
   }
 
-  String _symbol(String code) => PockitoCurrencies.of(code).symbol;
+  /// What stands between the reader and one other person in this Space, from
+  /// the reader's side: positive means they owe the reader.
+  ///
+  /// `memberBalance` gives each person's position against the Space as a
+  /// whole, which is the wrong number here — a settlement is between two
+  /// people, so the figure that changes is the edge joining them.
+  int _pairwiseBalance(
+    PockitoRepository repo,
+    SharedSpace space,
+    String otherUserId,
+  ) {
+    var balance = 0;
+    for (final edge in repo.debtEdges()) {
+      if (edge.spaceId != space.id) continue;
+      if (edge.fromUserId == otherUserId &&
+          edge.toUserId == repo.currentUserId) {
+        balance += edge.amountMinor;
+      } else if (edge.fromUserId == repo.currentUserId &&
+          edge.toUserId == otherUserId) {
+        balance -= edge.amountMinor;
+      }
+    }
+    return balance;
+  }
 
   Future<void> _review(BuildContext context, SharedSpace space) async {
     final repo = context.read<PockitoAppViewModel>().repository;
@@ -3231,24 +3343,45 @@ class _SettleUpScreenState extends State<SettleUpScreen> {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: PkSpacing.x4),
-              _ExpenseDetailRow(label: context.t.spaceLabel, value: space.name),
-              _ExpenseDetailRow(
+              PkDetailRow(label: context.t.spaceLabel, value: space.name),
+              PkDetailRow(
                 label: context.t.from,
                 value: _personName(repo, _fromUserId),
               ),
-              _ExpenseDetailRow(
+              PkDetailRow(
                 label: context.t.to,
                 value: _personName(repo, _toUserId),
               ),
-              _ExpenseDetailRow(
+              PkDetailRow(
                 label: context.t.amount,
                 value: PkFormat.money(amount, space.currency),
               ),
-              _ExpenseDetailRow(
+              PkDetailRow(
                 label: context.t.accountLabel,
-                value: _accountId == '__outside__'
+                value: _accountId == PkAccountPicker.outside
                     ? context.t.outsidePockitoNoWalletMovement
-                    : repo.accountById(_accountId!)?.name ?? 'Account',
+                    : repo.accountById(_accountId ?? '')?.name ??
+                          context.t.accountLabel,
+              ),
+              const SizedBox(height: PkSpacing.x4),
+              // C-4: the facts above say what is being recorded. This says
+              // what it *does* — the question the reader actually has with
+              // their thumb over the button.
+              PkBalanceImpact(
+                counterpartyName: _fromUserId == repo.currentUserId
+                    ? recipientName
+                    : _personName(repo, _fromUserId),
+                previousMinor: _pairwiseBalance(
+                  repo,
+                  space,
+                  _fromUserId == repo.currentUserId ? _toUserId! : _fromUserId!,
+                ),
+                // Paying someone reduces what they are owed; being paid
+                // reduces what the reader is owed.
+                deltaMinor: _fromUserId == repo.currentUserId
+                    ? amount
+                    : -amount,
+                currency: space.currency,
               ),
               const SizedBox(height: PkSpacing.x4),
               // A settlement only shifts balances once the person receiving
@@ -3482,7 +3615,9 @@ class SettlementHistoryScreen extends StatelessWidget {
                   children: [
                     PkIconTile(
                       icon: Icons.handshake_outlined,
-                      color: Theme.of(context).colorScheme.primary,
+                      accent: PkAccent.ink(
+                        Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                     const SizedBox(width: PkSpacing.x3),
                     Expanded(
@@ -3652,16 +3787,14 @@ class _SettlementList extends StatelessWidget {
                 : settlement.isPending
                 ? context.pk.warning
                 : context.pk.textTertiary;
-            return ListTile(
+            return PkLedgerRow.management(
               leading: PkIconTile(
                 icon: Icons.handshake_outlined,
-                color: statusColor,
+                accent: PkAccent.ink(statusColor),
                 size: 40,
               ),
-              title: Text(context.t.x0PaidX1(fromLabel, toLabel)),
-              subtitle: Text(
-                _settlementSubtitle(context, repository, settlement),
-              ),
+              title: context.t.x0PaidX1(fromLabel, toLabel),
+              subtitle: _settlementSubtitle(context, repository, settlement),
               trailing: PkAmountText(
                 amountMinor: settlement.amountMinor,
                 currency: settlement.currency,
@@ -3729,11 +3862,13 @@ class SettlementDetailScreen extends StatelessWidget {
                   : confirmed
                   ? Icons.handshake_rounded
                   : Icons.block_rounded,
-              color: proposed
-                  ? context.pk.warning
-                  : confirmed
-                  ? context.pk.owed
-                  : context.pk.textTertiary,
+              accent: PkAccent.ink(
+                proposed
+                    ? context.pk.warning
+                    : confirmed
+                    ? context.pk.owed
+                    : context.pk.textTertiary,
+              ),
               size: 64,
               iconSize: 30,
             ),
@@ -3773,23 +3908,20 @@ class SettlementDetailScreen extends StatelessWidget {
             PkCard(
               child: Column(
                 children: [
-                  _ExpenseDetailRow(
-                    label: context.t.spaceLabel,
-                    value: space.name,
-                  ),
-                  _ExpenseDetailRow(
+                  PkDetailRow(label: context.t.spaceLabel, value: space.name),
+                  PkDetailRow(
                     label: context.t.from,
                     value: from?.isYou == true
                         ? context.t.you
                         : from?.name ?? 'Member',
                   ),
-                  _ExpenseDetailRow(
+                  PkDetailRow(
                     label: context.t.to,
                     value: to?.isYou == true
                         ? context.t.you
                         : to?.name ?? 'Member',
                   ),
-                  _ExpenseDetailRow(
+                  PkDetailRow(
                     label: context.t.statusLabel,
                     value: proposed
                         ? context.t.proposedByAwaiting(
@@ -3803,15 +3935,12 @@ class SettlementDetailScreen extends StatelessWidget {
                         : context.t.cancelledWord,
                   ),
                   if (settlement.cancelReason != null)
-                    _ExpenseDetailRow(
+                    PkDetailRow(
                       label: context.t.reason,
                       value: settlement.cancelReason!,
                     ),
                   if (settlement.note.isNotEmpty)
-                    _ExpenseDetailRow(
-                      label: context.t.note,
-                      value: settlement.note,
-                    ),
+                    PkDetailRow(label: context.t.note, value: settlement.note),
                 ],
               ),
             ),
@@ -4021,7 +4150,7 @@ class SpaceCyclesScreen extends StatelessWidget {
                       semanticIdentifier: 'cycle_${cycle.id}',
                       leading: const PkIconTile(
                         icon: Icons.event_available_outlined,
-                        color: PkPalette.indigo600,
+                        accent: PkPalette.brand,
                       ),
                       title: cycle.label,
                       subtitle: context.t.expensesSettlements(
@@ -4100,33 +4229,32 @@ class SpaceCycleDetailScreen extends StatelessWidget {
             PkCard(
               color: context.pk.sharedSurface,
               borderColor: context.pk.sharedBorder,
-              child: ListTile(
-                contentPadding: EdgeInsets.zero,
+              child: PkLedgerRow.management(
                 leading: Icon(Icons.lock_clock_outlined),
-                title: Text(context.t.settledCycleReadOnly),
-                subtitle: Text(context.t.thisSnapshotDoesNotChange),
+                title: context.t.settledCycleReadOnly,
+                subtitle: context.t.thisSnapshotDoesNotChange,
               ),
             ),
             const SizedBox(height: PkSpacing.x4),
             PkCard(
               child: Column(
                 children: [
-                  _ExpenseDetailRow(
+                  PkDetailRow(
                     label: context.t.period,
                     value:
                         '${PkFormat.longDate(cycle.startedAt, context.t)} → ${PkFormat.longDate(cycle.endedAt, context.t)}',
                   ),
-                  _ExpenseDetailRow(
+                  PkDetailRow(
                     label: context.t.spent,
                     value: PkFormat.money(cycle.spentMinor, cycle.currency),
                   ),
-                  _ExpenseDetailRow(
+                  PkDetailRow(
                     label: context.t.budgetLabel,
                     value: cycle.budgetLimitMinor == 0
                         ? context.t.noBudget
                         : '${PkFormat.money(cycle.budgetLimitMinor, cycle.currency)} · ${(cycle.spentMinor / cycle.budgetLimitMinor * 100).round()}%',
                   ),
-                  _ExpenseDetailRow(
+                  PkDetailRow(
                     label: context.t.finalStatus,
                     value: context.t.everyoneSettled,
                   ),
@@ -4143,17 +4271,13 @@ class SpaceCycleDetailScreen extends StatelessWidget {
                   final paid = cycle.memberPaidMinor[userId] ?? 0;
                   final responsibility =
                       cycle.memberResponsibilityMinor[userId] ?? 0;
-                  return ListTile(
+                  return PkLedgerRow.management(
                     leading: PkAvatar(label: user?.initials ?? '?'),
-                    title: Text(
-                      user?.isYou == true
-                          ? context.t.you
-                          : user?.name ?? 'Member',
-                    ),
-                    subtitle: Text(
-                      context.t.responsibleForX0(
-                        PkFormat.money(responsibility, cycle.currency),
-                      ),
+                    title: user?.isYou == true
+                        ? context.t.you
+                        : user?.name ?? 'Member',
+                    subtitle: context.t.responsibleForX0(
+                      PkFormat.money(responsibility, cycle.currency),
                     ),
                     trailing: Text(
                       context.t.paidX0(PkFormat.money(paid, cycle.currency)),
@@ -4170,11 +4294,10 @@ class SpaceCycleDetailScreen extends StatelessWidget {
               child: Column(
                 children: cycle.categoryTotalsMinor.entries
                     .map(
-                      (entry) => ListTile(
-                        title: Text(
-                          repo.categoryById(entry.key)?.name ??
-                              context.t.uncategorised,
-                        ),
+                      (entry) => PkLedgerRow.management(
+                        title:
+                            repo.categoryById(entry.key)?.name ??
+                            context.t.uncategorised,
                         trailing: PkAmountText(
                           amountMinor: entry.value,
                           currency: cycle.currency,
@@ -4247,7 +4370,7 @@ class ArchivedSpacesScreen extends StatelessWidget {
                     children: [
                       PkIconTile(
                         icon: PkIcons.named(space.icon),
-                        color: PkPalette.categoryAt(space.colorIndex),
+                        accent: PkPalette.categoryAt(space.colorIndex),
                       ),
                       const SizedBox(width: PkSpacing.x3),
                       Expanded(
@@ -4386,9 +4509,13 @@ class _SpaceHero extends StatelessWidget {
   final VoidCallback? onSettle;
   @override
   Widget build(BuildContext context) {
-    final color = PkPalette.categoryAt(space.colorIndex);
+    final accent = PkPalette.categoryAt(space.colorIndex);
+    // The hero is painted with the fill; the controls that sit *on white*
+    // inside it take the ink, because a saturated fill on white is the case
+    // that measured as low as 1.75:1.
+    final onWhite = accent.inkOn(Brightness.light);
     return PkHeroPanel(
-      color: color,
+      color: accent.fill,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -4404,9 +4531,11 @@ class _SpaceHero extends StatelessWidget {
                 showSelectedIcon: false,
                 expandedInsets: EdgeInsets.zero,
                 style: SegmentedButton.styleFrom(
-                  backgroundColor: Colors.white.withValues(alpha: .12),
+                  // Same correction as Home's month control: a white wash
+                  // under a white label is what drops it below 4.5:1.
+                  backgroundColor: PkPalette.kitoNavy900.withValues(alpha: .22),
                   selectedBackgroundColor: Colors.white,
-                  selectedForegroundColor: color,
+                  selectedForegroundColor: onWhite,
                   foregroundColor: Colors.white,
                   side: BorderSide.none,
                   // D-04: the segment reads as a compact pill through its
@@ -4478,7 +4607,7 @@ class _SpaceHero extends StatelessWidget {
                     onPressed: onSettle,
                     style: FilledButton.styleFrom(
                       backgroundColor: Colors.white,
-                      foregroundColor: color,
+                      foregroundColor: onWhite,
                     ),
                     child: Text(context.t.quickSettleUp),
                   ),
@@ -4527,10 +4656,26 @@ class _SharedExpenseTile extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-            if (mine != null)
-              PkShareRule(
-                fraction: mine.amountMinor / expense.totalMinor,
+            if (expense.shares.length > 1)
+              SizedBox(
                 width: compact ? 80 : 64,
+                // C-5: every share, not just the reader's own fraction. The
+                // bar it replaces could only say "you had some of this".
+                child: PkSplitBar(
+                  height: 4,
+                  currency: expense.currency,
+                  segments: [
+                    for (final (index, share) in expense.shares.indexed)
+                      PkSplitSegment(
+                        id: share.userId,
+                        label:
+                            repo.userById(share.userId)?.name ??
+                            context.t.member,
+                        amountMinor: share.amountMinor,
+                        accent: PkPalette.categoryAt(index + 1),
+                      ),
+                  ],
+                ),
               ),
           ];
           return Row(
@@ -4540,7 +4685,7 @@ class _SharedExpenseTile extends StatelessWidget {
             children: [
               PkIconTile(
                 icon: PkIcons.named(category?.icon ?? 'receipt'),
-                color: PkPalette.categoryAt(category?.colorIndex ?? 2),
+                accent: PkPalette.categoryAt(category?.colorIndex ?? 2),
                 size: compact ? 40 : 48,
               ),
               SizedBox(width: compact ? PkSpacing.x2 : PkSpacing.x3),
@@ -4605,7 +4750,7 @@ class _ActivityEvent extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        PkIconTile(icon: icon, color: PkPalette.indigo600),
+        PkIconTile(icon: icon, accent: PkPalette.brand),
         const SizedBox(width: PkSpacing.x3),
         Expanded(
           child: Column(
@@ -4630,37 +4775,6 @@ class _ActivityEvent extends StatelessWidget {
                   ),
                 ),
             ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-class _ExpenseDetailRow extends StatelessWidget {
-  const _ExpenseDetailRow({required this.label, required this.value});
-  final String label;
-  final String value;
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: PkSpacing.x3),
-    child: Row(
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: context.pk.textSecondary),
-          ),
-        ),
-        Flexible(
-          child: Text(
-            value,
-            textAlign: TextAlign.right,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
         ),
       ],
@@ -4766,42 +4880,39 @@ class _SpaceActivityLogScreenState extends State<SpaceActivityLogScreen> {
                 child: Column(
                   children: [
                     for (final event in events)
-                      ListTile(
+                      PkLedgerRow.management(
                         key: ValueKey('activity_${event.id}'),
                         leading: PkIconTile(
                           icon: _iconFor(event.type),
-                          color: event.outcome == ActivityOutcome.denied
-                              ? context.pk.danger
-                              : Theme.of(context).colorScheme.primary,
-                          size: 40,
-                          iconSize: 19,
+                          accent: PkAccent.ink(
+                            event.outcome == ActivityOutcome.denied
+                                ? context.pk.danger
+                                : Theme.of(context).colorScheme.primary,
+                          ),
+                          size: PkSize.avatarMember,
+                          iconSize: PkSize.icon,
                         ),
-                        title: Text(
-                          _detailed
-                              ? '${repo.userById(event.actorUserId)?.name ?? 'Someone'} · ${event.type.name}'
-                              : event.summary,
-                        ),
-                        subtitle: Text(
-                          _detailed
-                              ? [
-                                  PkFormat.longDate(event.at, context.t),
-                                  if (event.entityLabel != null)
-                                    event.entityLabel!,
-                                  if (event.permission != null)
-                                    'permission: ${event.permission}',
-                                  'outcome: ${event.outcome.name}',
-                                  if (event.detail != null) event.detail!,
-                                ].join(' · ')
-                              : [
-                                  PkFormat.shortDate(
-                                    event.at,
-                                    repo.today,
-                                    context.t,
-                                  ),
-                                  if (event.detail != null) event.detail!,
-                                ].join(' · '),
-                        ),
-                        isThreeLine: _detailed,
+                        title: _detailed
+                            ? '${repo.userById(event.actorUserId)?.name ?? 'Someone'} · ${event.type.name}'
+                            : event.summary,
+                        subtitle: _detailed
+                            ? [
+                                PkFormat.longDate(event.at, context.t),
+                                if (event.entityLabel != null)
+                                  event.entityLabel!,
+                                if (event.permission != null)
+                                  'permission: ${event.permission}',
+                                'outcome: ${event.outcome.name}',
+                                if (event.detail != null) event.detail!,
+                              ].join(' · ')
+                            : [
+                                PkFormat.shortDate(
+                                  event.at,
+                                  repo.today,
+                                  context.t,
+                                ),
+                                if (event.detail != null) event.detail!,
+                              ].join(' · '),
                         trailing: event.outcome == ActivityOutcome.denied
                             ? Icon(
                                 Icons.block_rounded,

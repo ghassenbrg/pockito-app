@@ -361,24 +361,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
               ),
               const SizedBox(height: PkSpacing.x6),
-              TextField(
+              PkTextField(
                 controller: _name,
                 textCapitalization: TextCapitalization.words,
-                decoration: InputDecoration(labelText: context.t.displayName),
+                label: context.t.displayName,
               ),
               const SizedBox(height: PkSpacing.x4),
-              TextField(
+              PkTextField(
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(labelText: context.t.email),
+                label: context.t.email,
               ),
               const SizedBox(height: PkSpacing.x4),
-              TextField(
+              PkTextField(
                 enabled: false,
-                decoration: InputDecoration(
-                  labelText: context.t.country,
-                  hintText: context.t.profileSampleCountry,
-                ),
+                label: context.t.country,
+                hint: context.t.profileSampleCountry,
               ),
               const SizedBox(height: PkSpacing.x8),
               FilledButton(
@@ -419,21 +417,21 @@ class CurrencySettingsScreen extends StatelessWidget {
           padding: const EdgeInsets.all(PkSpacing.screen),
           children: [
             PkCard(
-              color: PkPalette.indigo50,
-              borderColor: PkPalette.indigo100,
+              color: pkStatusSurface(context, PkStatusTone.info),
+              borderColor: pkStatusBorder(context, PkStatusTone.info),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.info_outline_rounded,
-                    color: PkPalette.indigo600,
+                    color: pkStatusInk(context, PkStatusTone.info),
                   ),
                   const SizedBox(width: PkSpacing.x3),
                   Expanded(
                     child: Text(
                       context.t.thisChangesReportingTotalsOnly,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: PkPalette.indigo700,
+                        color: context.pk.textPrimary,
                       ),
                     ),
                   ),
@@ -444,24 +442,18 @@ class CurrencySettingsScreen extends StatelessWidget {
             // A searchable picker with recents and flags: a plain dropdown of
             // thirty currencies is a scroll, not a choice.
             PkCard(
-              child: ListTile(
+              child: PkLedgerRow.management(
                 key: const ValueKey('pick_reporting_currency'),
-                contentPadding: EdgeInsets.zero,
                 leading: Text(
                   current.flag.isEmpty ? current.symbol : current.flag,
                   // pk-exempt: a flag glyph is artwork sized to the row, not
                   // type on the reading scale.
                   style: const TextStyle(fontSize: 28),
                 ),
-                title: Text('${current.code} · ${current.name}'),
-                subtitle: Text(
-                  repo.fxQuote(current.code, current.code) == null
-                      ? context.t.currencyNoRate
-                      : context.t.currencyAvailable(
-                          PockitoCurrencies.all.length,
-                        ),
-                ),
-                trailing: const Icon(Icons.chevron_right_rounded),
+                title: '${current.code} · ${current.name}',
+                subtitle: repo.fxQuote(current.code, current.code) == null
+                    ? context.t.currencyNoRate
+                    : context.t.currencyAvailable(PockitoCurrencies.all.length),
                 onTap: () async {
                   final picked = await showPkCurrencyPicker(
                     context,
@@ -486,6 +478,7 @@ class CurrencySettingsScreen extends StatelessWidget {
                     successMessage: context.t.reportingInX0(picked),
                   );
                 },
+                showChevron: true,
               ),
             ),
           ],
@@ -583,16 +576,15 @@ class _ExchangeRatesScreenState extends State<ExchangeRatesScreen> {
             const SizedBox(height: PkSpacing.x5),
             if (_mode == FxRateMode.automatic)
               PkCard(
-                color: PkPalette.indigo50,
-                borderColor: PkPalette.indigo100,
+                color: pkStatusSurface(context, PkStatusTone.info),
+                borderColor: pkStatusBorder(context, PkStatusTone.info),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
+                    PkLedgerRow.management(
                       leading: Icon(Icons.verified_outlined),
-                      title: Text(context.t.automaticSnapshotActive),
-                      subtitle: Text(context.t.mockedLocallyForThePrototype),
+                      title: context.t.automaticSnapshotActive,
+                      subtitle: context.t.mockedLocallyForThePrototype,
                     ),
                     Text(
                       context.t.providerX0(
@@ -632,16 +624,14 @@ class _ExchangeRatesScreenState extends State<ExchangeRatesScreen> {
                 final target = entry.key.split('_').last;
                 return Padding(
                   padding: const EdgeInsets.only(bottom: PkSpacing.x4),
-                  child: TextFormField(
+                  child: PkTextField(
                     key: ValueKey('fx_rate_$target'),
                     controller: entry.value,
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    decoration: InputDecoration(
-                      labelText: context.t.l1X0InX1(base, target),
-                      helperText: context.t.yourManualRate(base, target),
-                    ),
+                    label: context.t.l1X0InX1(base, target),
+                    helper: context.t.yourManualRate(base, target),
                   ),
                 );
               }),
@@ -995,8 +985,8 @@ class AboutScreen extends StatelessWidget {
             padding: EdgeInsets.zero,
             child: Column(
               children: [
-                ListTile(
-                  title: Text(context.t.privacy),
+                PkLedgerRow.management(
+                  title: context.t.privacy,
                   trailing: const Icon(Icons.open_in_new_rounded, size: 18),
                   onTap: () => _showInfo(
                     context,
@@ -1004,8 +994,8 @@ class AboutScreen extends StatelessWidget {
                     context.t.noPersonalDataLeavesThis,
                   ),
                 ),
-                ListTile(
-                  title: Text(context.t.terms),
+                PkLedgerRow.management(
+                  title: context.t.terms,
                   trailing: const Icon(Icons.open_in_new_rounded, size: 18),
                   onTap: () => _showInfo(
                     context,
@@ -1013,14 +1003,14 @@ class AboutScreen extends StatelessWidget {
                     context.t.prototypeTermsAreIntentionallyLocal,
                   ),
                 ),
-                ListTile(
-                  title: Text(context.t.licences),
-                  trailing: const Icon(Icons.chevron_right_rounded),
+                PkLedgerRow.management(
+                  title: context.t.licences,
                   onTap: () => showLicensePage(
                     context: context,
                     applicationName: 'Pockito',
                     applicationVersion: '0.1.0',
                   ),
+                  showChevron: true,
                 ),
               ],
             ),
@@ -1217,7 +1207,11 @@ class _NotificationRow extends StatelessWidget {
       // Section 7.19: 68–80 depending on action and status, unread carried by
       // a dot *and* semantics rather than by weight or colour alone.
       child: ColoredBox(
-        color: item.read ? Colors.transparent : PkPalette.indigo50,
+        // Unread is a wash derived from the theme, not a fixed light tint:
+        // `indigo50` behind `textPrimary` was white-on-white in dark mode.
+        color: item.read
+            ? Colors.transparent
+            : pkStatusSurface(context, PkStatusTone.info),
         child: PkLedgerRow(
           density: actionRequired ? PkRowDensity.status : PkRowDensity.rich,
           semanticIdentifier: 'notification_${item.id}',
@@ -1230,11 +1224,13 @@ class _NotificationRow extends StatelessWidget {
           ].join(', '),
           leading: PkIconTile(
             icon: _notificationIcon(item.type),
-            color: item.type == 'BUDGET_ALERT'
-                ? context.pk.warning
-                : item.type.startsWith('AI')
-                ? PkPalette.indigo600
-                : context.pk.sharedStrong,
+            accent: PkAccent.ink(
+              item.type == 'BUDGET_ALERT'
+                  ? context.pk.warning
+                  : item.type.startsWith('AI')
+                  ? PkPalette.indigo600
+                  : context.pk.sharedStrong,
+            ),
           ),
           title: item.title,
           badges: [
@@ -1259,8 +1255,8 @@ class _NotificationRow extends StatelessWidget {
                   child: Container(
                     width: 8,
                     height: 8,
-                    decoration: const BoxDecoration(
-                      color: PkPalette.indigo600,
+                    decoration: BoxDecoration(
+                      color: pkStatusInk(context, PkStatusTone.info),
                       shape: BoxShape.circle,
                     ),
                   ),

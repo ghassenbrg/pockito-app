@@ -3275,5 +3275,102 @@
   "changeAvatar": "Change avatar",
   "balanceHidden": "Balance hidden",
   "privacyHideBalances": "Hide balances",
-  "privacyHideBalancesDetail": "Mask every amount without changing the layout."
+  "privacyHideBalancesDetail": "Mask every amount without changing the layout.",
+  "done": "Done",
+  "selected": "selected",
+  "addANote": "Add a note",
+  "member": "Member",
+  "cadenceDaily": "Daily",
+  "cadenceWeekly": "Weekly",
+  "cadenceMonthly": "Monthly",
+  "cadenceYearly": "Yearly",
+  "countryJapan": "Japan",
+  "countryGermany": "Germany",
+  "countryLuxembourg": "Luxembourg",
+  "countryTunisia": "Tunisia",
+  "countryUnitedKingdom": "United Kingdom",
+  "countryUnitedStates": "United States",
+  "balanceImpactTitle": "What this changes",
+  "balanceImpactWillOwe": "{name} will owe you",
+  "@balanceImpactWillOwe": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceImpactYouWillOwe": "You will owe {name}",
+  "@balanceImpactYouWillOwe": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceImpactNoChange": "Nothing changes between you",
+  "balanceImpactWith": "Your balance with {name}",
+  "@balanceImpactWith": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "splitBarLabel": "{name}, {percent}% — {amount}",
+  "@splitBarLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "splitBarTitle": "How this splits",
+  "iconGroupMoney": "Money",
+  "iconGroupFood": "Food & drink",
+  "iconGroupHome": "Home & bills",
+  "iconGroupTransport": "Getting around",
+  "iconGroupTravel": "Travel",
+  "iconGroupHealth": "Health",
+  "iconGroupLeisure": "Leisure",
+  "iconGroupShopping": "Shopping",
+  "iconGroupWork": "Work & study",
+  "iconGroupPeople": "People",
+  "iconGroupOther": "Other",
+  "chooseAnIcon": "Choose an icon",
+  "searchIcons": "Search icons",
+  "searchKindDestination": "Go to",
+  "searchTermsHome": "home,dashboard,overview,net worth",
+  "searchTermsAccounts": "accounts,wallet,bank,balance,cash",
+  "searchTermsSpaces": "spaces,shared,group,household,split,members",
+  "searchTermsActivity": "activity,transactions,history,ledger,expenses",
+  "searchTermsBudgets": "budgets,limit,spending plan",
+  "searchTermsSubscriptions": "subscriptions,recurring,renewals,bills",
+  "searchTermsCategories": "categories,tags,labels",
+  "searchTermsNotifications": "notifications,alerts,inbox",
+  "searchTermsSettings": "settings,preferences,profile,currency,theme",
+  "searchTermsAssistant": "assistant,ai,kito,insights",
+  "recordHistory": "How this got here",
+  "timelineRecorded": "Recorded",
+  "timelineEdited": "Edited",
+  "timelineEditedDetail": "Revised {p0} times since it was recorded",
+  "timelineVoided": "Voided",
+  "timelineAwaitingConfirmation": "Waiting to be confirmed",
+  "timelineAwaitingDetail": "It does not move a balance until someone confirms it",
+  "timelineSettled": "Settled",
+  "timelineSettledDetail": "Part of a closed cycle, so it is read-only now",
+  "timelineByX0On": "{p0} · {p1}",
+  "timelineAddedByAssistant": "Added by {p0}",
+  "homeInsights": "Trends",
+  "homeInsightsSubtitle": "Where the month went, and how it compares",
+  "homeAccountsSummary": "{p0} across {p1}",
+  "homeUpcomingSummary": "{p0} due",
+  "homeUpcomingNone": "Nothing due",
+  "homeWhereItWentSummary": "{p0} in {p1}",
+  "homeNothingSpentYet": "Nothing spent yet"
 }

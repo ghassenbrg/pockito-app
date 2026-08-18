@@ -144,7 +144,7 @@ class NetWorthBreakdownScreen extends StatelessWidget {
                     children: [
                       PkIconTile(
                         icon: PkIcons.named(account.icon),
-                        color: PkPalette.categoryAt(account.colorIndex),
+                        accent: PkPalette.categoryAt(account.colorIndex),
                       ),
                       const SizedBox(width: PkSpacing.x3),
                       Expanded(
@@ -509,7 +509,7 @@ class BudgetDetailScreen extends StatelessWidget {
                       budget,
                       month,
                     );
-                    return _ManagementRow(
+                    return PkDetailRow(
                       label:
                           '${month.year}-${month.month.toString().padLeft(2, '0')}',
                       value:
@@ -704,38 +704,51 @@ class _BudgetEditorScreenState extends State<BudgetEditorScreen> {
                     }),
                   ),
                   const SizedBox(height: PkSpacing.x5),
-                  TextFormField(
+                  PkTextField(
                     key: const ValueKey('budget_name'),
                     controller: _name,
                     textCapitalization: TextCapitalization.words,
-                    decoration: InputDecoration(
-                      labelText: context.t.budgetName,
-                      hintText: context.t.eGGroceries,
-                    ),
                     validator: (value) => value == null || value.trim().isEmpty
                         ? context.t.nameThisBudget
                         : null,
+                    label: context.t.budgetName,
+                    hint: context.t.eGGroceries,
                   ),
                   if (_scope == BudgetScope.space) ...[
                     const SizedBox(height: PkSpacing.x4),
-                    DropdownButtonFormField<String>(
-                      initialValue: _spaceId,
-                      decoration: InputDecoration(
-                        labelText: context.t.spaceLabel,
-                      ),
-                      items: repo.spaces
-                          .where((item) => item.status == SpaceStatus.active)
-                          .map(
-                            (item) => DropdownMenuItem(
-                              value: item.id,
-                              child: Text('${item.name} · ${item.currency}'),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) => setState(() {
-                        _spaceId = value;
-                        _currency = repo.spaceById(value!)!.currency;
-                      }),
+                    PkSelectField(
+                      key: const ValueKey('budget_space'),
+                      label: context.t.spaceLabel,
+                      value: _spaceId == null
+                          ? null
+                          : '${repo.spaceById(_spaceId!)?.name} · $_currency',
+                      onTap: () async {
+                        final active = repo.spaces
+                            .where((item) => item.status == SpaceStatus.active)
+                            .toList();
+                        final chosen = await showPkOptionPicker<String>(
+                          context,
+                          title: context.t.spaceLabel,
+                          selected: _spaceId,
+                          options: [
+                            for (final item in active)
+                              PkOption(
+                                value: item.id,
+                                label: item.name,
+                                hint: item.currency,
+                                icon: PkIcons.named(item.icon),
+                                accent: PkPalette.categoryAt(item.colorIndex),
+                              ),
+                          ],
+                        );
+                        if (chosen == null) return;
+                        setState(() {
+                          _spaceId = chosen;
+                          // A Space budget is always kept in the Space's own
+                          // currency; picking one settles the other.
+                          _currency = repo.spaceById(chosen)!.currency;
+                        });
+                      },
                     ),
                   ],
                   const SizedBox(height: PkSpacing.x4),
@@ -817,16 +830,11 @@ class _BudgetEditorScreenState extends State<BudgetEditorScreen> {
                     ),
                   ],
                   const SizedBox(height: PkSpacing.x4),
-                  TextFormField(
-                    key: const ValueKey('budget_limit'),
+                  PkAmountField(
+                    fieldKey: const ValueKey('budget_limit'),
                     controller: _limit,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: context.t.x0Limit(_period.label),
-                      prefixText: '${_symbol(_currency)} ',
-                    ),
+                    currency: _currency,
+                    label: context.t.x0Limit(_period.label),
                     validator: (value) =>
                         (double.tryParse(value ?? '') ?? 0) <= 0
                         ? context.t.enterALimitGreaterThan
@@ -927,8 +935,6 @@ class _BudgetEditorScreenState extends State<BudgetEditorScreen> {
       ),
     );
   }
-
-  String _symbol(String code) => PockitoCurrencies.of(code).symbol;
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
@@ -1305,7 +1311,7 @@ class SubscriptionDetailScreen extends StatelessWidget {
                 children: [
                   PkIconTile(
                     icon: PkIcons.named(subscription.icon),
-                    color: PkPalette.categoryAt(category?.colorIndex ?? 2),
+                    accent: PkPalette.categoryAt(category?.colorIndex ?? 2),
                     size: 64,
                     iconSize: 30,
                   ),
@@ -1339,7 +1345,7 @@ class SubscriptionDetailScreen extends StatelessWidget {
               child: PkCard(
                 child: Column(
                   children: [
-                    _ManagementRow(
+                    PkDetailRow(
                       label: context.t.nextDue,
                       value: subscription.nextDueOn == null
                           ? context.t.notScheduled
@@ -1348,15 +1354,15 @@ class SubscriptionDetailScreen extends StatelessWidget {
                               context.t,
                             ),
                     ),
-                    _ManagementRow(
+                    PkDetailRow(
                       label: context.t.accountLabel,
                       value: account?.name ?? context.t.unknown,
                     ),
-                    _ManagementRow(
+                    PkDetailRow(
                       label: context.t.categoryLabel,
                       value: category?.name ?? context.t.uncategorised,
                     ),
-                    _ManagementRow(
+                    PkDetailRow(
                       label: context.t.started,
                       value: PkFormat.longDate(
                         subscription.startsOn,
@@ -1605,52 +1611,51 @@ class _SubscriptionEditorScreenState extends State<SubscriptionEditorScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(PkSpacing.screen),
                 children: [
-                  TextFormField(
+                  PkTextField(
                     key: const ValueKey('subscription_name'),
                     controller: _name,
                     autofocus: !editing,
                     textCapitalization: TextCapitalization.words,
-                    decoration: InputDecoration(
-                      labelText: context.t.name,
-                      hintText: context.t.eGSpotify,
-                    ),
                     validator: (value) => value == null || value.trim().isEmpty
                         ? context.t.nameThisSubscription
                         : null,
+                    label: context.t.name,
+                    hint: context.t.eGSpotify,
                   ),
                   const SizedBox(height: PkSpacing.x4),
-                  TextFormField(
-                    key: const ValueKey('subscription_amount'),
+                  PkAmountField(
+                    fieldKey: const ValueKey('subscription_amount'),
                     controller: _amount,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: context.t.amount,
-                      prefixText: '${PockitoCurrencies.of(_currency).symbol} ',
-                    ),
+                    currency: _currency,
+                    // C-6: the billing currency is right here rather than in a
+                    // separate field further down the form.
+                    onCurrencyTap: () async {
+                      final chosen = await showPkCurrencyPicker(
+                        context,
+                        repo: repo,
+                        selectedCode: _currency,
+                      );
+                      if (chosen != null) setState(() => _currency = chosen);
+                    },
                     validator: (value) =>
                         (double.tryParse(value ?? '') ?? 0) <= 0
                         ? context.t.enterAnAmount
                         : null,
                   ),
                   const SizedBox(height: PkSpacing.x4),
-                  DropdownButtonFormField<String>(
+                  PkSelectField(
                     key: const ValueKey('subscription_currency'),
-                    isExpanded: true,
-                    initialValue: _currency,
-                    decoration: InputDecoration(
-                      labelText: context.t.billingCurrency,
-                    ),
-                    items: PockitoCurrencies.all.values
-                        .map(
-                          (item) => DropdownMenuItem(
-                            value: item.code,
-                            child: Text('${item.code} · ${item.name}'),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) => setState(() => _currency = value!),
+                    label: context.t.billingCurrency,
+                    value:
+                        '$_currency · ${PockitoCurrencies.of(_currency).name}',
+                    onTap: () async {
+                      final chosen = await showPkCurrencyPicker(
+                        context,
+                        repo: repo,
+                        selectedCode: _currency,
+                      );
+                      if (chosen != null) setState(() => _currency = chosen);
+                    },
                   ),
                   const SizedBox(height: PkSpacing.x4),
                   // Section 6.11: rich entities get the shared picker, which
@@ -1666,7 +1671,7 @@ class _SubscriptionEditorScreenState extends State<SubscriptionEditorScreen> {
                       if (account == null) return null;
                       return PkIconTile(
                         icon: PkIcons.named(account.icon),
-                        color: PkPalette.categoryAt(account.colorIndex),
+                        accent: PkPalette.categoryAt(account.colorIndex),
                         size: PkSize.avatarCompact,
                       );
                     }(),
@@ -1691,7 +1696,7 @@ class _SubscriptionEditorScreenState extends State<SubscriptionEditorScreen> {
                       if (category == null) return null;
                       return PkIconTile(
                         icon: PkIcons.named(category.icon),
-                        color: PkPalette.categoryAt(category.colorIndex),
+                        accent: PkPalette.categoryAt(category.colorIndex),
                         size: PkSize.avatarCompact,
                       );
                     }(),
@@ -1707,17 +1712,14 @@ class _SubscriptionEditorScreenState extends State<SubscriptionEditorScreen> {
                   ),
                   const SizedBox(height: PkSpacing.x4),
                   PkCard(
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
+                    child: PkLedgerRow.management(
                       leading: const Icon(Icons.autorenew_rounded),
-                      title: Text(context.t.cadence),
-                      subtitle: Text(
-                        _frequency == 'MONTHLY'
-                            ? context.t.monthlyOnDay(_day)
-                            : _frequency.toLowerCase(),
-                      ),
-                      trailing: const Icon(Icons.chevron_right_rounded),
+                      title: context.t.cadence,
+                      subtitle: _frequency == 'MONTHLY'
+                          ? context.t.monthlyOnDay(_day)
+                          : _frequency.toLowerCase(),
                       onTap: _pickCadence,
+                      showChevron: true,
                     ),
                   ),
                   const SizedBox(height: PkSpacing.x8),
@@ -1889,10 +1891,10 @@ class CategoriesScreen extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: PkSpacing.x4),
-              TextField(
+              PkTextField(
                 controller: name,
                 autofocus: true,
-                decoration: InputDecoration(labelText: context.t.name),
+                label: context.t.name,
               ),
               const SizedBox(height: PkSpacing.x4),
               SegmentedButton<CategoryType>(
@@ -1916,14 +1918,14 @@ class CategoriesScreen extends StatelessWidget {
                 spacing: PkSpacing.x2,
                 runSpacing: PkSpacing.x2,
                 children: List.generate(
-                  PkPalette.category.length,
+                  PkPalette.categoryCount,
                   (index) => InkWell(
                     onTap: () => setModalState(() => color = index + 1),
                     child: Container(
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: PkPalette.category[index],
+                        color: PkPalette.categoryFillAt(index + 1),
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: color == index + 1
@@ -2223,7 +2225,7 @@ class _SubscriptionCard extends StatelessWidget {
       ].where((part) => part.isNotEmpty).join(', '),
       leading: PkIconTile(
         icon: PkIcons.named(subscription.icon),
-        color: PkPalette.categoryAt(
+        accent: PkPalette.categoryAt(
           repo.categoryById(subscription.categoryId)?.colorIndex ?? 2,
         ),
       ),
@@ -2265,6 +2267,16 @@ class _CadencePicker extends StatefulWidget {
 }
 
 class _CadencePickerState extends State<_CadencePicker> {
+  /// The wire value said in the reader's language. The values themselves stay
+  /// language-free because they are what the repository stores.
+  String _frequencyLabel(BuildContext context, String frequency) =>
+      switch (frequency) {
+        'DAILY' => context.t.cadenceDaily,
+        'WEEKLY' => context.t.cadenceWeekly,
+        'YEARLY' => context.t.cadenceYearly,
+        _ => context.t.cadenceMonthly,
+      };
+
   late String _frequency = widget.frequency;
   late int _day = widget.day;
   @override
@@ -2281,32 +2293,48 @@ class _CadencePickerState extends State<_CadencePicker> {
       children: [
         Text(context.t.cadence, style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: PkSpacing.x4),
-        DropdownButtonFormField<String>(
-          initialValue: _frequency,
-          decoration: InputDecoration(labelText: context.t.repeats),
-          items: const ['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY']
-              .map(
-                (item) => DropdownMenuItem(
-                  value: item,
-                  child: Text(item[0] + item.substring(1).toLowerCase()),
-                ),
-              )
-              .toList(),
-          onChanged: (value) => setState(() => _frequency = value!),
+        // The menu title-cased the wire value, so a Japanese reader chose
+        // between DAILY, WEEKLY, MONTHLY and YEARLY in English.
+        PkSelectField(
+          key: const ValueKey('cadence_frequency'),
+          label: context.t.repeats,
+          value: _frequencyLabel(context, _frequency),
+          onTap: () async {
+            final chosen = await showPkOptionPicker<String>(
+              context,
+              title: context.t.repeats,
+              selected: _frequency,
+              options: [
+                for (final item in const [
+                  'DAILY',
+                  'WEEKLY',
+                  'MONTHLY',
+                  'YEARLY',
+                ])
+                  PkOption(value: item, label: _frequencyLabel(context, item)),
+              ],
+            );
+            if (chosen != null) setState(() => _frequency = chosen);
+          },
         ),
         if (_frequency == 'MONTHLY') ...[
           const SizedBox(height: PkSpacing.x4),
-          DropdownButtonFormField<int>(
-            initialValue: _day,
-            decoration: InputDecoration(labelText: context.t.dayOfMonth),
-            items: List.generate(
-              28,
-              (index) => DropdownMenuItem(
-                value: index + 1,
-                child: Text('${index + 1}'),
-              ),
-            ),
-            onChanged: (value) => setState(() => _day = value!),
+          PkSelectField(
+            key: const ValueKey('cadence_day'),
+            label: context.t.dayOfMonth,
+            value: '$_day',
+            onTap: () async {
+              final chosen = await showPkOptionPicker<int>(
+                context,
+                title: context.t.dayOfMonth,
+                selected: _day,
+                options: [
+                  for (var day = 1; day <= 28; day++)
+                    PkOption(value: day, label: '$day'),
+                ],
+              );
+              if (chosen != null) setState(() => _day = chosen);
+            },
           ),
         ],
         const SizedBox(height: PkSpacing.x5),
@@ -2351,7 +2379,7 @@ class _CategoryGroup extends StatelessWidget {
                 semanticIdentifier: 'category_${category.id}',
                 leading: PkIconTile(
                   icon: PkIcons.named(category.icon),
-                  color: PkPalette.categoryAt(category.colorIndex),
+                  accent: PkPalette.categoryAt(category.colorIndex),
                   size: category.parentId == null
                       ? PkSize.iconTileDense
                       : PkSize.avatarCompact,
@@ -2385,57 +2413,45 @@ class _CategoryGroup extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ListTile(
+            PkLedgerRow.management(
               key: const ValueKey('category_edit'),
-              contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.edit_outlined),
-              title: Text(context.t.rename),
+              title: context.t.rename,
               onTap: () => Navigator.pop(context, 'edit'),
             ),
-            ListTile(
+            PkLedgerRow.management(
               key: const ValueKey('category_parent'),
-              contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.account_tree_outlined),
-              title: Text(
-                category.parentId == null
-                    ? context.t.nestUnderAnotherCategory
-                    : context.t.moveOutOfParent(
-                        repo.categoryById(category.parentId!)?.name ?? '',
-                      ),
-              ),
+              title: category.parentId == null
+                  ? context.t.nestUnderAnotherCategory
+                  : context.t.moveOutOfParent(
+                      repo.categoryById(category.parentId!)?.name ?? '',
+                    ),
               onTap: () => Navigator.pop(context, 'parent'),
             ),
-            ListTile(
+            PkLedgerRow.management(
               key: const ValueKey('category_hide'),
-              contentPadding: EdgeInsets.zero,
               leading: Icon(
                 category.hidden
                     ? Icons.visibility_outlined
                     : Icons.visibility_off_outlined,
               ),
-              title: Text(
-                category.hidden ? context.t.showAgain : context.t.hide,
-              ),
-              subtitle: Text(
-                category.hidden
-                    ? context.t.itReappearsInPickersAnd
-                    : context.t.itStaysOnEveryRecord,
-              ),
+              title: category.hidden ? context.t.showAgain : context.t.hide,
+              subtitle: category.hidden
+                  ? context.t.itReappearsInPickersAnd
+                  : context.t.itStaysOnEveryRecord,
               onTap: () => Navigator.pop(context, 'hide'),
             ),
             // Deleting is only offered where it is actually possible.
             if (!category.system)
-              ListTile(
+              PkLedgerRow.management(
                 key: const ValueKey('category_delete'),
-                contentPadding: EdgeInsets.zero,
                 leading: Icon(
                   Icons.delete_outline_rounded,
                   color: context.pk.danger,
                 ),
-                title: Text(
-                  context.t.delete,
-                  style: TextStyle(color: context.pk.danger),
-                ),
+                title: context.t.delete,
+                destructive: true,
                 onTap: () => Navigator.pop(context, 'delete'),
               ),
           ],
@@ -2500,7 +2516,13 @@ class _CategoryGroup extends StatelessWidget {
         context: context,
         builder: (context) => AlertDialog(
           title: Text(context.t.editCategory),
-          content: TextField(controller: controller, autofocus: true),
+          // An unlabelled field in a dialog announces as "text field" and
+          // nothing else, so the name it is asking for has to be said.
+          content: PkTextField(
+            controller: controller,
+            autofocus: true,
+            label: context.t.name,
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -2564,22 +2586,21 @@ class _CategoryGroup extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: PkSpacing.x4),
-              DropdownButtonFormField<String>(
-                initialValue: replacement,
-                decoration: InputDecoration(labelText: context.t.moveTo),
-                items: repo.categories
-                    .where(
-                      (item) =>
-                          item.type == category.type && item.id != category.id,
-                    )
-                    .map(
-                      (item) => DropdownMenuItem(
-                        value: item.id,
-                        child: Text(item.name),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (value) => setState(() => replacement = value!),
+              PkSelectField(
+                key: const ValueKey('category_replacement'),
+                label: context.t.moveTo,
+                value: repo.categoryById(replacement)?.name,
+                onTap: () async {
+                  final chosen = await showPkCategoryPicker(
+                    context,
+                    repo: repo,
+                    type: category.type,
+                    selectedId: replacement,
+                    title: context.t.moveTo,
+                  );
+                  if (chosen == null || chosen == category.id) return;
+                  setState(() => replacement = chosen);
+                },
               ),
               const SizedBox(height: PkSpacing.x5),
               FilledButton(
@@ -2598,36 +2619,4 @@ class _CategoryGroup extends StatelessWidget {
       await repo.reassignAndDeleteCategory(category.id, replacement);
     }
   }
-}
-
-class _ManagementRow extends StatelessWidget {
-  const _ManagementRow({required this.label, required this.value});
-  final String label;
-  final String value;
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: PkSpacing.x3),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: context.pk.textSecondary),
-          ),
-        ),
-        Flexible(
-          child: Text(
-            value,
-            textAlign: TextAlign.right,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-          ),
-        ),
-      ],
-    ),
-  );
 }

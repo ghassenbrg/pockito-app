@@ -35,7 +35,6 @@ class HomeScreen extends StatelessWidget {
     final recent = repo.transactions.take(5).toList();
     final actions = repo.actionItems();
     final debts = repo.debtEdges();
-    final trend = repo.spendSeries(viewModel.selectedMonth);
     final comparison = repo.spendingComparison(viewModel.selectedMonth);
     // Four is the number of categories that can be told apart by colour on
     // both surfaces; the rest fold into one neutral slice.
@@ -179,61 +178,6 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              // The actions that make sense from here, so the central add
-              // button is not the only way to start something. Below the hero:
-              // they are a shortcut, not the answer.
-              SliverPadding(
-                padding: EdgeInsetsDirectional.fromSTEB(
-                  context.gutter,
-                  PkSpacing.x3,
-                  context.gutter,
-                  0,
-                ),
-                sliver: SliverToBoxAdapter(
-                  child: PkQuickActions(
-                    actions: [
-                      PkQuickAction(
-                        id: 'scan',
-                        icon: Icons.document_scanner_outlined,
-                        label: context.t.quickScanReceipt,
-                        onTap: () => context.push('/add?scan=1'),
-                      ),
-                      if (spaces.isNotEmpty)
-                        PkQuickAction(
-                          id: 'shared',
-                          // Distinct from the Spaces navigation icon: this is
-                          // about splitting one expense, not about the
-                          // destination.
-                          icon: Icons.call_split_rounded,
-                          label: context.t.quickSharedExpense,
-                          onTap: () =>
-                              context.push('/add?space=${spaces.first.id}'),
-                        ),
-                      if (debts.isNotEmpty)
-                        PkQuickAction(
-                          id: 'settle',
-                          icon: Icons.handshake_outlined,
-                          label: context.t.quickSettleUp,
-                          onTap: () => context.push(
-                            '/spaces/${debts.first.spaceId}/settle',
-                          ),
-                        ),
-                      PkQuickAction(
-                        id: 'income',
-                        icon: Icons.south_west_rounded,
-                        label: context.t.quickRecordIncome,
-                        onTap: () => context.push('/add?type=income'),
-                      ),
-                      PkQuickAction(
-                        id: 'budget',
-                        icon: Icons.donut_large_rounded,
-                        label: context.t.quickNewBudget,
-                        onTap: () => context.push('/budgets/new'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
               // A new user lands on a page of zeroes with no idea which of
               // six things to do first. This names them in order and
               // disappears once they are done.
@@ -259,69 +203,142 @@ class HomeScreen extends StatelessWidget {
               // anything wider.
               _HomeSections(
                 sections: [
+                  // UI-020 §5, progressive disclosure. These four used to be
+                  // four section headers, four cards and two charts — roughly
+                  // 224 px of chrome before the first number, in the part of
+                  // the screen competing with the hero. They are now four
+                  // 56 px rows in one surface: the same height, four answers
+                  // instead of four headings, and four "See all" buttons that
+                  // no longer need to exist because the whole row is the way
+                  // in. "Who owes whom" and "Budgets" stay full below, because
+                  // those are the two a reader acts on rather than reads.
                   _HomeSection(
                     top: PkSpacing.section,
-                    header: PkSectionHeader(
-                      title: context.t.homeAccounts,
-                      actionLabel: context.t.homeSeeAll,
-                      onAction: () => context.go('/accounts'),
-                    ),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        if (constraints.maxWidth >= PkSize.compactWidth) {
-                          return GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                const SliverGridDelegateWithMaxCrossAxisExtent(
-                                  maxCrossAxisExtent: 230,
-                                  mainAxisExtent: 92,
-                                  crossAxisSpacing: PkSpacing.x3,
-                                  mainAxisSpacing: PkSpacing.x3,
-                                ),
-                            itemCount: accounts.length,
-                            itemBuilder: (context, index) => PkAccountTile(
-                              account: accounts[index],
-                              balanceMinor: repo.accountBalance(
-                                accounts[index],
-                              ),
-                              compact: true,
-                              onTap: () => context.push(
-                                '/accounts/${accounts[index].id}',
-                              ),
-                            ),
-                          );
-                        }
-                        // The strip's height is a design value at the default
-                        // scale; at 2.0x the same two lines simply need more room,
-                        // so it grows with the reader rather than clipping.
-                        return SizedBox(
-                          height:
-                              82 * MediaQuery.textScalerOf(context).scale(1),
-                          child: ListView.separated(
-                            clipBehavior: Clip.none,
-                            scrollDirection: Axis.horizontal,
-                            itemCount: accounts.length + 1,
-                            separatorBuilder: (_, _) =>
-                                const SizedBox(width: PkSpacing.x2),
-                            itemBuilder: (context, index) {
-                              if (index == accounts.length) {
-                                return _AddSmallCard(
-                                  onTap: () => context.push('/accounts/new'),
-                                );
-                              }
-                              final account = accounts[index];
-                              return PkAccountTile(
-                                account: account,
-                                balanceMinor: repo.accountBalance(account),
-                                compact: true,
-                                onTap: () =>
-                                    context.push('/accounts/${account.id}'),
-                              );
-                            },
+                    child: PkGroupedSurface(
+                      children: [
+                        PkLedgerRow.management(
+                          key: const ValueKey('home_accounts_row'),
+                          leading: const PkIconTile(
+                            icon: Icons.account_balance_wallet_outlined,
+                            accent: PkPalette.brand,
+                            size: PkSize.iconTileDense,
                           ),
-                        );
-                      },
+                          title: context.t.homeAccounts,
+                          subtitle: context.t.homeAccountsSummary(
+                            PkFormat.money(
+                              repo.netWorthMinor(
+                                repo.profile.reportingCurrency,
+                              ),
+                              repo.profile.reportingCurrency,
+                            ),
+                            accounts.length,
+                          ),
+                          showChevron: true,
+                          onTap: () => context.go('/accounts'),
+                        ),
+                        PkLedgerRow.management(
+                          key: const ValueKey('home_upcoming_row'),
+                          leading: const PkIconTile(
+                            icon: Icons.event_repeat_outlined,
+                            accent: PkPalette.brand,
+                            size: PkSize.iconTileDense,
+                          ),
+                          title: context.t.homeUpcoming,
+                          subtitle: upcoming.isEmpty
+                              ? context.t.homeUpcomingNone
+                              : context.t.homeUpcomingSummary(
+                                  PkFormat.money(
+                                    upcoming.fold<int>(
+                                      0,
+                                      (sum, item) => sum + item.amountMinor,
+                                    ),
+                                    upcoming.first.currency,
+                                  ),
+                                ),
+                          showChevron: true,
+                          onTap: () => context.push('/subscriptions'),
+                        ),
+                        PkLedgerRow.management(
+                          key: const ValueKey('home_trend_row'),
+                          leading: const PkIconTile(
+                            icon: Icons.show_chart_rounded,
+                            accent: PkPalette.brand,
+                            size: PkSize.iconTileDense,
+                          ),
+                          title: context.t.homeSpendingTrend,
+                          subtitle: pkComparisonReading(comparison, context.t),
+                          showChevron: true,
+                          onTap: () => context.push('/home/insights'),
+                        ),
+                        PkLedgerRow.management(
+                          key: const ValueKey('home_breakdown_row'),
+                          leading: const PkIconTile(
+                            icon: Icons.donut_small_rounded,
+                            accent: PkPalette.brand,
+                            size: PkSize.iconTileDense,
+                          ),
+                          title: context.t.homeWhereItWent,
+                          subtitle: breakdown.isEmpty
+                              ? context.t.homeNothingSpentYet
+                              : context.t.homeWhereItWentSummary(
+                                  PkFormat.money(
+                                    breakdown.first.valueMinor,
+                                    repo.profile.reportingCurrency,
+                                  ),
+                                  breakdown.first.label,
+                                ),
+                          showChevron: true,
+                          onTap: () => context.push('/home/insights'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // UI-020: the shortcuts sit *below* the first section of
+                  // real data rather than above it. They are a way to start
+                  // something, not an answer to anything, and at the top they
+                  // were 52 px between the reader and their own accounts.
+                  _HomeSection(
+                    child: PkQuickActions(
+                      actions: [
+                        PkQuickAction(
+                          id: 'scan',
+                          icon: Icons.document_scanner_outlined,
+                          label: context.t.quickScanReceipt,
+                          onTap: () => context.push('/add?scan=1'),
+                        ),
+                        if (spaces.isNotEmpty)
+                          PkQuickAction(
+                            id: 'shared',
+                            // Distinct from the Spaces navigation icon: this is
+                            // about splitting one expense, not about the
+                            // destination.
+                            icon: Icons.call_split_rounded,
+                            label: context.t.quickSharedExpense,
+                            onTap: () =>
+                                context.push('/add?space=${spaces.first.id}'),
+                          ),
+                        if (debts.isNotEmpty)
+                          PkQuickAction(
+                            id: 'settle',
+                            icon: Icons.handshake_outlined,
+                            label: context.t.quickSettleUp,
+                            onTap: () => context.push(
+                              '/spaces/${debts.first.spaceId}/settle',
+                            ),
+                          ),
+                        PkQuickAction(
+                          id: 'income',
+                          icon: Icons.south_west_rounded,
+                          label: context.t.quickRecordIncome,
+                          onTap: () => context.push('/add?type=income'),
+                        ),
+                        PkQuickAction(
+                          id: 'budget',
+                          icon: Icons.donut_large_rounded,
+                          label: context.t.quickNewBudget,
+                          onTap: () => context.push('/budgets/new'),
+                        ),
+                      ],
                     ),
                   ),
                   // The Spaces tab already leads with the same two totals, so
@@ -379,80 +396,6 @@ class HomeScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  _HomeSection(
-                    header: PkSectionHeader(
-                      title: context.t.homeUpcoming,
-                      actionLabel: context.t.homeSeeAll,
-                      onAction: () => context.push('/subscriptions'),
-                    ),
-                    child: PkGroupedSurface(
-                      children: [
-                        for (final subscription in upcoming.take(2))
-                          _SubscriptionRow(
-                            subscription: subscription,
-                            onTap: () => context.push(
-                              '/subscriptions/${subscription.id}',
-                            ),
-                            onPay: () =>
-                                _paySubscription(context, subscription),
-                          ),
-                      ],
-                    ),
-                  ),
-                  _HomeSection(
-                    header: PkSectionHeader(title: context.t.homeSpendingTrend),
-                    child: PkCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          PkSparkline(
-                            points: trend,
-                            currency: repo.profile.reportingCurrency,
-                          ),
-                          const SizedBox(height: PkSpacing.x2),
-                          PkComparisonLabel(comparison: comparison),
-                          PkChartDataTable(
-                            rows: [
-                              for (final point in trend)
-                                (point.label, point.valueMinor),
-                            ],
-                            currency: repo.profile.reportingCurrency,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  if (breakdown.isNotEmpty)
-                    _HomeSection(
-                      header: PkSectionHeader(
-                        title: context.t.homeWhereItWent,
-                        actionLabel: context.t.homeViewActivity,
-                        onAction: () => context.push('/activity'),
-                      ),
-                      child: PkCard(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            PkCategoryDonut(
-                              slices: breakdown,
-                              currency: repo.profile.reportingCurrency,
-                              totalMinor: breakdown.fold(
-                                0,
-                                (sum, slice) => sum + slice.valueMinor,
-                              ),
-                              onSliceTap: (slice) => context.push('/activity'),
-                            ),
-                            PkChartDataTable(
-                              rows: [
-                                for (final slice in breakdown)
-                                  (slice.label, slice.valueMinor),
-                              ],
-                              currency: repo.profile.reportingCurrency,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
                   // Section 7.1: Kito's reading of the month sits *below* the
                   // finance content it is commenting on, and stays compact
                   // unless the insight is urgent.
@@ -528,53 +471,6 @@ class HomeScreen extends StatelessWidget {
     );
     if (selected != null) viewModel.selectMonth(selected);
   }
-
-  Future<void> _paySubscription(
-    BuildContext context,
-    Subscription subscription,
-  ) async {
-    final viewModel = context.read<PockitoAppViewModel>();
-    final account = viewModel.repository.accountById(subscription.accountId);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.t.payX0(subscription.name)),
-        content: Text(
-          context.t.x0WillBeRecordedFromX1ThisIsLocalPrototypeDa(
-            PkFormat.money(subscription.amountMinor, subscription.currency),
-            account?.name ?? context.t.theSelectedAccount,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(context.t.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(context.t.recordPayment),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !context.mounted) return;
-    await viewModel.repository.recordSubscriptionPayment(
-      subscription.id,
-      accountId: subscription.accountId,
-      date: viewModel.repository.today,
-    );
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.t.markedAsPaid(subscription.name)),
-          action: SnackBarAction(
-            label: context.t.view,
-            onPressed: () => context.push('/activity'),
-          ),
-        ),
-      );
-    }
-  }
 }
 
 /// Brand row at the very top of Home: the lockup, then the three actions.
@@ -584,14 +480,26 @@ class _HomeBrandHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final repo = context.watch<PockitoAppViewModel>().repository;
-    return SliverPadding(
-      padding: const EdgeInsetsDirectional.fromSTEB(
-        PkSpacing.screen,
-        PkSpacing.x4,
-        PkSpacing.screen,
-        0,
-      ),
-      sliver: SliverToBoxAdapter(
+    // UI-020 §5: the wordmark and its three actions used to hold 76 px of
+    // permanent height at the very top of a screen whose whole problem was
+    // that the reader's own money started below the fold. Floating costs
+    // nothing — the header is there on arrival, leaves as the reader scrolls
+    // into the ledger, and snaps back on any upward flick, which is where a
+    // reader reaches for search or notifications anyway.
+    return SliverAppBar(
+      floating: true,
+      snap: true,
+      automaticallyImplyLeading: false,
+      backgroundColor: context.pk.page,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      toolbarHeight: PkSize.touch + PkSpacing.x3,
+      titleSpacing: 0,
+      title: Padding(
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: PkSpacing.screen,
+        ),
         child: Row(
           children: [
             // The actions have a fixed footprint; the lockup takes what is
@@ -745,7 +653,10 @@ class _EmptySetupCard extends StatelessWidget {
     onTap: onTap,
     child: Row(
       children: [
-        PkIconTile(icon: icon, color: Theme.of(context).colorScheme.primary),
+        PkIconTile(
+          icon: icon,
+          accent: PkAccent.ink(Theme.of(context).colorScheme.primary),
+        ),
         const SizedBox(width: PkSpacing.x3),
         Expanded(
           child: Column(
@@ -814,8 +725,11 @@ class _HeroCard extends StatelessWidget {
       // Section 7.1 budgets this hero at 148–168. The label, the amount and the
       // month control share one row rather than stacking into three, which is
       // what buys the room for the comparison P0-12 requires without pushing
-      // the first data section below the fold.
-      padding: const EdgeInsets.all(PkSpacing.x4),
+      // the first data section below the fold. UI-020 brings the padding down
+      // one step as well: at 16 the panel measured 181, and the 13 px over
+      // budget were the difference between the account strip clearing the
+      // navigation and sitting under it.
+      padding: const EdgeInsets.all(PkSpacing.x3),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -882,8 +796,16 @@ class _HeroCard extends StatelessWidget {
                           horizontal: PkSpacing.x3,
                           vertical: 6,
                         ),
+                        // A white wash on the hero *lightens* the background
+                        // under a white label: at 14% the month control
+                        // measured 4.39:1, under the 4.5 a 12 px word needs.
+                        // Scrimming darker raises it to about 7:1, and the
+                        // hairline keeps the pill's edge readable.
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: .14),
+                          color: PkPalette.kitoNavy900.withValues(alpha: .22),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: .28),
+                          ),
                           borderRadius: BorderRadius.circular(PkRadius.full),
                         ),
                         child: Row(
@@ -913,9 +835,9 @@ class _HeroCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: PkSpacing.x2),
+          const SizedBox(height: PkSpacing.x1),
           Divider(height: 1, color: Colors.white.withValues(alpha: .16)),
-          const SizedBox(height: PkSpacing.x2),
+          const SizedBox(height: PkSpacing.x1),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1009,94 +931,15 @@ class _HeroMetric extends StatelessWidget {
       if (!context.isShort)
         Text(
           note,
-          maxLines: 2,
+          // One line, not two. Section 7.1 budgets this hero at 148–168 and a
+          // wrapping note was what took it to 199 — which is 31 px of prose
+          // charged against the first row of the reader's own money.
+          maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: context.pkText.supporting.copyWith(color: Colors.white),
         ),
     ],
   );
-}
-
-class _SubscriptionRow extends StatelessWidget {
-  const _SubscriptionRow({
-    required this.subscription,
-    required this.onTap,
-    required this.onPay,
-  });
-  final Subscription subscription;
-  final VoidCallback onTap;
-  final VoidCallback onPay;
-
-  @override
-  Widget build(BuildContext context) {
-    final repo = context.read<PockitoAppViewModel>().repository;
-    final days = subscription.nextDueOn?.difference(repo.today).inDays;
-    final due = days == null
-        ? context.t.noDueDate
-        : days < 0
-        ? context.t.overdueByX0DayX1(days.abs(), days.abs() == 1 ? '' : 's')
-        : days == 0
-        ? context.t.dueToday
-        : context.t.dueInDays(days);
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: PkSpacing.x4,
-          vertical: PkSpacing.x3,
-        ),
-        child: Row(
-          children: [
-            PkIconTile(
-              icon: Icons.autorenew_rounded,
-              color: PkPalette.indigo600,
-              size: 42,
-            ),
-            const SizedBox(width: PkSpacing.x3),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    subscription.name,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    '$due · ${repo.accountById(subscription.accountId)?.name}',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                PkAmountText(
-                  amountMinor: subscription.amountMinor,
-                  currency: subscription.currency,
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                SizedBox(
-                  child: TextButton(
-                    onPressed: onPay,
-                    style: TextButton.styleFrom(
-                      minimumSize: const Size(PkSize.touch, PkSize.touch),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: PkSpacing.x2,
-                      ),
-                    ),
-                    child: Text(context.t.pay),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 /// One titled block of Home content.
@@ -1107,11 +950,14 @@ class _SubscriptionRow extends StatelessWidget {
 /// arrange them.
 class _HomeSection extends StatelessWidget {
   const _HomeSection({
-    required this.header,
     required this.child,
+    this.header,
     this.top = PkSpacing.section,
   });
-  final Widget header;
+
+  /// Null for a block that is a strip of controls rather than a named group —
+  /// a heading over five shortcut chips only repeats what the chips say.
+  final Widget? header;
   final Widget child;
   final double top;
 
@@ -1120,7 +966,7 @@ class _HomeSection extends StatelessWidget {
     padding: EdgeInsetsDirectional.only(top: top),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [header, child],
+      children: [?header, child],
     ),
   );
 }
@@ -1179,32 +1025,6 @@ class _HomeSections extends StatelessWidget {
   }
 }
 
-class _AddSmallCard extends StatelessWidget {
-  const _AddSmallCard({required this.onTap});
-  final VoidCallback onTap;
-  @override
-  Widget build(BuildContext context) => SizedBox(
-    width: 76,
-    child: PkCard(
-      onTap: onTap,
-      padding: const EdgeInsets.all(PkSpacing.x3),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.add_rounded, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(height: 3),
-          Text(
-            context.t.add,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
 class _MonthPicker extends StatelessWidget {
   const _MonthPicker({required this.selected});
   final DateTime selected;
@@ -1236,8 +1056,8 @@ class _MonthPicker extends StatelessWidget {
             ],
           ),
           ...months.map(
-            (month) => ListTile(
-              title: Text(DateFormat('MMMM yyyy').format(month)),
+            (month) => PkLedgerRow.management(
+              title: DateFormat('MMMM yyyy').format(month),
               trailing:
                   month.year == selected.year && month.month == selected.month
                   ? Icon(
@@ -1346,36 +1166,39 @@ class _ActionRequiredBlock extends StatelessWidget {
               ],
             ),
           ),
-          // Two rows is enough to say "something needs you" without pushing
-          // net worth off a small phone's first screen.
-          for (final item in items.take(2))
-            ListTile(
-              key: ValueKey('action_${item.id}'),
-              dense: true,
-              leading: Icon(switch (item.kind) {
-                ActionItemKind.invitation => Icons.mail_outline_rounded,
-                ActionItemKind.settlementProposal => Icons.handshake_outlined,
-                ActionItemKind.draftRecord => Icons.edit_note_rounded,
-                ActionItemKind.budgetBreach => Icons.donut_large_rounded,
-                ActionItemKind.aiApproval => Icons.auto_awesome_outlined,
-                ActionItemKind.subscriptionDue => Icons.autorenew_rounded,
-              }, color: context.pk.sharedStrong),
-              title: Text(
-                item.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              subtitle: Text(
-                item.amountMinor == null || item.currency == null
+          // One row, and a count for the rest. The block's job is to say
+          // "something needs you" and name the most pressing one; listing two
+          // cost 56 px of the viewport the data itself needs.
+          // These are the things waiting on the reader, so they get the row
+          // system's full target rather than a `dense` tile that shrank it.
+          for (final item in items.take(1))
+            Builder(
+              builder: (context) {
+                final detail = item.amountMinor == null || item.currency == null
                     ? item.detail
-                    : '${PkFormat.money(item.amountMinor!, item.currency!)} ${item.detail}',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => context.push(item.destination),
+                    : '${PkFormat.money(item.amountMinor!, item.currency!)} '
+                          '${item.detail}';
+                return PkLedgerRow.management(
+                  key: ValueKey('action_${item.id}'),
+                  semanticIdentifier: 'action_${item.id}',
+                  semanticLabel: '${item.title}, $detail',
+                  leading: Icon(switch (item.kind) {
+                    ActionItemKind.invitation => Icons.mail_outline_rounded,
+                    ActionItemKind.settlementProposal =>
+                      Icons.handshake_outlined,
+                    ActionItemKind.draftRecord => Icons.edit_note_rounded,
+                    ActionItemKind.budgetBreach => Icons.donut_large_rounded,
+                    ActionItemKind.aiApproval => Icons.auto_awesome_outlined,
+                    ActionItemKind.subscriptionDue => Icons.autorenew_rounded,
+                  }, color: context.pk.sharedStrong),
+                  title: item.title,
+                  subtitle: detail,
+                  showChevron: true,
+                  onTap: () => context.push(item.destination),
+                );
+              },
             ),
-          if (items.length > 2)
+          if (items.length > 1)
             Padding(
               padding: const EdgeInsetsDirectional.fromSTEB(
                 PkSpacing.x4,
@@ -1384,7 +1207,7 @@ class _ActionRequiredBlock extends StatelessWidget {
                 PkSpacing.x2,
               ),
               child: Text(
-                context.t.homeAndMore(items.length - 2),
+                context.t.homeAndMore(items.length - 1),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
@@ -1406,19 +1229,14 @@ class _DebtRow extends StatelessWidget {
     final iOwe = edge.fromUserId == repo.currentUserId;
     final other = repo.userById(iOwe ? edge.toUserId : edge.fromUserId);
     final space = repo.spaceById(edge.spaceId);
-    return ListTile(
+    return PkLedgerRow.management(
       key: ValueKey('debt_${edge.spaceId}_${edge.fromUserId}_${edge.toUserId}'),
       leading: PkAvatar(label: other?.initials ?? '?'),
-      title: Text(
-        iOwe
-            ? context.t.homeYouOwe(other?.name ?? '')
-            : context.t.homeOwesYou(other?.name ?? ''),
-      ),
-      subtitle: Text(
-        '${space?.name ?? ''} · ${space?.type.labelIn(context.t) ?? ''}',
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
+      title: iOwe
+          ? context.t.homeYouOwe(other?.name ?? '')
+          : context.t.homeOwesYou(other?.name ?? ''),
+      subtitle:
+          '${space?.name ?? ''} · ${space?.type.labelIn(context.t) ?? ''}',
       trailing: PkAmountText(
         amountMinor: edge.amountMinor,
         currency: edge.currency,
@@ -1556,6 +1374,117 @@ class _FinancialHealthPanel extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// The two charts that used to sit on Home, one tap away.
+///
+/// UI-020 §5: the spending trend and the category breakdown each cost Home a
+/// section header, a card and a chart in the first viewport — roughly a
+/// quarter of the screen spent on two things a reader consults occasionally
+/// and reads once. Collapsing them into rows only works if the rows lead
+/// somewhere, so this is where they lead. Nothing was dropped: both charts,
+/// both comparison labels and both accessible data tables are here in full.
+class HomeInsightsScreen extends StatelessWidget {
+  const HomeInsightsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final viewModel = context.watch<PockitoAppViewModel>();
+    final repo = viewModel.repository;
+    final reporting = repo.profile.reportingCurrency;
+    final trend = repo.spendSeries(viewModel.selectedMonth);
+    final comparison = repo.spendingComparison(viewModel.selectedMonth);
+    final breakdown = repo.categoryBreakdown(
+      viewModel.selectedMonth,
+      limit: PkChartPalette.maxSeries,
+    );
+    return Scaffold(
+      appBar: PkAppBar(title: Text(context.t.homeInsights)),
+      body: PkPage(
+        bottomPadding: PkSpacing.x8,
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              PkSpacing.screen,
+              PkSpacing.x3,
+              PkSpacing.screen,
+              PkSpacing.headerToContent,
+            ),
+            sliver: SliverToBoxAdapter(
+              child: PkSectionHeader(title: context.t.homeSpendingTrend),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: PkSpacing.screen),
+            sliver: SliverToBoxAdapter(
+              child: PkCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    PkSparkline(points: trend, currency: reporting),
+                    const SizedBox(height: PkSpacing.x2),
+                    PkComparisonLabel(comparison: comparison),
+                    PkChartDataTable(
+                      rows: [
+                        for (final point in trend)
+                          (point.label, point.valueMinor),
+                      ],
+                      currency: reporting,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          if (breakdown.isNotEmpty) ...[
+            SliverPadding(
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                PkSpacing.screen,
+                PkSpacing.section,
+                PkSpacing.screen,
+                PkSpacing.headerToContent,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: PkSectionHeader(
+                  title: context.t.homeWhereItWent,
+                  actionLabel: context.t.homeViewActivity,
+                  onAction: () => context.push('/activity'),
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: PkSpacing.screen),
+              sliver: SliverToBoxAdapter(
+                child: PkCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      PkCategoryDonut(
+                        slices: breakdown,
+                        currency: reporting,
+                        totalMinor: breakdown.fold(
+                          0,
+                          (sum, slice) => sum + slice.valueMinor,
+                        ),
+                        onSliceTap: (slice) => context.push('/activity'),
+                      ),
+                      PkChartDataTable(
+                        rows: [
+                          for (final slice in breakdown)
+                            (slice.label, slice.valueMinor),
+                        ],
+                        currency: reporting,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

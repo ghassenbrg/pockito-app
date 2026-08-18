@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pockito/l10n/app_localizations.dart';
 import 'package:pockito/app/pockito_app_view_model.dart';
 import 'package:pockito/data/repositories/mock_pockito_repository.dart';
 import 'package:pockito/main.dart';
@@ -145,8 +146,11 @@ void main() {
     expect(plan.length, lessThanOrEqualTo(space.members.length));
   });
 
-  test('search across everything stays bounded', () {
-    final hits = PockitoAppViewModel(repository: repository).search('sample');
+  test('search across everything stays bounded', () async {
+    final strings = await PkStrings.delegate.load(const Locale('en'));
+    final hits = PockitoAppViewModel(
+      repository: repository,
+    ).search('sample', strings);
     // A query matching hundreds of rows returns a readable page, not all of
     // them.
     expect(hits.length, lessThanOrEqualTo(40));

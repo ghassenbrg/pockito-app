@@ -63,6 +63,33 @@ void main() {
     }
   });
 
+  group('right to left', () {
+    // P2-13. The accessibility suite already proves nothing *clips* in RTL;
+    // that is a weaker claim than it sounds, because a row that anchors its
+    // amount to the left instead of the trailing edge clips nowhere and is
+    // still wrong. These are the surfaces where the mirroring actually has to
+    // be right — a ledger, a summary, a form and a settings list — captured so
+    // a regression is visible rather than merely non-fatal.
+    const mirrored = ['home', 'accounts', 'activity', 'more'];
+
+    testWidgets('the surfaces where mirroring matters', (tester) async {
+      for (final id in mirrored) {
+        final surface = pkSurfaceManifest.firstWhere(
+          (item) => item.id == id,
+          orElse: () => throw StateError('No surface named $id'),
+        );
+        await pumpSurface(
+          tester,
+          route: surface.route,
+          viewport: phone,
+          direction: TextDirection.rtl,
+        );
+        while (tester.takeException() != null) {}
+        await expectGolden(tester, '${surface.id}.rtl');
+      }
+    });
+  });
+
   group('declared states', () {
     testWidgets('Home across its states', (tester) async {
       for (final state in const [
@@ -171,7 +198,7 @@ void main() {
                   density: density,
                   leading: const PkIconTile(
                     icon: Icons.savings_outlined,
-                    color: PkPalette.kitoBlue600,
+                    accent: PkAccent.ink(PkPalette.kitoBlue600),
                   ),
                   title: density.name,
                   subtitle: 'Bank · EUR',
@@ -202,7 +229,7 @@ void main() {
               PkLedgerRow(
                 leading: const PkIconTile(
                   icon: Icons.savings_outlined,
-                  color: PkPalette.kitoBlue600,
+                  accent: PkAccent.ink(PkPalette.kitoBlue600),
                 ),
                 title: 'Revolut',
                 subtitle: 'Bank · EUR',
@@ -217,6 +244,97 @@ void main() {
           ),
         );
         await expectGolden(tester, 'component.rows.scale-$scale');
+      }
+    });
+
+    testWidgets('the split editor at 1.0x and 2.0x', (tester) async {
+      // UI-021's exit gate. The split editor is the one surface where a
+      // shared number is *decided* rather than reported, and it stacks the
+      // most pieces: a proportional bar, a legend that has to name every
+      // segment without relying on its colour, and the consequence statement
+      // underneath. 2.0x is where a bar with four segments and a legend with
+      // four names either holds its shape or does not.
+      for (final scale in const [1.0, 2.0]) {
+        final segments = [
+          for (final (index, entry) in const [
+            ('you', 'You', 4900),
+            ('mira', 'Mira', 2450),
+            ('fran', 'Fran', 1650),
+          ].indexed)
+            PkSplitSegment(
+              id: entry.$1,
+              label: entry.$2,
+              amountMinor: entry.$3,
+              accent: PkPalette.categoryAt(index + 1),
+            ),
+        ];
+        await pumpComponent(
+          tester,
+          textScale: scale,
+          size: Size(390, scale > 1 ? 960 : 340),
+          // The real editor is inside a scroll view, and at 2.0x it has to
+          // be: the bar, three legend rows and the consequence statement do
+          // not fit a phone at that scale and are not supposed to. What the
+          // baseline locks is that each piece keeps its shape, not that the
+          // whole thing fits.
+          SingleChildScrollView(
+            child: PkCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  PkSplitBar(segments: segments, currency: 'EUR'),
+                  const SizedBox(height: PkSpacing.x3),
+                  // The legend as the editor composes it: an avatar carrying
+                  // the segment's own dot, the name in words, and the amount.
+                  // Colour is never the only thing telling two shares apart.
+                  for (final segment in segments)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: PkSpacing.x2),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: PkSize.avatarCompact,
+                            height: PkSize.avatarCompact,
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                PkAvatar(
+                                  label: segment.label.substring(0, 1),
+                                  size: PkSize.avatarCompact,
+                                ),
+                                PositionedDirectional(
+                                  end: -2,
+                                  bottom: -2,
+                                  child: PkSplitLegendDot(
+                                    accent: segment.accent,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: PkSpacing.x3),
+                          Expanded(child: Text(segment.label)),
+                          PkAmountText(
+                            amountMinor: segment.amountMinor,
+                            currency: 'EUR',
+                          ),
+                        ],
+                      ),
+                    ),
+                  const SizedBox(height: PkSpacing.x4),
+                  const PkBalanceImpact(
+                    counterpartyName: 'Mira',
+                    previousMinor: 1200,
+                    deltaMinor: 2450,
+                    currency: 'EUR',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+        await expectGolden(tester, 'component.split-editor.scale-$scale');
       }
     });
 

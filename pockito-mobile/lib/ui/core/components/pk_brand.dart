@@ -194,6 +194,19 @@ class PkWelcomeBanner extends StatelessWidget {
             // the top by default.
             alignment: AlignmentDirectional.centerStart,
             children: [
+              // The greeting is inked in navy because the artwork behind it is
+              // a pale field. That ink is only safe if the pale field is
+              // guaranteed — an image that has not decoded yet, or fails to,
+              // would otherwise leave navy text on whatever the page is, which
+              // in dark mode is navy. The backdrop is the artwork's own
+              // colour, so nothing changes once the image paints over it.
+              // pk-exempt: this is not a themed surface. It is the artwork's
+              // own pale field, standing in for the image until it paints, and
+              // it must stay light in both themes because the ink on it is
+              // fixed navy to match the illustration.
+              const Positioned.fill(
+                child: ColoredBox(color: PkPalette.kitoBlue50),
+              ),
               Positioned.fill(
                 child: Image.asset(
                   PkBrandAssets.welcomeHeader,

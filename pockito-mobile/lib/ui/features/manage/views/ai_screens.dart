@@ -392,9 +392,11 @@ class ConnectAiScreen extends StatelessWidget {
                                 ),
                                 if (app.$2) ...[
                                   const SizedBox(width: 5),
-                                  const Icon(
+                                  Icon(
                                     Icons.verified_rounded,
-                                    color: PkPalette.indigo600,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                     size: 17,
                                   ),
                                 ],
@@ -481,9 +483,9 @@ class _AiAuthorizationScreenState extends State<AiAuthorizationScreen> {
                             ),
                             if (widget.verified) ...[
                               const SizedBox(width: 6),
-                              const Icon(
+                              Icon(
                                 Icons.verified_rounded,
-                                color: PkPalette.indigo600,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                             ],
                           ],
@@ -688,9 +690,9 @@ class AiConnectionDetailScreen extends StatelessWidget {
                       ),
                       if (connection.verified) ...[
                         const SizedBox(width: 5),
-                        const Icon(
+                        Icon(
                           Icons.verified_rounded,
-                          color: PkPalette.indigo600,
+                          color: Theme.of(context).colorScheme.primary,
                           size: 18,
                         ),
                       ],
@@ -703,19 +705,19 @@ class AiConnectionDetailScreen extends StatelessWidget {
             PkCard(
               child: Column(
                 children: [
-                  _InfoRow(
+                  PkDetailRow.compact(
                     label: context.t.connected,
                     value: PkFormat.longDate(connection.createdAt, context.t),
                   ),
-                  _InfoRow(
+                  PkDetailRow.compact(
                     label: context.t.lastUsed,
                     value: PkFormat.longDate(connection.lastUsedAt, context.t),
                   ),
-                  _InfoRow(
+                  PkDetailRow.compact(
                     label: context.t.reads,
                     value: '${connection.readCount}',
                   ),
-                  _InfoRow(
+                  PkDetailRow.compact(
                     label: context.t.writes,
                     value: '${connection.writeCount}',
                   ),
@@ -733,12 +735,12 @@ class AiConnectionDetailScreen extends StatelessWidget {
               child: Column(
                 children: connection.scopes
                     .map(
-                      (scope) => ListTile(
-                        leading: const Icon(
+                      (scope) => PkLedgerRow.management(
+                        leading: Icon(
                           Icons.check_circle_outline_rounded,
-                          color: PkPalette.indigo600,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
-                        title: Text(scope),
+                        title: scope,
                       ),
                     )
                     .toList(),
@@ -866,8 +868,8 @@ class AiActivityScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 if (index == attributed.length) {
                   return PkCard(
-                    color: PkPalette.rose50,
-                    borderColor: PkPalette.rose400.withValues(alpha: .3),
+                    color: pkStatusSurface(context, PkStatusTone.danger),
+                    borderColor: pkStatusBorder(context, PkStatusTone.danger),
                     child: Row(
                       children: [
                         Icon(Icons.block_rounded, color: context.pk.danger),
@@ -1011,22 +1013,25 @@ class _ApprovalCard extends StatelessWidget {
             borderColor: context.pk.sharedBorder,
             child: Column(
               children: [
-                _InfoRow(label: context.t.spaceLabel, value: space.name),
-                _InfoRow(
+                PkDetailRow.compact(
+                  label: context.t.spaceLabel,
+                  value: space.name,
+                ),
+                PkDetailRow.compact(
                   label: context.t.from,
                   value: repo.userById(approval.fromUserId)?.name ?? 'Member',
                 ),
-                _InfoRow(
+                PkDetailRow.compact(
                   label: context.t.to,
                   value: repo.userById(approval.toUserId)?.isYou == true
                       ? context.t.you
                       : repo.userById(approval.toUserId)?.name ?? 'Member',
                 ),
-                _InfoRow(
+                PkDetailRow.compact(
                   label: context.t.amount,
                   value: PkFormat.money(approval.amountMinor, space.currency),
                 ),
-                _InfoRow(
+                PkDetailRow.compact(
                   label: context.t.recordedOn,
                   value:
                       repo.accountById(approval.accountId)?.name ?? 'Account',
@@ -1116,29 +1121,4 @@ class _AiMark extends StatelessWidget {
       ),
     );
   }
-}
-
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.label, required this.value});
-  final String label;
-  final String value;
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: PkSpacing.x2),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Text(label, style: Theme.of(context).textTheme.bodySmall),
-        ),
-        Flexible(
-          child: Text(
-            value,
-            textAlign: TextAlign.right,
-            style: Theme.of(context).textTheme.labelMedium,
-          ),
-        ),
-      ],
-    ),
-  );
 }

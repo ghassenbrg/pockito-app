@@ -286,24 +286,31 @@ class PkAvatar extends StatelessWidget {
   final Color? color;
 
   @override
-  Widget build(BuildContext context) => Container(
-    width: size,
-    height: size,
-    alignment: Alignment.center,
-    decoration: BoxDecoration(
-      color: color ?? PkPalette.indigo50,
-      shape: BoxShape.circle,
-      border: Border.all(
-        color: (color ?? PkPalette.indigo600).withValues(alpha: .18),
+  Widget build(BuildContext context) {
+    // The default fill used to be `indigo50` whatever the theme, which put a
+    // pale disc in the middle of a dark row. It follows the theme now, and the
+    // initials follow the fill.
+    final scheme = Theme.of(context).colorScheme;
+    final fill = color ?? pkStatusSurface(context, PkStatusTone.info);
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: fill,
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: (color ?? scheme.primary).withValues(alpha: .28),
+        ),
       ),
-    ),
-    child: Text(
-      label,
-      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-        color: color == null ? PkPalette.indigo700 : Colors.white,
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: color == null ? scheme.primary : Colors.white,
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 /// The coloured square that identifies an account, category or Space.
@@ -315,37 +322,95 @@ class PkIconTile extends StatelessWidget {
   const PkIconTile({
     super.key,
     required this.icon,
-    required this.color,
+    required this.accent,
     this.size = PkSize.iconTileDense,
     this.iconSize,
+    this.provenance,
+    this.provenanceIcon,
   });
 
   /// The larger treatment, for a card rather than a ledger row.
-  const PkIconTile.feature({super.key, required this.icon, required this.color})
-    : size = PkSize.iconTileFeature,
-      iconSize = 22;
+  const PkIconTile.feature({
+    super.key,
+    required this.icon,
+    required this.accent,
+    this.provenance,
+    this.provenanceIcon,
+  }) : size = PkSize.iconTileFeature,
+       iconSize = 22;
 
   final IconData icon;
-  final Color color;
+
+  /// The colour in its three roles. A bare `Color` is deliberately not
+  /// accepted: the glyph and the wash have different contrast obligations and
+  /// passing one value for both is how six category colours ended up
+  /// illegible.
+  final PkAccent accent;
+
   final double size;
   final double? iconSize;
 
+  /// A corner mark saying where this record came from — extracted by the
+  /// assistant, read off a receipt.
+  ///
+  /// P2-15. Provenance was previously only a badge beside the title, which
+  /// works in a row and has nowhere to go on a tile. The tone carries the
+  /// meaning and the glyph repeats it, so it is never colour alone.
+  final PkStatusTone? provenance;
+
+  /// The glyph inside [provenance]. Ignored when no provenance is set.
+  final IconData? provenanceIcon;
+
   @override
-  Widget build(BuildContext context) => Container(
-    width: size,
-    height: size,
-    alignment: Alignment.center,
-    decoration: BoxDecoration(
-      color: color.withValues(alpha: .12),
-      borderRadius: BorderRadius.circular(PkRadius.control),
-      border: Border.all(color: color.withValues(alpha: .12)),
-    ),
-    child: Icon(
-      icon,
-      color: color,
-      size: iconSize ?? (size >= PkSize.iconTileFeature ? 22 : PkSize.icon),
-    ),
-  );
+  Widget build(BuildContext context) {
+    final tile = Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: accent.wash(),
+        borderRadius: BorderRadius.circular(PkRadius.control),
+        border: Border.all(color: accent.wash()),
+      ),
+      child: Icon(
+        icon,
+        color: accent.ink(context),
+        size: iconSize ?? (size >= PkSize.iconTileFeature ? 22 : PkSize.icon),
+      ),
+    );
+    if (provenance == null) return tile;
+    final ink = pkStatusInk(context, provenance!);
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          tile,
+          PositionedDirectional(
+            end: -3,
+            bottom: -3,
+            child: Container(
+              width: 16,
+              height: 16,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: ink,
+                shape: BoxShape.circle,
+                // The ring is what keeps the mark readable over any tile.
+                border: Border.all(color: context.pk.surface, width: 1.5),
+              ),
+              child: Icon(
+                provenanceIcon ?? Icons.auto_awesome_rounded,
+                size: 9,
+                color: context.pk.surface,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// Whether balances are masked, and what the mask must not give away.
@@ -422,10 +487,24 @@ class PkProgressBar extends StatelessWidget {
     super.key,
     required this.value,
     this.color,
+    this.tone,
     this.height = 8,
-  });
+  }) : assert(
+         color == null || tone == null,
+         'Give a bar its tone, not a colour: the tone is what keeps it '
+         'agreeing with the badge beside it.',
+       );
   final double value;
+
+  /// A raw colour, for a bar that is not carrying a status — an account's
+  /// savings progress, a setup checklist.
   final Color? color;
+
+  /// What the bar is saying. Preferred: it resolves through the same grammar
+  /// the status badge uses, so health cannot be amber on the bar and red on
+  /// the badge.
+  final PkStatusTone? tone;
+
   final double height;
 
   @override
@@ -439,7 +518,11 @@ class PkProgressBar extends StatelessWidget {
         value: animated,
         minHeight: height,
         backgroundColor: context.pk.sunken,
-        color: color ?? Theme.of(context).colorScheme.primary,
+        color:
+            color ??
+            (tone == null
+                ? Theme.of(context).colorScheme.primary
+                : pkStatusInk(context, tone!)),
       ),
     ),
   );
@@ -506,26 +589,6 @@ class PkBalanceLabel extends StatelessWidget {
   }
 }
 
-class PkShareRule extends StatelessWidget {
-  const PkShareRule({super.key, required this.fraction, this.width = 64});
-  final double fraction;
-  final double width;
-
-  @override
-  Widget build(BuildContext context) => SizedBox(
-    width: width,
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(2),
-      child: LinearProgressIndicator(
-        value: fraction.clamp(.04, 1),
-        minHeight: 2,
-        backgroundColor: context.pk.borderSubtle,
-        color: context.pk.shared,
-      ),
-    ),
-  );
-}
-
 /// An account in a list.
 ///
 /// Section 6.7: the default rendering is a grouped row, not one card per
@@ -553,7 +616,7 @@ class PkAccountTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = PkPalette.categoryAt(account.colorIndex);
+    final accent = PkPalette.categoryAt(account.colorIndex);
     if (compact) {
       return PkCard(
         variant: PkCardVariant.dense,
@@ -589,7 +652,7 @@ class PkAccountTile extends StatelessWidget {
         typeLabel,
         if (account.isDefault) context.t.defaultLabel,
       ].join(', '),
-      leading: PkIconTile(icon: PkIcons.named(account.icon), color: color),
+      leading: PkIconTile(icon: PkIcons.named(account.icon), accent: accent),
       title: account.name,
       badges: [
         if (account.isDefault)
@@ -634,7 +697,7 @@ class PkSpaceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = PkPalette.categoryAt(space.colorIndex);
+    final accent = PkPalette.categoryAt(space.colorIndex);
     final subtitle =
         '${space.type.labelIn(context.t)} · ${space.currency} · '
         '${context.t.memberCountPlain(space.members.length)}';
@@ -646,7 +709,7 @@ class PkSpaceTile extends StatelessWidget {
         subtitle,
         PkBalanceLabel.announce(context, balanceMinor, space.currency),
       ].join(', '),
-      leading: PkIconTile(icon: PkIcons.named(space.icon), color: color),
+      leading: PkIconTile(icon: PkIcons.named(space.icon), accent: accent),
       title: space.name,
       subtitle: subtitle,
       trailing: PkBalanceLabel(
@@ -697,8 +760,8 @@ class PkTransactionTile extends StatelessWidget {
     final shared = transaction.splitId == null
         ? null
         : repository.sharedExpenseById(transaction.splitId!);
-    final color = category == null
-        ? PkPalette.slate500
+    final accent = category == null
+        ? PkPalette.neutral
         : PkPalette.categoryAt(category.colorIndex);
     final positive = transaction.type == MoneyEventType.income;
     final transfer =
@@ -747,7 +810,20 @@ class PkTransactionTile extends StatelessWidget {
         icon: PkIcons.named(
           category?.icon ?? (transfer ? 'wallet' : 'receipt'),
         ),
-        color: voided ? context.pk.textTertiary : color,
+        // A voided row drops its category colour along with its amount.
+        accent: voided ? PkAccent.ink(context.pk.textTertiary) : accent,
+        // P2-15: where the record came from, on the tile rather than as a
+        // fourth badge competing with the title. An assistant wrote it, or a
+        // receipt backs it — the two provenances a reader questions. Tone and
+        // glyph together, so it never depends on colour alone.
+        provenance: transaction.source == 'mcp'
+            ? PkStatusTone.ai
+            : transaction.attachments.isNotEmpty
+            ? PkStatusTone.neutral
+            : null,
+        provenanceIcon: transaction.source == 'mcp'
+            ? Icons.auto_awesome_rounded
+            : Icons.receipt_long_rounded,
       ),
       title: transaction.merchant,
       struckThrough: voided,
@@ -803,11 +879,13 @@ class PkBudgetTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isSpace = snapshot.budget.scope == BudgetScope.space;
-    final barColor = switch (snapshot.health) {
-      BudgetHealth.exceeded => context.pk.danger,
-      BudgetHealth.near => context.pk.shared,
-      BudgetHealth.healthy =>
-        isSpace ? context.pk.shared : Theme.of(context).colorScheme.primary,
+    // P1-8: health is a status, so it speaks the status grammar. The bar used
+    // to compute its own colour while the badge computed another, which is how
+    // "near the limit" ended up amber in one place and gold in the other.
+    final tone = switch (snapshot.health) {
+      BudgetHealth.exceeded => PkStatusTone.danger,
+      BudgetHealth.near => PkStatusTone.warning,
+      BudgetHealth.healthy => isSpace ? PkStatusTone.shared : PkStatusTone.info,
     };
     final remaining = snapshot.health == BudgetHealth.exceeded
         ? context.t.x0Over(
@@ -875,7 +953,7 @@ class PkBudgetTile extends StatelessWidget {
             value: '${(snapshot.progress * 100).round()}%',
             child: PkProgressBar(
               value: snapshot.progress,
-              color: barColor,
+              tone: tone,
               height: 6,
             ),
           ),

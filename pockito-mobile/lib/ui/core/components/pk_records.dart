@@ -502,7 +502,7 @@ class PkRelatedItems extends StatelessWidget {
                 children: [
                   PkIconTile(
                     icon: item.icon,
-                    color: Theme.of(context).colorScheme.primary,
+                    accent: PkAccent.ink(Theme.of(context).colorScheme.primary),
                     size: 36,
                     iconSize: 17,
                   ),
@@ -670,6 +670,382 @@ class PkFxDisclosure extends StatelessWidget {
   }
 }
 
+/// One thing that happened to a record.
+@immutable
+class PkTimelineEntry {
+  const PkTimelineEntry({
+    required this.title,
+    required this.detail,
+    this.tone = PkStatusTone.neutral,
+    this.done = true,
+  });
+
+  final String title;
+
+  /// When, and by whom. The two things a disagreement about a number turns on.
+  final String detail;
+
+  final PkStatusTone tone;
+
+  /// False for a step that is expected but has not happened — a settlement
+  /// waiting on the other person, an invite not yet accepted.
+  final bool done;
+}
+
+/// How a record got to where it is.
+///
+/// `PkRecordStatusBanner` says what state a record is *in*. This says how it
+/// arrived — created, edited, settled, voided — which is the question two
+/// people actually have when they disagree about a shared number. The Space
+/// activity log answers it for a whole Space; nothing answered it for one
+/// record.
+class PkRecordTimeline extends StatelessWidget {
+  const PkRecordTimeline({super.key, required this.entries});
+
+  final List<PkTimelineEntry> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    if (entries.isEmpty) return const SizedBox.shrink();
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final (index, entry) in entries.indexed)
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: PkSpacing.x6,
+                  child: Column(
+                    children: [
+                      _PkTimelineMarker(entry: entry),
+                      if (index < entries.length - 1)
+                        Expanded(
+                          child: Container(
+                            width: 2,
+                            color: context.pk.borderSubtle,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: PkSpacing.x3),
+                Expanded(
+                  child: Semantics(
+                    container: true,
+                    label: '${entry.title}, ${entry.detail}',
+                    excludeSemantics: true,
+                    child: Padding(
+                      padding: EdgeInsetsDirectional.only(
+                        bottom: index == entries.length - 1 ? 0 : PkSpacing.x4,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(entry.title, style: context.pkText.rowTitle),
+                          Text(entry.detail, style: context.pkText.supporting),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _PkTimelineMarker extends StatelessWidget {
+  const _PkTimelineMarker({required this.entry});
+
+  final PkTimelineEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = pkStatusInk(context, entry.tone);
+    if (!entry.done) {
+      // A hollow ring for something still expected: the rail should read as
+      // unfinished at a glance, not only in the words.
+      return Container(
+        width: PkSpacing.x5,
+        height: PkSpacing.x5,
+        margin: const EdgeInsets.only(top: 2),
+        decoration: BoxDecoration(
+          color: context.pk.surface,
+          shape: BoxShape.circle,
+          border: Border.all(color: context.pk.borderDefault, width: 2),
+        ),
+      );
+    }
+    return Container(
+      width: PkSpacing.x5,
+      height: PkSpacing.x5,
+      margin: const EdgeInsets.only(top: 2),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(color: ink, shape: BoxShape.circle),
+      child: Icon(
+        Icons.check_rounded,
+        size: PkSpacing.x3,
+        color: context.pk.surface,
+      ),
+    );
+  }
+}
+
+/// One person's slice of a shared expense.
+class PkSplitSegment {
+  const PkSplitSegment({
+    required this.id,
+    required this.label,
+    required this.amountMinor,
+    required this.accent,
+  });
+
+  final String id;
+  final String label;
+  final int amountMinor;
+  final PkAccent accent;
+}
+
+/// How a shared expense divides, as one bar.
+///
+/// `PkShareRule` — the 64 px, 2 px, unlabelled bar this replaces — could show
+/// one person's fraction and nothing else, on the one feature Pockito is built
+/// around. This shows every share at once, keyed by colour to the member rows
+/// beneath it, and says the same thing in words for a reader who cannot use
+/// the colours at all.
+class PkSplitBar extends StatelessWidget {
+  const PkSplitBar({
+    super.key,
+    required this.segments,
+    required this.currency,
+    this.height = 10,
+  });
+
+  final List<PkSplitSegment> segments;
+  final String currency;
+  final double height;
+
+  /// No slice is allowed to vanish. A 1% share still has to be findable, and
+  /// a hairline is not a share.
+  static const double _minSegment = 6;
+
+  int get _total =>
+      segments.fold(0, (sum, segment) => sum + segment.amountMinor);
+
+  /// The same division as a sentence, in the order the bar draws it.
+  String announce(BuildContext context) {
+    final total = _total;
+    return segments
+        .map(
+          (segment) => context.t.splitBarLabel(
+            segment.label,
+            total == 0 ? 0 : (segment.amountMinor / total * 100).round(),
+            PkFormat.money(segment.amountMinor, currency),
+          ),
+        )
+        .join(', ');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (segments.isEmpty) return const SizedBox.shrink();
+    final total = _total;
+    return Semantics(
+      container: true,
+      label: '${context.t.splitBarTitle}: ${announce(context)}',
+      excludeSemantics: true,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Widths are computed rather than flexed: `Expanded` cannot hold a
+          // floor, so a 1% slice would round away to nothing.
+          final available = constraints.maxWidth;
+          final raw = [
+            for (final segment in segments)
+              total == 0
+                  ? available / segments.length
+                  : available * segment.amountMinor / total,
+          ];
+          final widths = [
+            for (final value in raw) value.clamp(_minSegment, available),
+          ];
+          final overflow =
+              widths.fold(0.0, (sum, value) => sum + value) - available;
+          if (overflow > 0) {
+            // Take the excess back from whoever can most afford it.
+            final slack = [
+              for (final value in widths) (value - _minSegment).clamp(0, value),
+            ];
+            final slackTotal = slack.fold(0.0, (sum, value) => sum + value);
+            if (slackTotal > 0) {
+              for (var index = 0; index < widths.length; index++) {
+                widths[index] -= overflow * slack[index] / slackTotal;
+              }
+            }
+          }
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(PkRadius.full),
+            child: SizedBox(
+              height: height,
+              child: Row(
+                children: [
+                  for (var index = 0; index < segments.length; index++)
+                    SizedBox(
+                      key: ValueKey('split_segment_${segments[index].id}'),
+                      width: widths[index],
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: segments[index].accent.fill,
+                          // A hairline between slices so two similar hues do
+                          // not read as one.
+                          border: index == 0
+                              ? null
+                              : BorderDirectional(
+                                  start: BorderSide(color: context.pk.surface),
+                                ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// The colour key that ties a member row to its slice of [PkSplitBar].
+class PkSplitLegendDot extends StatelessWidget {
+  const PkSplitLegendDot({super.key, required this.accent, this.size = 10});
+
+  final PkAccent accent;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: size,
+    height: size,
+    decoration: BoxDecoration(
+      color: accent.fill,
+      shape: BoxShape.circle,
+      border: Border.all(color: context.pk.surface, width: 1.5),
+    ),
+  );
+}
+
+/// What saving this will do to the balance between two people.
+///
+/// The split preview answers "how does this divide". This answers the question
+/// the reader actually has at the moment they tap save: *what does this change
+/// between me and them*. Shared money is the one place in a finance app where
+/// a record alters a relationship, and stating that before the tap rather than
+/// after is the difference between a ledger and a thing people trust.
+class PkBalanceImpact extends StatelessWidget {
+  const PkBalanceImpact({
+    super.key,
+    required this.counterpartyName,
+    required this.previousMinor,
+    required this.deltaMinor,
+    required this.currency,
+  });
+
+  final String counterpartyName;
+
+  /// The balance before this record. Positive means they owe the reader.
+  final int previousMinor;
+
+  /// What this record adds to it, in the same direction.
+  final int deltaMinor;
+
+  final String currency;
+
+  int get _next => previousMinor + deltaMinor;
+
+  String _direction(BuildContext context) {
+    if (deltaMinor == 0) return context.t.balanceImpactNoChange;
+    return deltaMinor > 0
+        ? context.t.balanceImpactWillOwe(counterpartyName)
+        : context.t.balanceImpactYouWillOwe(counterpartyName);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final gaining = deltaMinor > 0;
+    final tone = deltaMinor == 0
+        ? context.pk.textSecondary
+        : gaining
+        ? context.pk.owed
+        : context.pk.owing;
+    final before = PkBalanceLabel.announce(context, previousMinor, currency);
+    final after = PkBalanceLabel.announce(context, _next, currency);
+    return Semantics(
+      container: true,
+      label: [
+        context.t.balanceImpactTitle,
+        _direction(context),
+        if (deltaMinor != 0) PkFormat.money(deltaMinor.abs(), currency),
+        '${context.t.balanceImpactWith(counterpartyName)}: $before → $after',
+      ].join(', '),
+      excludeSemantics: true,
+      child: PkCard(
+        variant: PkCardVariant.dense,
+        color: context.pk.sunken,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              context.t.balanceImpactTitle,
+              style: context.pkText.label.copyWith(
+                color: context.pk.textSecondary,
+              ),
+            ),
+            const SizedBox(height: PkSpacing.x2),
+            Row(
+              children: [
+                Icon(
+                  deltaMinor == 0
+                      ? Icons.remove_rounded
+                      : gaining
+                      ? Icons.north_east_rounded
+                      : Icons.south_west_rounded,
+                  size: PkSize.icon,
+                  color: tone,
+                ),
+                const SizedBox(width: PkSpacing.x2),
+                Expanded(
+                  child: Text(
+                    _direction(context),
+                    style: context.pkText.bodyStrong,
+                  ),
+                ),
+                if (deltaMinor != 0)
+                  PkAmountText(
+                    amountMinor: deltaMinor.abs(),
+                    currency: currency,
+                    color: tone,
+                  ),
+              ],
+            ),
+            const SizedBox(height: PkSpacing.x2),
+            Text(
+              '${context.t.balanceImpactWith(counterpartyName)}: '
+              '$before → $after',
+              style: context.pkText.supporting,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// The actions that make sense on the surface the user is already looking at.
 class PkQuickActions extends StatelessWidget {
   const PkQuickActions({super.key, required this.actions});
@@ -762,29 +1138,24 @@ class PkSetupChecklist extends StatelessWidget {
           const SizedBox(height: PkSpacing.x2),
           PkProgressBar(value: done / steps.length),
           const SizedBox(height: PkSpacing.x3),
+          // P1-9: `ListTile(dense: true)` shrank the step below the 48 px the
+          // rest of the app guarantees — the one place a screen escaped the
+          // row system. A done step keeps its target too: it is still a
+          // statement the reader can land on.
           for (final step in steps)
-            ListTile(
+            PkLedgerRow.management(
               key: ValueKey('setup_${step.id}'),
-              dense: true,
-              contentPadding: EdgeInsets.zero,
+              semanticIdentifier: 'setup_${step.id}',
               leading: Icon(
                 step.done
                     ? Icons.check_circle_rounded
                     : Icons.radio_button_unchecked_rounded,
                 color: step.done ? context.pk.success : context.pk.textTertiary,
               ),
-              title: Text(
-                step.label,
-                style: step.done
-                    ? TextStyle(
-                        decoration: TextDecoration.lineThrough,
-                        color: context.pk.textTertiary,
-                      )
-                    : null,
-              ),
-              trailing: step.done
-                  ? null
-                  : const Icon(Icons.chevron_right_rounded),
+              title: step.label,
+              struckThrough: step.done,
+              showChevron: !step.done,
+              enabled: !step.done,
               onTap: step.done ? null : step.onTap,
             ),
         ],

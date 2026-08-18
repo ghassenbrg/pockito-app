@@ -405,53 +405,98 @@ class _LegendRow extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    child: Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(
-        children: [
-          Container(
-            width: 10,
-            height: 10,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(3),
-            ),
-          ),
-          const SizedBox(width: PkSpacing.x2),
-          Expanded(
-            child: Text(
-              slice.label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              // Text stays in ink, never the series colour: the swatch beside
-              // it is what carries identity.
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ),
-          const SizedBox(width: PkSpacing.x2),
-          Text(
-            '${(share * 100).round()}%',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: context.pk.textSecondary,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-          ),
-          const SizedBox(width: PkSpacing.x2),
-          Text(
-            PkFormat.money(slice.valueMinor, currency),
-            maxLines: 1,
-            overflow: TextOverflow.fade,
-            softWrap: false,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-          ),
-        ],
+  Widget build(BuildContext context) {
+    final swatch = Container(
+      width: 10,
+      height: 10,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(3),
       ),
-    ),
-  );
+    );
+    final label = Text(
+      slice.label,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      // Text stays in ink, never the series colour: the swatch beside it is
+      // what carries identity.
+      style: Theme.of(context).textTheme.bodySmall,
+    );
+    final percent = Text(
+      '${(share * 100).round()}%',
+      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+        color: context.pk.textSecondary,
+        fontFeatures: const [FontFeature.tabularFigures()],
+      ),
+    );
+    final amount = Text(
+      PkFormat.money(slice.valueMinor, currency),
+      maxLines: 1,
+      overflow: TextOverflow.fade,
+      softWrap: false,
+      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+        fontFeatures: const [FontFeature.tabularFigures()],
+      ),
+    );
+    // Three fixed-width tokens on one line stop fitting before 1.3x: the
+    // label's `Expanded` shrinks to nothing and the row overflows anyway,
+    // because a percentage and an amount cannot be squeezed. Above that the
+    // numbers move under the name — the rule `PkLedgerRow` and `PkDetailRow`
+    // already follow — rather than one of them being dropped.
+    final stacked = MediaQuery.textScalerOf(context).scale(1) > 1.2;
+    final row = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: stacked
+          ? Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: PkSpacing.x1),
+                  child: swatch,
+                ),
+                const SizedBox(width: PkSpacing.x2),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      label,
+                      Row(
+                        children: [
+                          percent,
+                          const SizedBox(width: PkSpacing.x2),
+                          Flexible(child: amount),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            )
+          : Row(
+              children: [
+                swatch,
+                const SizedBox(width: PkSpacing.x2),
+                Expanded(child: label),
+                const SizedBox(width: PkSpacing.x2),
+                percent,
+                const SizedBox(width: PkSpacing.x2),
+                amount,
+              ],
+            ),
+    );
+    // A legend that only labels the ring may be as tight as it likes. One that
+    // *navigates* is a control, and a control is 48 — the rows were 24, which
+    // is how a chart legend became the smallest tap target in the app.
+    if (onTap == null) return row;
+    return InkWell(
+      onTap: onTap,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: PkSize.touch),
+        child: row,
+      ),
+    );
+  }
 }
 
 class _DonutPainter extends CustomPainter {
@@ -783,6 +828,20 @@ class _ArcPainter extends CustomPainter {
 ///
 /// A number with no baseline carries no judgement: €1,899 is only high or low
 /// against what last month was.
+/// How a period compares with the one before it, in words.
+///
+/// Extracted so a row that only has space for the sentence says exactly what
+/// the chart beside it would have said. Two phrasings of one comparison is how
+/// a summary and its detail start disagreeing.
+String pkComparisonReading(PeriodComparison comparison, PkStrings t) {
+  if (comparison.isFlat) return t.comparisonFlat(comparison.previousLabel);
+  final ratio = comparison.ratio;
+  final percent = ratio == null ? 100 : (ratio.abs() * 100).round();
+  return comparison.isUp
+      ? t.comparisonMore(percent, comparison.previousLabel)
+      : t.comparisonLess(percent, comparison.previousLabel);
+}
+
 class PkComparisonLabel extends StatelessWidget {
   const PkComparisonLabel({
     super.key,
@@ -813,24 +872,9 @@ class PkComparisonLabel extends StatelessWidget {
         : good!
         ? context.pk.success
         : context.pk.danger;
-    final ratio = comparison.ratio;
     // "About the same as July" is what a person says. A percentage that reads
     // 3% is noise dressed up as a finding.
-    final reading = flat
-        ? context.t.comparisonFlat(comparison.previousLabel)
-        : ratio == null
-        ? (up
-              ? context.t.comparisonMore(100, comparison.previousLabel)
-              : context.t.comparisonLess(100, comparison.previousLabel))
-        : (up
-              ? context.t.comparisonMore(
-                  (ratio.abs() * 100).round(),
-                  comparison.previousLabel,
-                )
-              : context.t.comparisonLess(
-                  (ratio.abs() * 100).round(),
-                  comparison.previousLabel,
-                ));
+    final reading = pkComparisonReading(comparison, context.t);
     return Semantics(
       label:
           '$reading. '

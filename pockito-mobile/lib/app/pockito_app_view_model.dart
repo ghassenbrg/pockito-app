@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../domain/models/financial_models.dart';
+import '../l10n/app_localizations.dart';
 import '../domain/repositories/pockito_repository.dart';
 
 enum PrototypeState { ready, loading, empty, error, offline }
@@ -392,17 +393,93 @@ class PockitoAppViewModel extends ChangeNotifier {
   bool get hasMoreActivity => filteredTransactions.length > _activityLimit;
 
   /// Everything matching [query], across every kind of record.
-  List<PkSearchHit> search(String query) {
+  /// Everything the reader can reach by name.
+  ///
+  /// C-7: the search used to match entity names and nothing else, so a reader
+  /// who typed "budget" — or 予算 — found a budget *called* that and could not
+  /// find the Budgets screen at all. Destinations are now hits too, matched
+  /// against synonyms the localisers own rather than a table of English words
+  /// buried in Dart.
+  /// The places a reader can be sent, with the words they might use to ask.
+  ///
+  /// (label, route, icon, synonyms). The synonyms come from the ARB bundles so
+  /// a translator can add "家計" without touching Dart.
+  List<(String, String, IconData, String)> _destinations(PkStrings t) => [
+    (t.navHome, '/home', Icons.home_rounded, t.searchTermsHome),
+    (
+      t.navAccounts,
+      '/accounts',
+      Icons.account_balance_wallet_outlined,
+      t.searchTermsAccounts,
+    ),
+    (t.navSpaces, '/spaces', Icons.group_outlined, t.searchTermsSpaces),
+    (
+      t.activityTitle,
+      '/activity',
+      Icons.receipt_long_outlined,
+      t.searchTermsActivity,
+    ),
+    (
+      t.homeBudgets,
+      '/budgets',
+      Icons.donut_large_rounded,
+      t.searchTermsBudgets,
+    ),
+    (
+      t.subscriptions,
+      '/subscriptions',
+      Icons.autorenew_rounded,
+      t.searchTermsSubscriptions,
+    ),
+    (
+      t.categories,
+      '/categories',
+      Icons.category_outlined,
+      t.searchTermsCategories,
+    ),
+    (
+      t.notifications,
+      '/notifications',
+      Icons.notifications_none_rounded,
+      t.searchTermsNotifications,
+    ),
+    (
+      t.preferences,
+      '/settings/preferences',
+      Icons.tune_rounded,
+      t.searchTermsSettings,
+    ),
+    (t.assistant, '/ai', Icons.auto_awesome_rounded, t.searchTermsAssistant),
+  ];
+
+  List<PkSearchHit> search(String query, PkStrings t) {
     final needle = query.toLowerCase().trim();
     if (needle.length < 2) return const [];
     final hits = <PkSearchHit>[];
+    for (final destination in _destinations(t)) {
+      final terms = destination.$4.toLowerCase().split(',');
+      final matched =
+          destination.$1.toLowerCase().contains(needle) ||
+          terms.any((term) => term.trim().contains(needle));
+      if (!matched) continue;
+      hits.add(
+        PkSearchHit(
+          id: 'go_${destination.$2}',
+          kind: t.searchKindDestination,
+          title: destination.$1,
+          subtitle: '',
+          route: destination.$2,
+          icon: destination.$3,
+        ),
+      );
+    }
     for (final account in repository.accounts.where(
       (item) => item.name.toLowerCase().contains(needle),
     )) {
       hits.add(
         PkSearchHit(
           id: account.id,
-          kind: 'Account',
+          kind: t.searchKindAccount,
           title: account.name,
           subtitle: '${account.type.name} · ${account.currency}',
           route: '/accounts/${account.id}',
@@ -419,7 +496,7 @@ class PockitoAppViewModel extends ChangeNotifier {
       hits.add(
         PkSearchHit(
           id: space.id,
-          kind: 'Space',
+          kind: t.searchKindSpace,
           title: space.name,
           subtitle: '${space.type.label} · ${space.members.length} members',
           route: '/spaces/${space.id}',
@@ -434,7 +511,7 @@ class PockitoAppViewModel extends ChangeNotifier {
       hits.add(
         PkSearchHit(
           id: category.id,
-          kind: 'Category',
+          kind: t.searchKindCategory,
           title: category.name,
           subtitle: category.parentId == null
               ? 'Top-level category'
@@ -451,7 +528,7 @@ class PockitoAppViewModel extends ChangeNotifier {
       hits.add(
         PkSearchHit(
           id: subscription.id,
-          kind: 'Recurring',
+          kind: t.searchKindRecurring,
           title: subscription.name,
           subtitle: subscription.kind == RecurringKind.subscription
               ? 'Subscription'
@@ -469,7 +546,7 @@ class PockitoAppViewModel extends ChangeNotifier {
       hits.add(
         PkSearchHit(
           id: budget.id,
-          kind: 'Budget',
+          kind: t.searchKindBudget,
           title: budget.name,
           subtitle: '${budget.period.label} budget',
           route: '/budgets/${budget.id}',
@@ -494,7 +571,7 @@ class PockitoAppViewModel extends ChangeNotifier {
       hits.add(
         PkSearchHit(
           id: transaction.id,
-          kind: 'Activity',
+          kind: t.searchKindActivity,
           title: transaction.merchant,
           subtitle: [
             category?.name,

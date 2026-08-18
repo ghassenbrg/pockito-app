@@ -4509,4 +4509,213 @@ class PkStringsJa extends PkStrings {
 
   @override
   String get privacyHideBalancesDetail => 'レイアウトを変えずに金額を伏せます。';
+
+  @override
+  String get done => '完了';
+
+  @override
+  String get selected => '選択中';
+
+  @override
+  String get addANote => 'メモを追加';
+
+  @override
+  String get member => 'メンバー';
+
+  @override
+  String get cadenceDaily => '毎日';
+
+  @override
+  String get cadenceWeekly => '毎週';
+
+  @override
+  String get cadenceMonthly => '毎月';
+
+  @override
+  String get cadenceYearly => '毎年';
+
+  @override
+  String get countryJapan => '日本';
+
+  @override
+  String get countryGermany => 'ドイツ';
+
+  @override
+  String get countryLuxembourg => 'ルクセンブルク';
+
+  @override
+  String get countryTunisia => 'チュニジア';
+
+  @override
+  String get countryUnitedKingdom => 'イギリス';
+
+  @override
+  String get countryUnitedStates => 'アメリカ';
+
+  @override
+  String get balanceImpactTitle => 'この記録で変わること';
+
+  @override
+  String balanceImpactWillOwe(String name) {
+    return '$nameさんがあなたに借りることになります';
+  }
+
+  @override
+  String balanceImpactYouWillOwe(String name) {
+    return 'あなたが$nameさんに借りることになります';
+  }
+
+  @override
+  String get balanceImpactNoChange => '二人の貸し借りは変わりません';
+
+  @override
+  String balanceImpactWith(String name) {
+    return '$nameさんとの残高';
+  }
+
+  @override
+  String splitBarLabel(String name, int percent, String amount) {
+    return '$name、$percent%（$amount）';
+  }
+
+  @override
+  String get splitBarTitle => '分担の内訳';
+
+  @override
+  String get iconGroupMoney => 'お金';
+
+  @override
+  String get iconGroupFood => '食事';
+
+  @override
+  String get iconGroupHome => '住まい・請求';
+
+  @override
+  String get iconGroupTransport => '移動';
+
+  @override
+  String get iconGroupTravel => '旅行';
+
+  @override
+  String get iconGroupHealth => '健康';
+
+  @override
+  String get iconGroupLeisure => '趣味・娯楽';
+
+  @override
+  String get iconGroupShopping => '買い物';
+
+  @override
+  String get iconGroupWork => '仕事・学び';
+
+  @override
+  String get iconGroupPeople => '人';
+
+  @override
+  String get iconGroupOther => 'その他';
+
+  @override
+  String get chooseAnIcon => 'アイコンを選ぶ';
+
+  @override
+  String get searchIcons => 'アイコンを検索';
+
+  @override
+  String get searchKindDestination => '移動';
+
+  @override
+  String get searchTermsHome => 'ホーム,ダッシュボード,概要,純資産';
+
+  @override
+  String get searchTermsAccounts => '口座,ウォレット,銀行,残高,現金';
+
+  @override
+  String get searchTermsSpaces => 'スペース,共有,グループ,家計,割り勘,メンバー';
+
+  @override
+  String get searchTermsActivity => '履歴,取引,明細,支出';
+
+  @override
+  String get searchTermsBudgets => '予算,上限,支出計画';
+
+  @override
+  String get searchTermsSubscriptions => 'サブスク,定期,更新,請求';
+
+  @override
+  String get searchTermsCategories => 'カテゴリ,タグ,ラベル';
+
+  @override
+  String get searchTermsNotifications => '通知,お知らせ,受信箱';
+
+  @override
+  String get searchTermsSettings => '設定,環境設定,プロフィール,通貨,テーマ';
+
+  @override
+  String get searchTermsAssistant => 'アシスタント,AI,キト,インサイト';
+
+  @override
+  String get recordHistory => 'この記録のあゆみ';
+
+  @override
+  String get timelineRecorded => '記録';
+
+  @override
+  String get timelineEdited => '編集';
+
+  @override
+  String timelineEditedDetail(Object p0) {
+    return '記録後に$p0回更新されました';
+  }
+
+  @override
+  String get timelineVoided => '取り消し';
+
+  @override
+  String get timelineAwaitingConfirmation => '確定待ち';
+
+  @override
+  String get timelineAwaitingDetail => '誰かが確定するまで残高は動きません';
+
+  @override
+  String get timelineSettled => '精算済み';
+
+  @override
+  String get timelineSettledDetail => '締めたサイクルの一部のため、読み取り専用です';
+
+  @override
+  String timelineByX0On(Object p0, Object p1) {
+    return '$p0・$p1';
+  }
+
+  @override
+  String timelineAddedByAssistant(Object p0) {
+    return '$p0が追加しました';
+  }
+
+  @override
+  String get homeInsights => '推移';
+
+  @override
+  String get homeInsightsSubtitle => '今月の使い道と、前月との比較';
+
+  @override
+  String homeAccountsSummary(Object p0, Object p1) {
+    return '$p1件で$p0';
+  }
+
+  @override
+  String homeUpcomingSummary(Object p0) {
+    return '$p0の予定';
+  }
+
+  @override
+  String get homeUpcomingNone => '予定なし';
+
+  @override
+  String homeWhereItWentSummary(Object p0, Object p1) {
+    return '$p1に$p0';
+  }
+
+  @override
+  String get homeNothingSpentYet => 'まだ支出はありません';
 }

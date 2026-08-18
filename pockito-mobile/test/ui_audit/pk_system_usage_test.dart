@@ -159,6 +159,255 @@ void main() {
             '  ${offenders.join('\n  ')}',
       );
     });
+
+    test('a category fill never becomes a mark', () {
+      // UI-017. `PkIconTile` now refuses a bare `Color`, so the tile itself is
+      // safe by type. This closes the other half: `categoryFillAt` is for
+      // areas — a swatch, a chart slice, a hero tint — and handing it to an
+      // `Icon` or a `TextStyle` puts an illegible colour back on a mark, which
+      // is the defect PkAccent was introduced to make unrepresentable.
+      final offenders = <String>[];
+      final marks = RegExp(
+        r'(Icon\(|IconData|style:|TextStyle\(|foregroundColor:|labelStyle)',
+      );
+      for (final file in [...featureFiles, ...componentFiles]) {
+        for (final (number, line) in statements(file)) {
+          if (!line.contains('categoryFillAt')) continue;
+          if (marks.hasMatch(line)) offenders.add('${file.path}:$number');
+        }
+      }
+      expect(
+        offenders,
+        isEmpty,
+        reason:
+            'Ask for the accent and take `.ink(context)` from it:\n'
+            '  ${offenders.join('\n  ')}',
+      );
+    });
+
+    test('the category palette is only read through its accessors', () {
+      // Indexing `PkPalette.category` directly bypasses the accent entirely.
+      final offenders = <String>[];
+      for (final file in [...featureFiles, ...componentFiles]) {
+        for (final (number, line) in statements(file)) {
+          if (line.contains('PkPalette.category[')) {
+            offenders.add('${file.path}:$number');
+          }
+        }
+      }
+      expect(
+        offenders,
+        isEmpty,
+        reason:
+            'Use PkPalette.categoryAt (accent) or categoryFillAt (area):\n'
+            '  ${offenders.join('\n  ')}',
+      );
+    });
+  });
+
+  group('UI-024 · a surface cannot be light-only', () {
+    test('no screen fills a surface with a fixed light tint', () {
+      // `PkPalette.indigo50` and its siblings are the *light* end of a ramp
+      // with no dark counterpart. Painted as a `color:` they survive the theme
+      // switch unchanged, so an unread notification became a near-white card
+      // with near-white writing on it, and the FX and currency notices went
+      // the same way. `pkStatusSurface` derives the wash from the tone's ink
+      // over whatever surface is current, so there is no light-only half to
+      // forget.
+      final tint = RegExp(
+        r'(color|borderColor|backgroundColor):[^,]*'
+        r'PkPalette\.[A-Za-z]+(50|100|200)\b',
+      );
+      final offenders = <String>[];
+      for (final file in [...featureFiles, ...componentFiles]) {
+        for (final (number, line) in statements(file)) {
+          // A brightness test on the same statement is the explicit,
+          // reviewed form of the same decision and stays allowed.
+          if (tint.hasMatch(line) && !line.contains('Brightness.')) {
+            offenders.add('${file.path}:$number');
+          }
+        }
+      }
+      expect(
+        offenders,
+        isEmpty,
+        reason:
+            'Use pkStatusSurface / pkStatusBorder, or branch on brightness:\n'
+            '  ${offenders.join('\n  ')}',
+      );
+    });
+
+    test('no screen inks a glyph with a light-only tier', () {
+      // The other half of the same defect. `indigo600` on `indigo50` reads in
+      // both themes only because the *background* was frozen too; the moment
+      // the surface followed the theme, every verified tick, unread dot and
+      // notice icon painted dark blue on dark blue. A saturated fill is still
+      // allowed — a hero panel or an accent block is a fill, not a glyph — so
+      // the rule is scoped to `color:` on ink-bearing properties.
+      // `PkAccent.ink(raw)` is the same mistake wearing the accent type:
+      // `ink` is for a colour that is *already* brightness-correct, not for a
+      // palette tier. `PkPalette.brand` and `.neutral` are the split versions.
+      final ink = RegExp(
+        r'(\bcolor:\s*|PkAccent\.ink\(\s*)'
+        r'PkPalette\.[A-Za-z]+([4-9]00)\b(?!\s*\.withValues)',
+      );
+      final offenders = <String>[];
+      for (final file in [...featureFiles, ...componentFiles]) {
+        var previous = '';
+        for (final (number, line) in statements(file)) {
+          // A `decoration:`/`BoxDecoration(` on the same statement means the
+          // colour is an area, not a mark.
+          final area =
+              line.contains('decoration:') ||
+              previous.contains('decoration:') ||
+              previous.contains('BoxDecoration(');
+          if (ink.hasMatch(line) && !area && !line.contains('Brightness.')) {
+            offenders.add('${file.path}:$number');
+          }
+          previous = line;
+        }
+      }
+      expect(
+        offenders,
+        isEmpty,
+        reason:
+            'Ink follows the theme: pkStatusInk, context.pk.*, or the scheme:\n'
+            '  ${offenders.join('\n  ')}',
+      );
+    });
+  });
+
+  group('UI-019 · rows keep their target', () {
+    test('no `ListTile` builds a list row in a feature screen', () {
+      // UI-019's exit gate. `ListTile` is Material's row, not Pockito's: it
+      // brings its own height, its own padding, its own idea of what a
+      // subtitle weighs, and it announces as separate fragments rather than as
+      // one row. Thirty-eight of them were drawing settings, members, sheet
+      // actions and Space rows beside `PkLedgerRow`s that looked almost but
+      // not quite the same.
+      //
+      // A `PopupMenuItem`'s child is exempt by shape rather than by marker:
+      // there, `ListTile` *is* the Material convention, the menu owns the
+      // geometry, and a `PkLedgerRow` inside a popup would be the odd one out.
+      final offenders = <String>[];
+      for (final file in featureFiles) {
+        final lines = file.readAsLinesSync();
+        for (final (number, line) in statements(file)) {
+          if (!RegExp(r'(?<![A-Za-z])ListTile\(').hasMatch(line)) continue;
+          final before = lines
+              .sublist((number - 9).clamp(0, lines.length), number)
+              .join('\n');
+          if (before.contains('PopupMenuItem')) continue;
+          offenders.add('${file.path}:$number');
+        }
+      }
+      expect(
+        offenders,
+        isEmpty,
+        reason:
+            'Use PkLedgerRow.management or PkDetailRow:\n'
+            '  ${offenders.join('\n  ')}',
+      );
+    });
+
+    test('no `dense: true` shrinks a list row', () {
+      // The sibling of the `VisualDensity.compact` rule. `dense` takes a
+      // `ListTile` under the 48 px floor, and it was doing so on Home's
+      // action-required rows, the first-run checklist and the role chooser —
+      // three places where the reader is being asked to act.
+      final offenders = <String>[];
+      for (final file in [...featureFiles, ...componentFiles]) {
+        for (final (number, line) in statements(file)) {
+          if (RegExp(r'\bdense:\s*true').hasMatch(line)) {
+            offenders.add('${file.path}:$number');
+          }
+        }
+      }
+      expect(
+        offenders,
+        isEmpty,
+        reason:
+            'Use PkLedgerRow.management, which is 56 with a 48 target:\n'
+            '  ${offenders.join('\n  ')}',
+      );
+    });
+  });
+
+  group('UI-018 · feature code uses the field system', () {
+    // The field system was built by UI-005 and then largely not adopted: at the
+    // start of UI-018 `lib/ui/features` held 24 `DropdownButtonFormField` and
+    // 20 raw `TextField` against 3 `PkAmountField` and 4 `PkSelectField`. The
+    // settlement amount — the most consequential number in the product — was a
+    // bare `TextField` styled `displayLarge`. These gates keep the components
+    // in service now that the screens have moved onto them.
+    test('no `DropdownButtonFormField` survives in a feature screen', () {
+      // A menu renders an entity as a bare string, cannot show its icon or
+      // colour, has no search past eight rows, and clips at large text sizes.
+      // `PkSelectField` and `showPkOptionPicker` do all four.
+      final offenders = <String>[];
+      for (final file in featureFiles) {
+        for (final (number, line) in statements(file)) {
+          if (line.contains('DropdownButtonFormField')) {
+            offenders.add('${file.path}:$number');
+          }
+        }
+      }
+      expect(
+        offenders,
+        isEmpty,
+        reason:
+            'Use PkSelectField / PkSelectFormField with a picker:\n'
+            '  ${offenders.join('\n  ')}',
+      );
+    });
+
+    test('no raw text field survives in a feature screen', () {
+      // The last raw primitive. `PkAmountField` owned money, `PkSelectField` a
+      // choice, `PkDateField` a date — and twenty screens still reached for
+      // `TextField`/`TextFormField` for a name or an email, each deciding for
+      // itself whether to validate at all (a `TextField` cannot) and how a
+      // multiline label should sit. `PkTextField` is that case.
+      //
+      // Three inline numeric cells stay exempt and say why: a table cell has
+      // no room for a floating label and a 48 px box.
+      final offenders = <String>[];
+      for (final file in featureFiles) {
+        for (final (number, line) in statements(file)) {
+          if (RegExp(r'\bTextF(orm)?Field\(').hasMatch(line)) {
+            offenders.add('${file.path}:$number');
+          }
+        }
+      }
+      expect(
+        offenders,
+        isEmpty,
+        reason:
+            'Use PkTextField, or mark the cell `pk-exempt` with its reason:\n'
+            '  ${offenders.join('\n  ')}',
+      );
+    });
+
+    test('no feature screen paints its own currency prefix', () {
+      // A currency symbol glued to a raw field is the signature of an amount
+      // input that is not `PkAmountField` — and so has no tabular figures, no
+      // currency-aware precision, and no cap on how far the 32 px number grows
+      // with the reader's text scale.
+      final offenders = <String>[];
+      for (final file in featureFiles) {
+        for (final (number, line) in statements(file)) {
+          if (line.contains('prefixText')) {
+            offenders.add('${file.path}:$number');
+          }
+        }
+      }
+      expect(
+        offenders,
+        isEmpty,
+        reason:
+            'Use PkAmountField, or mark a real exception with `pk-exempt`:\n'
+            '  ${offenders.join('\n  ')}',
+      );
+    });
   });
 
   group('UI-005 · one sheet presenter', () {

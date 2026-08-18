@@ -112,6 +112,16 @@ void registerPockitoAcceptanceTests() {
     await tester.pumpAndSettle();
     await tester.tap(field);
     await tester.pumpAndSettle();
+    // UI-018 replaced the dropdown menus with sheets. A sheet over roughly
+    // eight rows carries a search field, and the long ones — every ISO
+    // currency — build lazily, so the row being chosen may not exist yet.
+    // Filtering first is what the reader would do and what makes the journey
+    // independent of how far down the list an option happens to sit.
+    final search = find.byType(PkSearchField);
+    if (search.evaluate().isNotEmpty) {
+      await tester.enterText(search, option.split(' · ').first);
+      await tester.pumpAndSettle();
+    }
     var item = find.text(option);
     if (ja != null && item.evaluate().isEmpty) item = find.text(ja);
     expect(item, findsWidgets, reason: 'Could not select "$option"');
@@ -168,7 +178,9 @@ void registerPockitoAcceptanceTests() {
     WidgetTester tester, {
     required String name,
     required String type,
+    required String typeJa,
     required String currency,
+    required String currencyName,
     required String balance,
   }) async {
     // Section 7.2 leaves one add entry point on Accounts — the app-bar action —
@@ -176,8 +188,12 @@ void registerPockitoAcceptanceTests() {
     // list. The stable key keeps the journey language-independent.
     await tapKey(tester, const ValueKey('accounts_add'));
     await enter(tester, const ValueKey('account_name'), name);
-    await choose(tester, const ValueKey('account_type'), type);
-    await choose(tester, const ValueKey('account_currency'), currency);
+    await choose(tester, const ValueKey('account_type'), type, ja: typeJa);
+    await choose(
+      tester,
+      const ValueKey('account_currency'),
+      '$currency · $currencyName',
+    );
     await enter(tester, const ValueKey('account_balance'), balance);
     final save = find.byKey(const ValueKey('save_account'));
     await tester.ensureVisible(save);
@@ -260,28 +276,36 @@ void registerPockitoAcceptanceTests() {
       tester,
       name: 'Cash',
       type: 'Cash',
+      typeJa: '現金',
       currency: 'JPY',
+      currencyName: 'Japanese Yen',
       balance: '10000',
     );
     await addAccount(
       tester,
       name: 'BGL Luxembourg',
       type: 'Bank',
+      typeJa: '銀行',
       currency: 'EUR',
+      currencyName: 'Euro',
       balance: '2450',
     );
     await addAccount(
       tester,
       name: 'BIAT Tunisia',
       type: 'Bank',
+      typeJa: '銀行',
       currency: 'TND',
+      currencyName: 'Tunisian Dinar',
       balance: '1200',
     );
     await addAccount(
       tester,
       name: 'Revolut Savings',
       type: 'Savings',
+      typeJa: '貯蓄',
       currency: 'EUR',
+      currencyName: 'Euro',
       balance: '0',
     );
     expect(repo.accounts, hasLength(5));
@@ -321,16 +345,8 @@ void registerPockitoAcceptanceTests() {
       const ValueKey('transaction_merchant'),
       'Cash withdrawal',
     );
-    await choose(
-      tester,
-      const ValueKey('transaction_account'),
-      'Rakuten Bank · JPY',
-    );
-    await choose(
-      tester,
-      const ValueKey('transaction_to_account'),
-      'Cash · JPY',
-    );
+    await choose(tester, const ValueKey('transaction_account'), 'Rakuten Bank');
+    await choose(tester, const ValueKey('transaction_to_account'), 'Cash');
     await saveMoneyEvent(tester);
 
     await openAdd(tester, 'transfer');
@@ -340,15 +356,11 @@ void registerPockitoAcceptanceTests() {
       const ValueKey('transaction_merchant'),
       'Move to Revolut',
     );
-    await choose(
-      tester,
-      const ValueKey('transaction_account'),
-      'Rakuten Bank · JPY',
-    );
+    await choose(tester, const ValueKey('transaction_account'), 'Rakuten Bank');
     await choose(
       tester,
       const ValueKey('transaction_to_account'),
-      'Revolut Savings · EUR',
+      'Revolut Savings',
     );
     await tester.tap(find.text('手動'));
     await settle(tester);
@@ -381,11 +393,7 @@ void registerPockitoAcceptanceTests() {
       repo.transactions.any((t) => t.merchant == 'Maruetsu Petit'),
       isFalse,
     );
-    await choose(
-      tester,
-      const ValueKey('transaction_account'),
-      'Rakuten Bank · JPY',
-    );
+    await choose(tester, const ValueKey('transaction_account'), 'Rakuten Bank');
     await saveMoneyEvent(tester);
     expect(
       repo.transactions.any((t) => t.merchant == 'Maruetsu Petit'),
@@ -424,7 +432,17 @@ void registerPockitoAcceptanceTests() {
     await tapText(tester, 'Create a space', last: true, ja: 'スペースを作る');
     await enter(tester, const ValueKey('space_name'), 'Household');
     await enter(tester, const ValueKey('space_budget'), '300000');
-    await choose(tester, const ValueKey('space_icon'), 'People', ja: '人数');
+    // UI-022: the icon field opens the catalogue, which is a grid of marks
+    // rather than a list of words — so the journey picks by the entry's stable
+    // identifier instead of by a label no icon has.
+    await reveal(tester, const ValueKey('space_icon'));
+    await tester.tap(find.byKey(const ValueKey('space_icon')));
+    await tester.pumpAndSettle();
+    final peopleIcon = find.bySemanticsIdentifier('icon_people.group');
+    await tester.ensureVisible(peopleIcon);
+    await tester.pumpAndSettle();
+    await tester.tap(peopleIcon);
+    await settle(tester);
     await tapKey(tester, const ValueKey('space_color_4'));
     await tapText(tester, 'Continue', ja: '続ける');
     await tapText(tester, 'Create and invite', ja: '作成して招待する');
@@ -434,7 +452,9 @@ void registerPockitoAcceptanceTests() {
     }
     final household = repo.spaces.singleWhere((s) => s.name == 'Household');
     expect(household.currency, 'JPY');
-    expect(household.icon, 'group');
+    // The catalogue stores namespaced ids; the legacy names still resolve for
+    // anything saved before UI-022.
+    expect(household.icon, 'people.group');
     expect(household.colorIndex, 4);
     expect(
       repo.invitations.where((i) => i.spaceId == household.id),
@@ -483,18 +503,19 @@ void registerPockitoAcceptanceTests() {
     await goBack(tester);
 
     // Shared expense from a tracked JPY wallet.
-    await tapText(tester, 'Expense', last: true, ja: '支出');
+    //
+    // The Money tab drops its floating "Expense" button while the Space has
+    // no expenses yet, because the empty state already carries its own call
+    // to action and the two would sit on top of each other. The journey takes
+    // the one a first-time reader is actually offered.
+    await tapText(tester, 'Add expense', last: true, ja: '支出を追加');
     await enter(tester, const ValueKey('transaction_amount'), '10000');
     await enter(
       tester,
       const ValueKey('transaction_merchant'),
       'Household groceries',
     );
-    await choose(
-      tester,
-      const ValueKey('transaction_account'),
-      'Rakuten Bank · JPY',
-    );
+    await choose(tester, const ValueKey('transaction_account'), 'Rakuten Bank');
     await choose(tester, const ValueKey('transaction_category'), 'Groceries');
     await saveMoneyEvent(tester);
 
@@ -545,7 +566,7 @@ void registerPockitoAcceptanceTests() {
     await choose(
       tester,
       const ValueKey('transaction_account'),
-      'BGL Luxembourg · EUR',
+      'BGL Luxembourg',
     );
     for (
       var attempt = 0;
@@ -838,6 +859,11 @@ void registerPockitoAcceptanceTests() {
 
     // Home leads with what needs the user, then explains the month: a trend
     // with a baseline, and a breakdown of where the money went.
+    //
+    // UI-020 §5 moved both charts one tap away — on Home they are two rows
+    // carrying their own summary, and the charts themselves live on Trends.
+    // The journey follows the row, which is the part that actually has to
+    // keep working: a summary that leads nowhere is worse than no summary.
     await tapText(tester, 'ホーム', last: true);
     // The journey runs in Japanese, so Home's own chrome is in Japanese —
     // which is the point of the language setting. Category names come from
@@ -849,11 +875,13 @@ void registerPockitoAcceptanceTests() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(breakdown, findsOneWidget);
+    await tapKey(tester, const ValueKey('home_breakdown_row'));
     expect(find.text('Groceries'), findsWidgets);
     // The donut's numbers are reachable without reading colour.
     expect(find.byType(PkCategoryDonut), findsOneWidget);
     expect(find.text('支出の推移'), findsOneWidget);
     expect(find.text('表で見る'), findsWidgets);
+    await goBack(tester);
 
     // Final wallet histories and balances use the same records as every other
     // surface, including received settlements and the paid subscription.

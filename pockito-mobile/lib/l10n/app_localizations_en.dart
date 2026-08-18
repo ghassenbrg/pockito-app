@@ -4661,4 +4661,219 @@ class PkStringsEn extends PkStrings {
   @override
   String get privacyHideBalancesDetail =>
       'Mask every amount without changing the layout.';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get selected => 'selected';
+
+  @override
+  String get addANote => 'Add a note';
+
+  @override
+  String get member => 'Member';
+
+  @override
+  String get cadenceDaily => 'Daily';
+
+  @override
+  String get cadenceWeekly => 'Weekly';
+
+  @override
+  String get cadenceMonthly => 'Monthly';
+
+  @override
+  String get cadenceYearly => 'Yearly';
+
+  @override
+  String get countryJapan => 'Japan';
+
+  @override
+  String get countryGermany => 'Germany';
+
+  @override
+  String get countryLuxembourg => 'Luxembourg';
+
+  @override
+  String get countryTunisia => 'Tunisia';
+
+  @override
+  String get countryUnitedKingdom => 'United Kingdom';
+
+  @override
+  String get countryUnitedStates => 'United States';
+
+  @override
+  String get balanceImpactTitle => 'What this changes';
+
+  @override
+  String balanceImpactWillOwe(String name) {
+    return '$name will owe you';
+  }
+
+  @override
+  String balanceImpactYouWillOwe(String name) {
+    return 'You will owe $name';
+  }
+
+  @override
+  String get balanceImpactNoChange => 'Nothing changes between you';
+
+  @override
+  String balanceImpactWith(String name) {
+    return 'Your balance with $name';
+  }
+
+  @override
+  String splitBarLabel(String name, int percent, String amount) {
+    return '$name, $percent% — $amount';
+  }
+
+  @override
+  String get splitBarTitle => 'How this splits';
+
+  @override
+  String get iconGroupMoney => 'Money';
+
+  @override
+  String get iconGroupFood => 'Food & drink';
+
+  @override
+  String get iconGroupHome => 'Home & bills';
+
+  @override
+  String get iconGroupTransport => 'Getting around';
+
+  @override
+  String get iconGroupTravel => 'Travel';
+
+  @override
+  String get iconGroupHealth => 'Health';
+
+  @override
+  String get iconGroupLeisure => 'Leisure';
+
+  @override
+  String get iconGroupShopping => 'Shopping';
+
+  @override
+  String get iconGroupWork => 'Work & study';
+
+  @override
+  String get iconGroupPeople => 'People';
+
+  @override
+  String get iconGroupOther => 'Other';
+
+  @override
+  String get chooseAnIcon => 'Choose an icon';
+
+  @override
+  String get searchIcons => 'Search icons';
+
+  @override
+  String get searchKindDestination => 'Go to';
+
+  @override
+  String get searchTermsHome => 'home,dashboard,overview,net worth';
+
+  @override
+  String get searchTermsAccounts => 'accounts,wallet,bank,balance,cash';
+
+  @override
+  String get searchTermsSpaces => 'spaces,shared,group,household,split,members';
+
+  @override
+  String get searchTermsActivity =>
+      'activity,transactions,history,ledger,expenses';
+
+  @override
+  String get searchTermsBudgets => 'budgets,limit,spending plan';
+
+  @override
+  String get searchTermsSubscriptions =>
+      'subscriptions,recurring,renewals,bills';
+
+  @override
+  String get searchTermsCategories => 'categories,tags,labels';
+
+  @override
+  String get searchTermsNotifications => 'notifications,alerts,inbox';
+
+  @override
+  String get searchTermsSettings =>
+      'settings,preferences,profile,currency,theme';
+
+  @override
+  String get searchTermsAssistant => 'assistant,ai,kito,insights';
+
+  @override
+  String get recordHistory => 'How this got here';
+
+  @override
+  String get timelineRecorded => 'Recorded';
+
+  @override
+  String get timelineEdited => 'Edited';
+
+  @override
+  String timelineEditedDetail(Object p0) {
+    return 'Revised $p0 times since it was recorded';
+  }
+
+  @override
+  String get timelineVoided => 'Voided';
+
+  @override
+  String get timelineAwaitingConfirmation => 'Waiting to be confirmed';
+
+  @override
+  String get timelineAwaitingDetail =>
+      'It does not move a balance until someone confirms it';
+
+  @override
+  String get timelineSettled => 'Settled';
+
+  @override
+  String get timelineSettledDetail =>
+      'Part of a closed cycle, so it is read-only now';
+
+  @override
+  String timelineByX0On(Object p0, Object p1) {
+    return '$p0 · $p1';
+  }
+
+  @override
+  String timelineAddedByAssistant(Object p0) {
+    return 'Added by $p0';
+  }
+
+  @override
+  String get homeInsights => 'Trends';
+
+  @override
+  String get homeInsightsSubtitle =>
+      'Where the month went, and how it compares';
+
+  @override
+  String homeAccountsSummary(Object p0, Object p1) {
+    return '$p0 across $p1';
+  }
+
+  @override
+  String homeUpcomingSummary(Object p0) {
+    return '$p0 due';
+  }
+
+  @override
+  String get homeUpcomingNone => 'Nothing due';
+
+  @override
+  String homeWhereItWentSummary(Object p0, Object p1) {
+    return '$p0 in $p1';
+  }
+
+  @override
+  String get homeNothingSpentYet => 'Nothing spent yet';
 }

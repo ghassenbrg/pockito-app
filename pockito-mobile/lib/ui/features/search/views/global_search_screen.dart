@@ -28,7 +28,7 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen> {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<PockitoAppViewModel>();
-    final hits = viewModel.search(_query);
+    final hits = viewModel.search(_query, context.t);
     // Grouped by kind so a name that exists in three places is not three
     // indistinguishable rows.
     final grouped = <String, List<PkSearchHit>>{};
@@ -83,57 +83,55 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen> {
                                   style: Theme.of(context).textTheme.bodySmall,
                                 ),
                               ),
-                              PkCard(
-                                padding: EdgeInsets.zero,
-                                child: Column(
-                                  children: [
-                                    for (final hit in entry.value)
-                                      ListTile(
-                                        key: ValueKey('hit_${hit.id}'),
-                                        leading: PkIconTile(
-                                          icon: hit.icon,
-                                          color: PkPalette.categoryAt(
-                                            hit.colorIndex,
+                              // C-11: results are objects in a list, so they
+                              // wear the same row as every other list in the
+                              // app — one announcement each, the row height
+                              // contract, and the on-contract icon tile.
+                              PkGroupedSurface(
+                                indent:
+                                    PkSpacing.x4 +
+                                    PkSize.iconTileDense +
+                                    PkSpacing.x3,
+                                children: [
+                                  for (final hit in entry.value)
+                                    PkLedgerRow(
+                                      key: ValueKey('hit_${hit.id}'),
+                                      semanticIdentifier: 'hit_${hit.id}',
+                                      semanticLabel: [
+                                        hit.title,
+                                        if (hit.subtitle.isNotEmpty)
+                                          hit.subtitle,
+                                        if (hit.amountMinor != null &&
+                                            hit.currency != null)
+                                          PkFormat.money(
+                                            hit.amountMinor!,
+                                            hit.currency!,
                                           ),
-                                          size: 40,
-                                          iconSize: 19,
+                                      ].join(', '),
+                                      leading: PkIconTile(
+                                        icon: hit.icon,
+                                        accent: PkPalette.categoryAt(
+                                          hit.colorIndex,
                                         ),
-                                        title: Text(
-                                          hit.title,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        subtitle: hit.subtitle.isEmpty
-                                            ? null
-                                            : Text(
-                                                hit.subtitle,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                        trailing:
-                                            hit.amountMinor == null ||
-                                                hit.currency == null
-                                            ? const Icon(
-                                                Icons.chevron_right_rounded,
-                                              )
-                                            : Text(
-                                                PkFormat.money(
-                                                  hit.amountMinor!,
-                                                  hit.currency!,
-                                                ),
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .labelLarge
-                                                    ?.copyWith(
-                                                      fontFeatures: const [
-                                                        FontFeature.tabularFigures(),
-                                                      ],
-                                                    ),
-                                              ),
-                                        onTap: () => context.push(hit.route),
                                       ),
-                                  ],
-                                ),
+                                      title: hit.title,
+                                      subtitle: hit.subtitle.isEmpty
+                                          ? null
+                                          : hit.subtitle,
+                                      trailing:
+                                          hit.amountMinor == null ||
+                                              hit.currency == null
+                                          ? null
+                                          : PkAmountText(
+                                              amountMinor: hit.amountMinor!,
+                                              currency: hit.currency!,
+                                            ),
+                                      showChevron:
+                                          hit.amountMinor == null ||
+                                          hit.currency == null,
+                                      onTap: () => context.push(hit.route),
+                                    ),
+                                ],
                               ),
                               const SizedBox(height: PkSpacing.x5),
                             ],

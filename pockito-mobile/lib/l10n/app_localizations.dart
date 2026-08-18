@@ -7811,6 +7811,384 @@ abstract class PkStrings {
   /// In en, this message translates to:
   /// **'Mask every amount without changing the layout.'**
   String get privacyHideBalancesDetail;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @selected.
+  ///
+  /// In en, this message translates to:
+  /// **'selected'**
+  String get selected;
+
+  /// No description provided for @addANote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note'**
+  String get addANote;
+
+  /// No description provided for @member.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get member;
+
+  /// No description provided for @cadenceDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get cadenceDaily;
+
+  /// No description provided for @cadenceWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get cadenceWeekly;
+
+  /// No description provided for @cadenceMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get cadenceMonthly;
+
+  /// No description provided for @cadenceYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get cadenceYearly;
+
+  /// No description provided for @countryJapan.
+  ///
+  /// In en, this message translates to:
+  /// **'Japan'**
+  String get countryJapan;
+
+  /// No description provided for @countryGermany.
+  ///
+  /// In en, this message translates to:
+  /// **'Germany'**
+  String get countryGermany;
+
+  /// No description provided for @countryLuxembourg.
+  ///
+  /// In en, this message translates to:
+  /// **'Luxembourg'**
+  String get countryLuxembourg;
+
+  /// No description provided for @countryTunisia.
+  ///
+  /// In en, this message translates to:
+  /// **'Tunisia'**
+  String get countryTunisia;
+
+  /// No description provided for @countryUnitedKingdom.
+  ///
+  /// In en, this message translates to:
+  /// **'United Kingdom'**
+  String get countryUnitedKingdom;
+
+  /// No description provided for @countryUnitedStates.
+  ///
+  /// In en, this message translates to:
+  /// **'United States'**
+  String get countryUnitedStates;
+
+  /// No description provided for @balanceImpactTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What this changes'**
+  String get balanceImpactTitle;
+
+  /// No description provided for @balanceImpactWillOwe.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will owe you'**
+  String balanceImpactWillOwe(String name);
+
+  /// No description provided for @balanceImpactYouWillOwe.
+  ///
+  /// In en, this message translates to:
+  /// **'You will owe {name}'**
+  String balanceImpactYouWillOwe(String name);
+
+  /// No description provided for @balanceImpactNoChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing changes between you'**
+  String get balanceImpactNoChange;
+
+  /// No description provided for @balanceImpactWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Your balance with {name}'**
+  String balanceImpactWith(String name);
+
+  /// No description provided for @splitBarLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, {percent}% — {amount}'**
+  String splitBarLabel(String name, int percent, String amount);
+
+  /// No description provided for @splitBarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How this splits'**
+  String get splitBarTitle;
+
+  /// No description provided for @iconGroupMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Money'**
+  String get iconGroupMoney;
+
+  /// No description provided for @iconGroupFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food & drink'**
+  String get iconGroupFood;
+
+  /// No description provided for @iconGroupHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home & bills'**
+  String get iconGroupHome;
+
+  /// No description provided for @iconGroupTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting around'**
+  String get iconGroupTransport;
+
+  /// No description provided for @iconGroupTravel.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel'**
+  String get iconGroupTravel;
+
+  /// No description provided for @iconGroupHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Health'**
+  String get iconGroupHealth;
+
+  /// No description provided for @iconGroupLeisure.
+  ///
+  /// In en, this message translates to:
+  /// **'Leisure'**
+  String get iconGroupLeisure;
+
+  /// No description provided for @iconGroupShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get iconGroupShopping;
+
+  /// No description provided for @iconGroupWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Work & study'**
+  String get iconGroupWork;
+
+  /// No description provided for @iconGroupPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get iconGroupPeople;
+
+  /// No description provided for @iconGroupOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get iconGroupOther;
+
+  /// No description provided for @chooseAnIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an icon'**
+  String get chooseAnIcon;
+
+  /// No description provided for @searchIcons.
+  ///
+  /// In en, this message translates to:
+  /// **'Search icons'**
+  String get searchIcons;
+
+  /// No description provided for @searchKindDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to'**
+  String get searchKindDestination;
+
+  /// No description provided for @searchTermsHome.
+  ///
+  /// In en, this message translates to:
+  /// **'home,dashboard,overview,net worth'**
+  String get searchTermsHome;
+
+  /// No description provided for @searchTermsAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'accounts,wallet,bank,balance,cash'**
+  String get searchTermsAccounts;
+
+  /// No description provided for @searchTermsSpaces.
+  ///
+  /// In en, this message translates to:
+  /// **'spaces,shared,group,household,split,members'**
+  String get searchTermsSpaces;
+
+  /// No description provided for @searchTermsActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'activity,transactions,history,ledger,expenses'**
+  String get searchTermsActivity;
+
+  /// No description provided for @searchTermsBudgets.
+  ///
+  /// In en, this message translates to:
+  /// **'budgets,limit,spending plan'**
+  String get searchTermsBudgets;
+
+  /// No description provided for @searchTermsSubscriptions.
+  ///
+  /// In en, this message translates to:
+  /// **'subscriptions,recurring,renewals,bills'**
+  String get searchTermsSubscriptions;
+
+  /// No description provided for @searchTermsCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'categories,tags,labels'**
+  String get searchTermsCategories;
+
+  /// No description provided for @searchTermsNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'notifications,alerts,inbox'**
+  String get searchTermsNotifications;
+
+  /// No description provided for @searchTermsSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'settings,preferences,profile,currency,theme'**
+  String get searchTermsSettings;
+
+  /// No description provided for @searchTermsAssistant.
+  ///
+  /// In en, this message translates to:
+  /// **'assistant,ai,kito,insights'**
+  String get searchTermsAssistant;
+
+  /// No description provided for @recordHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'How this got here'**
+  String get recordHistory;
+
+  /// No description provided for @timelineRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded'**
+  String get timelineRecorded;
+
+  /// No description provided for @timelineEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'Edited'**
+  String get timelineEdited;
+
+  /// No description provided for @timelineEditedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Revised {p0} times since it was recorded'**
+  String timelineEditedDetail(Object p0);
+
+  /// No description provided for @timelineVoided.
+  ///
+  /// In en, this message translates to:
+  /// **'Voided'**
+  String get timelineVoided;
+
+  /// No description provided for @timelineAwaitingConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to be confirmed'**
+  String get timelineAwaitingConfirmation;
+
+  /// No description provided for @timelineAwaitingDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'It does not move a balance until someone confirms it'**
+  String get timelineAwaitingDetail;
+
+  /// No description provided for @timelineSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled'**
+  String get timelineSettled;
+
+  /// No description provided for @timelineSettledDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Part of a closed cycle, so it is read-only now'**
+  String get timelineSettledDetail;
+
+  /// No description provided for @timelineByX0On.
+  ///
+  /// In en, this message translates to:
+  /// **'{p0} · {p1}'**
+  String timelineByX0On(Object p0, Object p1);
+
+  /// No description provided for @timelineAddedByAssistant.
+  ///
+  /// In en, this message translates to:
+  /// **'Added by {p0}'**
+  String timelineAddedByAssistant(Object p0);
+
+  /// No description provided for @homeInsights.
+  ///
+  /// In en, this message translates to:
+  /// **'Trends'**
+  String get homeInsights;
+
+  /// No description provided for @homeInsightsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the month went, and how it compares'**
+  String get homeInsightsSubtitle;
+
+  /// No description provided for @homeAccountsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{p0} across {p1}'**
+  String homeAccountsSummary(Object p0, Object p1);
+
+  /// No description provided for @homeUpcomingSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{p0} due'**
+  String homeUpcomingSummary(Object p0);
+
+  /// No description provided for @homeUpcomingNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing due'**
+  String get homeUpcomingNone;
+
+  /// No description provided for @homeWhereItWentSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{p0} in {p1}'**
+  String homeWhereItWentSummary(Object p0, Object p1);
+
+  /// No description provided for @homeNothingSpentYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing spent yet'**
+  String get homeNothingSpentYet;
 }
 
 class _PkStringsDelegate extends LocalizationsDelegate<PkStrings> {

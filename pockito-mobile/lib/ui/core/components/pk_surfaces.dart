@@ -163,6 +163,45 @@ class PkGroupedSurface extends StatelessWidget {
 /// once.
 enum PkStatusTone { neutral, info, success, warning, danger, shared, ai }
 
+/// The ink a tone carries, so a badge, a bar and an arc cannot disagree about
+/// what "near the limit" looks like.
+Color pkStatusInk(BuildContext context, PkStatusTone tone) => switch (tone) {
+  PkStatusTone.neutral => context.pk.textSecondary,
+  PkStatusTone.info => Theme.of(context).colorScheme.primary,
+  PkStatusTone.success => context.pk.success,
+  PkStatusTone.warning => context.pk.warning,
+  PkStatusTone.danger => context.pk.danger,
+  PkStatusTone.shared => context.pk.sharedStrong,
+  PkStatusTone.ai => context.pk.ai,
+};
+
+/// The wash a tone carries, and the hairline around it.
+///
+/// These exist because the alternative kept being written by hand: a `PkCard`
+/// filled with `PkPalette.indigo50` or `PkPalette.rose50`. Those are *light*
+/// tints with no dark counterpart, so in dark mode they became near-white
+/// blocks — and the text inside them, drawn in `textPrimary`, is near-white
+/// too. An unread notification was a white card with white writing on it.
+///
+/// Deriving the wash from the tone's own ink over the current surface means
+/// there is one definition per tone rather than one per theme, and no way to
+/// ship the light half without the dark one.
+Color pkStatusSurface(BuildContext context, PkStatusTone tone) {
+  if (tone == PkStatusTone.shared) return context.pk.sharedSurface;
+  // Dark needs slightly more of the ink to separate from the page at all;
+  // light needs less before the wash starts competing with the text on it.
+  final alpha = Theme.of(context).brightness == Brightness.dark ? .16 : .09;
+  return Color.alphaBlend(
+    pkStatusInk(context, tone).withValues(alpha: alpha),
+    context.pk.surface,
+  );
+}
+
+Color pkStatusBorder(BuildContext context, PkStatusTone tone) =>
+    tone == PkStatusTone.shared
+    ? context.pk.sharedBorder
+    : pkStatusInk(context, tone).withValues(alpha: .32);
+
 /// A compact status label. Colour is never the only carrier: the badge always
 /// shows its word, and an icon where one adds meaning.
 class PkStatusBadge extends StatelessWidget {
@@ -177,15 +216,7 @@ class PkStatusBadge extends StatelessWidget {
   final PkStatusTone tone;
   final IconData? icon;
 
-  Color _foreground(BuildContext context) => switch (tone) {
-    PkStatusTone.neutral => context.pk.textSecondary,
-    PkStatusTone.info => Theme.of(context).colorScheme.primary,
-    PkStatusTone.success => context.pk.success,
-    PkStatusTone.warning => context.pk.warning,
-    PkStatusTone.danger => context.pk.danger,
-    PkStatusTone.shared => context.pk.sharedStrong,
-    PkStatusTone.ai => context.pk.ai,
-  };
+  Color _foreground(BuildContext context) => pkStatusInk(context, tone);
 
   @override
   Widget build(BuildContext context) {
@@ -274,6 +305,7 @@ class PkLedgerRow extends StatelessWidget {
     this.semanticIdentifier,
     this.footer,
     this.enabled = true,
+    this.destructive = false,
   });
 
   /// A management row: 56 px, no amount column, usually a chevron or a switch.
@@ -288,12 +320,13 @@ class PkLedgerRow extends StatelessWidget {
     this.semanticLabel,
     this.semanticIdentifier,
     this.enabled = true,
+    this.struckThrough = false,
+    this.destructive = false,
   }) : subtitleWidget = null,
        badges = const [],
        trailingSubtitle = null,
        onLongPress = null,
        density = PkRowDensity.management,
-       struckThrough = false,
        footer = null;
 
   /// The object's icon, avatar or colour tile. Kept at [PkSize.iconTileDense]
@@ -338,6 +371,11 @@ class PkLedgerRow extends StatelessWidget {
 
   final bool enabled;
 
+  /// Deletes, removals, "leave this Space". Four sheets were each colouring
+  /// their own title `danger` by hand, which meant four chances to forget and
+  /// no single place to change what destructive looks like.
+  final bool destructive;
+
   /// Above this text scale the amount moves beneath the title instead of
   /// competing with it for a width neither can have. Section 5.1.
   static const double _stackAboveScale = 1.5;
@@ -348,27 +386,61 @@ class PkLedgerRow extends StatelessWidget {
     final stacked = scale >= _stackAboveScale;
     final titleStyle = context.pkText.rowTitle.copyWith(
       decoration: struckThrough ? TextDecoration.lineThrough : null,
-      color: enabled ? null : context.pk.textTertiary,
+      color: !enabled
+          ? context.pk.textTertiary
+          : destructive
+          ? context.pk.danger
+          : null,
     );
 
-    final titleLine = Row(
-      children: [
-        Flexible(
-          child: Text(
+    // Badges shrink before the title does: the object's name is what the
+    // reader is scanning for.
+    //
+    // Two `Flexible`s do *not* express that. `Row` splits the free space by
+    // flex factor, so a title and a badge both at flex 1 each get half the
+    // line whatever they actually need — which is how "Approval requested"
+    // ended up rendered as "Appro…" beside a badge with room to spare. The
+    // badge is laid out inflexibly at its own width instead, capped so it can
+    // never take the line, and the title takes everything that is left.
+    final titleLine = badges.isEmpty
+        ? Text(
             title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: titleStyle,
-          ),
-        ),
-        // Badges shrink before the title does: the object's name is what the
-        // reader is scanning for.
-        for (final badge in badges) ...[
-          const SizedBox(width: PkSpacing.x1),
-          Flexible(child: badge),
-        ],
-      ],
-    );
+          )
+        : LayoutBuilder(
+            builder: (context, constraints) {
+              // A badge has an incompressible floor of its own — padding plus
+              // glyph — so the cap is never allowed below it, or the badge
+              // overflows itself on a narrow row. Squeezed that far it shows
+              // its icon alone, which still carries the meaning; the words are
+              // in the row's composed announcement either way.
+              const badgeFloor = 30.0;
+              final share = (constraints.maxWidth * .42 / badges.length)
+                  .floorToDouble();
+              final badgeCap = share < badgeFloor ? badgeFloor : share - 1;
+              return Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: titleStyle,
+                    ),
+                  ),
+                  for (final badge in badges) ...[
+                    const SizedBox(width: PkSpacing.x1),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: badgeCap),
+                      child: badge,
+                    ),
+                  ],
+                ],
+              );
+            },
+          );
 
     final leadingColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -397,36 +469,48 @@ class PkLedgerRow extends StatelessWidget {
       ],
     );
 
-    final row = Row(
-      crossAxisAlignment: stacked
-          ? CrossAxisAlignment.start
-          : CrossAxisAlignment.center,
-      children: [
-        if (leading != null) ...[
-          leading!,
-          SizedBox(width: context.isNarrow ? PkSpacing.x2 : PkSpacing.x3),
-        ],
-        Expanded(child: leadingColumn),
-        if (!stacked && (trailing != null || trailingSubtitle != null)) ...[
-          const SizedBox(width: PkSpacing.x2),
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: [?trailing, ?trailingSubtitle],
+    // The same flex trap as the title line, one level up: `Expanded` and
+    // `Flexible` are both flex 1, so the name-and-metadata column was handed
+    // half the row no matter how little the amount column needed. That is why
+    // "Household · EUR · 2 members" clipped to "Household · EUR · 2 …" beside
+    // an amount with slack to spare.
+    //
+    // The amount column is measured at its own width instead — an amount must
+    // never be the thing that truncates — and capped so a long status line
+    // beneath it still cannot swallow the row.
+    final row = LayoutBuilder(
+      builder: (context, constraints) => Row(
+        crossAxisAlignment: stacked
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
+        children: [
+          if (leading != null) ...[
+            leading!,
+            SizedBox(width: context.isNarrow ? PkSpacing.x2 : PkSpacing.x3),
+          ],
+          Expanded(child: leadingColumn),
+          if (!stacked && (trailing != null || trailingSubtitle != null)) ...[
+            const SizedBox(width: PkSpacing.x2),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: constraints.maxWidth * .55),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [?trailing, ?trailingSubtitle],
+              ),
             ),
-          ),
-        ],
-        if (showChevron)
-          Padding(
-            padding: const EdgeInsetsDirectional.only(start: PkSpacing.x1),
-            child: Icon(
-              Icons.chevron_right_rounded,
-              size: PkSize.iconLarge,
-              color: context.pk.textTertiary,
+          ],
+          if (showChevron)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(start: PkSpacing.x1),
+              child: Icon(
+                Icons.chevron_right_rounded,
+                size: PkSize.chevron,
+                color: context.pk.textTertiary,
+              ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
 
     final body = Padding(
@@ -465,6 +549,126 @@ class PkLedgerRow extends StatelessWidget {
       child: onTap == null
           ? sized
           : InkWell(onTap: onTap, onLongPress: onLongPress, child: sized),
+    );
+  }
+}
+
+/// A read-only fact: what it is on the left, what it says on the right.
+///
+/// Four screens had grown their own private version of this — `_DetailRow`,
+/// `_ExpenseDetailRow`, `_ManagementRow` and `_InfoRow` — differing only in
+/// vertical padding and which text style they happened to reach for. They also
+/// each announced as two separate strings, so a screen reader read a column of
+/// labels and then a column of values.
+class PkDetailRow extends StatelessWidget {
+  const PkDetailRow({
+    super.key,
+    required this.label,
+    required this.value,
+    this.valueWidget,
+    this.trailing,
+    this.onTap,
+  }) : compact = false;
+
+  /// Tighter vertical rhythm, for a dense panel of facts rather than a list.
+  const PkDetailRow.compact({
+    super.key,
+    required this.label,
+    required this.value,
+    this.valueWidget,
+    this.trailing,
+    this.onTap,
+  }) : compact = true;
+
+  final String label;
+
+  /// The plain-text value, and the string the row announces.
+  final String value;
+
+  /// A richer rendering of the same value — an amount, a badge. It has to say
+  /// the same thing [value] does, because that is what is announced.
+  final Widget? valueWidget;
+
+  final Widget? trailing;
+  final VoidCallback? onTap;
+  final bool compact;
+
+  /// Above this scale the value moves under the label rather than fighting it
+  /// for a width neither can have — the rule [PkLedgerRow] already follows.
+  static const double _stackAboveScale = 1.5;
+
+  @override
+  Widget build(BuildContext context) {
+    final stacked =
+        MediaQuery.textScalerOf(context).scale(1) >= _stackAboveScale;
+    final labelText = Text(
+      label,
+      style: context.pkText.supporting.copyWith(
+        color: context.pk.textSecondary,
+      ),
+    );
+    final valueText =
+        valueWidget ??
+        Text(
+          value,
+          textAlign: stacked ? TextAlign.start : TextAlign.end,
+          style: context.pkText.bodyStrong,
+        );
+
+    final body = Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: compact ? PkSpacing.x2 : PkSpacing.x3,
+      ),
+      child: stacked
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                labelText,
+                const SizedBox(height: PkSpacing.x1),
+                valueText,
+                ?trailing,
+              ],
+            )
+          // The same flex trap `PkLedgerRow` had: two flex-1 children split
+          // the row down the middle, so "Category" was handed as much width
+          // as "Restaurants · Revolut · Shared with Flat". The label is
+          // measured at its own width — capped, because a long label in
+          // Japanese must not take the row either — and the value, which is
+          // the half the reader came for, gets what is left.
+          : LayoutBuilder(
+              builder: (context, constraints) => Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: constraints.maxWidth * .45,
+                    ),
+                    child: labelText,
+                  ),
+                  const SizedBox(width: PkSpacing.x4),
+                  Expanded(child: valueText),
+                  ?trailing,
+                ],
+              ),
+            ),
+    );
+
+    return Semantics(
+      container: true,
+      button: onTap != null,
+      // One node, so the pair is heard as the fact it is.
+      label: '$label, $value',
+      excludeSemantics: true,
+      child: onTap == null
+          ? body
+          : InkWell(
+              onTap: onTap,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: PkSize.touch),
+                child: body,
+              ),
+            ),
     );
   }
 }
@@ -519,15 +723,24 @@ class PkSectionHeader extends StatelessWidget {
           ),
         ),
         ?trailing,
+        // "See all" is inflexible at default text and 100 px wide at 2.0x,
+        // where it pushed the whole header past the gutter. The title is what
+        // the section is; the way in may ellipsize.
         if (actionLabel != null)
-          TextButton(
-            onPressed: onAction,
-            style: TextButton.styleFrom(
-              minimumSize: const Size(PkSize.touch, PkSize.touch),
-              padding: const EdgeInsets.symmetric(horizontal: PkSpacing.x2),
-              textStyle: context.pkText.bodyStrong,
+          Flexible(
+            child: TextButton(
+              onPressed: onAction,
+              style: TextButton.styleFrom(
+                minimumSize: const Size(PkSize.touch, PkSize.touch),
+                padding: const EdgeInsets.symmetric(horizontal: PkSpacing.x2),
+                textStyle: context.pkText.bodyStrong,
+              ),
+              child: Text(
+                actionLabel!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-            child: Text(actionLabel!),
           ),
       ],
     ),

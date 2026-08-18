@@ -154,6 +154,119 @@ void main() {
     });
   });
 
+  group('a row spends its width on the name (UI-024)', () {
+    /// Renders one row at phone width and returns the painted width of the
+    /// widget under [finder].
+    Future<double> widthOf(
+      WidgetTester tester,
+      Widget row,
+      Finder finder,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: PkTheme.light(),
+          home: Scaffold(
+            body: SizedBox(width: pkPhone.width, child: row),
+          ),
+        ),
+      );
+      return tester.getSize(finder).width;
+    }
+
+    testWidgets('a badge cannot take the line away from the title', (
+      tester,
+    ) async {
+      // `Row` divides free space by flex factor, so a title and a badge both
+      // wrapped in `Flexible` each got half the line however little the badge
+      // needed — which rendered "Approval requested" as "Appro…" beside a
+      // badge with room to spare.
+      const title = 'Approval requested for a shared expense';
+      final withBadge = await widthOf(
+        tester,
+        const PkLedgerRow(
+          title: title,
+          badges: [PkStatusBadge(label: 'Waiting on you')],
+        ),
+        find.text(title),
+      );
+      final without = await widthOf(
+        tester,
+        const PkLedgerRow(title: title),
+        find.text(title),
+      );
+      expect(
+        withBadge,
+        greaterThan(without * .5),
+        reason: 'The badge is still taking half the line from the title',
+      );
+    });
+
+    testWidgets('an amount column takes what it needs and no more', (
+      tester,
+    ) async {
+      // The same trap one level up: `Expanded` and `Flexible` are both flex 1,
+      // so the name column was handed half the row whatever the amount needed,
+      // clipping "Household · EUR · 2 members" beside "€48.20".
+      const subtitle = 'Household · EUR · 2 members';
+      final short = await widthOf(
+        tester,
+        const PkLedgerRow(
+          title: 'Flat',
+          subtitle: subtitle,
+          trailing: Text('€48.20'),
+        ),
+        find.text(subtitle),
+      );
+      final long = await widthOf(
+        tester,
+        const PkLedgerRow(
+          title: 'Flat',
+          subtitle: subtitle,
+          trailing: Text('€48.20'),
+          trailingSubtitle: Text('You are owed'),
+        ),
+        find.text(subtitle),
+      );
+      // A wider amount column legitimately costs the subtitle some width, but
+      // the short one must not be paying for space nobody asked for.
+      expect(
+        short,
+        greaterThan(long),
+        reason: 'The amount column is not sizing to its content',
+      );
+      expect(
+        short,
+        greaterThan(pkPhone.width * .5),
+        reason: 'A bare "€48.20" is still claiming half the row',
+      );
+    });
+  });
+
+  group('a fact row spends its width on the answer (UI-024)', () {
+    testWidgets('a short label does not claim half the row', (tester) async {
+      // `PkDetailRow` had the same two-flex-children split, so "Category" was
+      // handed as much width as the value beside it and long values wrapped
+      // for no reason.
+      const value = 'Restaurants · Revolut · Shared with Flat · Aug 13';
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: PkTheme.light(),
+          home: Scaffold(
+            body: SizedBox(
+              width: pkPhone.width,
+              child: const PkDetailRow(label: 'Category', value: value),
+            ),
+          ),
+        ),
+      );
+      expect(
+        tester.getSize(find.text(value)).width,
+        greaterThan(pkPhone.width * .5),
+        reason: 'The label is still taking half the row from the value',
+      );
+    });
+  });
+
   group('no sizing hacks remain in feature code (UI-016)', () {
     testWidgets('rows come from the shared foundation', (tester) async {
       // The acceptance criterion is "no component-specific sizing hacks remain

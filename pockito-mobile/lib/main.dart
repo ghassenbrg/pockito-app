@@ -66,13 +66,25 @@ class PockitoApp extends StatelessWidget {
       localizationsDelegates: PkStrings.localizationsDelegates,
       // Inside the app, so the widget's payload can be built in the reader's
       // language.
-      builder: (context, child) => PkPrivacy(
-        // One switch masks every balance in the app; each amount does not have
-        // to remember to ask.
-        hidden: context.select<PockitoAppViewModel, bool>(
-          (viewModel) => viewModel.repository.profile.balancesHidden,
+      builder: (context, child) => GestureDetector(
+        // A tap anywhere that isn't itself a control — a field, a button —
+        // closes the keyboard, so it never sits pinned over half the screen
+        // once the reader has looked away from what they were typing.
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        behavior: HitTestBehavior.translucent,
+        // …and it stays out of the accessibility tree. It is a convenience for
+        // a pointer, not a control: advertised, it becomes an unlabelled
+        // button the size of the whole screen sitting above every route, and a
+        // screen reader has no way to know it means nothing.
+        excludeFromSemantics: true,
+        child: PkPrivacy(
+          // One switch masks every balance in the app; each amount does not
+          // have to remember to ask.
+          hidden: context.select<PockitoAppViewModel, bool>(
+            (viewModel) => viewModel.repository.profile.balancesHidden,
+          ),
+          child: PkHomeWidgetSync(child: child ?? const SizedBox.shrink()),
         ),
-        child: PkHomeWidgetSync(child: child ?? const SizedBox.shrink()),
       ),
     );
   }

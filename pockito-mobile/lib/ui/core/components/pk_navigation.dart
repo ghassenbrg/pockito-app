@@ -398,7 +398,12 @@ class _PkAddLauncher extends StatelessWidget {
           icon: Icons.swap_horiz_rounded,
           label: context.t.transfer,
           hint: context.t.betweenAccounts,
-          color: PkPalette.kitoAqua500,
+          // The one option whose accent was frozen while its three siblings
+          // followed the theme. Aqua-500 is a mid-ramp value: legible on
+          // white, and 2.4:1 on the dark sheet.
+          color: Theme.of(context).brightness == Brightness.light
+              ? PkPalette.kitoAqua700
+              : PkPalette.kitoAqua300,
         ),
         _PkAddOption(
           id: 'scan',
@@ -431,7 +436,7 @@ class _PkAddOption extends StatelessWidget {
   Widget build(BuildContext context) => PkLedgerRow.management(
     key: ValueKey('add_launcher_$id'),
     semanticIdentifier: 'add_launcher_$id',
-    leading: PkIconTile(icon: icon, color: color),
+    leading: PkIconTile(icon: icon, accent: PkAccent.ink(color)),
     title: label,
     subtitle: hint,
     showChevron: true,

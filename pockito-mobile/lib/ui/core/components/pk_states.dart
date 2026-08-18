@@ -300,7 +300,7 @@ Future<PkConflictChoice?> showPkConflictSheet(
             alignment: Alignment.center,
             child: PkIconTile(
               icon: Icons.merge_type_rounded,
-              color: context.pk.warning,
+              accent: PkAccent.ink(context.pk.warning),
               size: 56,
               iconSize: 26,
             ),
@@ -370,7 +370,7 @@ class _ConflictOption extends StatelessWidget {
         children: [
           PkIconTile(
             icon: icon,
-            color: Theme.of(context).colorScheme.primary,
+            accent: PkAccent.ink(Theme.of(context).colorScheme.primary),
             size: 40,
             iconSize: 19,
           ),
@@ -930,7 +930,12 @@ class _Sheet extends StatelessWidget {
           Align(
             alignment: Alignment.center,
             child: mascot == null
-                ? PkIconTile(icon: icon, color: tone, size: 56, iconSize: 26)
+                ? PkIconTile(
+                    icon: icon,
+                    accent: PkAccent.ink(tone),
+                    size: 56,
+                    iconSize: 26,
+                  )
                 : KitoImage.sized(asset: mascot!, size: KitoSize.state),
           ),
           const SizedBox(height: PkSpacing.x4),
