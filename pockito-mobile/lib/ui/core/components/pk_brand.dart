@@ -167,7 +167,7 @@ class PkWelcomeBanner extends StatelessWidget {
   final String date;
 
   /// Intrinsic aspect of `welcome-header.png`.
-  static const double _aspect = 1743 / 855;
+  static const double _aspect = 2172 / 724;
 
   /// The artwork leaves a clear pale-blue field between the coin on the far
   /// left and Kito on the right. Text is inset past the coin and stops before

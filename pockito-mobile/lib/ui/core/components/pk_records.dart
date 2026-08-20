@@ -1055,24 +1055,78 @@ class PkQuickActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (actions.isEmpty) return const SizedBox.shrink();
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: context.pk.surface,
+        borderRadius: BorderRadius.circular(PkRadius.large),
+        border: Border.all(color: context.pk.borderSubtle),
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        // Intrinsic rather than a fixed height: a two-line label at 2.0x text
+        // scale needs more room than the 1.0x row does, and this grows with
+        // it instead of clipping.
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(
+            horizontal: PkSpacing.x2,
+            vertical: PkSpacing.x3,
+          ),
+          child: IntrinsicHeight(
+            child: Row(
+              children: [
+                for (var index = 0; index < actions.length; index++) ...[
+                  if (index > 0) const SizedBox(width: PkSpacing.x1),
+                  _PkQuickActionButton(action: actions[index]),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PkQuickActionButton extends StatelessWidget {
+  const _PkQuickActionButton({required this.action});
+
+  final PkQuickAction action;
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = PkPalette.brand.ink(context);
     return SizedBox(
-      height: 40,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: actions.length,
-        separatorBuilder: (_, _) => const SizedBox(width: PkSpacing.x2),
-        itemBuilder: (context, index) {
-          final action = actions[index];
-          return ActionChip(
-            key: ValueKey('quick_${action.id}'),
-            avatar: Icon(action.icon, size: 18),
-            label: Text(action.label),
-            onPressed: () {
-              PkHaptics.selection();
-              action.onTap();
-            },
-          );
+      width: 88,
+      child: InkWell(
+        key: ValueKey('quick_${action.id}'),
+        borderRadius: BorderRadius.circular(PkRadius.control),
+        onTap: () {
+          PkHaptics.selection();
+          action.onTap();
         },
+        child: Semantics(
+          button: true,
+          label: action.label,
+          excludeSemantics: true,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(action.icon, size: PkSize.iconLarge, color: ink),
+              const SizedBox(height: PkSpacing.x1),
+              Text(
+                action.label,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: context.pkText.label.copyWith(
+                  color: ink,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

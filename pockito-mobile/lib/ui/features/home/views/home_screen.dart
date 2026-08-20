@@ -146,6 +146,60 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              // A fast way to start something, right where the greeting
+              // leaves off — before the numbers, not after them.
+              SliverPadding(
+                padding: EdgeInsetsDirectional.fromSTEB(
+                  context.gutter,
+                  0,
+                  context.gutter,
+                  PkSpacing.x4,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: PkQuickActions(
+                    actions: [
+                      PkQuickAction(
+                        id: 'scan',
+                        icon: Icons.document_scanner_outlined,
+                        label: context.t.quickScanReceipt,
+                        onTap: () => context.push('/add?scan=1'),
+                      ),
+                      if (spaces.isNotEmpty)
+                        PkQuickAction(
+                          id: 'shared',
+                          // Distinct from the Spaces navigation icon: this is
+                          // about splitting one expense, not about the
+                          // destination.
+                          icon: Icons.call_split_rounded,
+                          label: context.t.quickSharedExpense,
+                          onTap: () =>
+                              context.push('/add?space=${spaces.first.id}'),
+                        ),
+                      if (debts.isNotEmpty)
+                        PkQuickAction(
+                          id: 'settle',
+                          icon: Icons.handshake_outlined,
+                          label: context.t.quickSettleUp,
+                          onTap: () => context.push(
+                            '/spaces/${debts.first.spaceId}/settle',
+                          ),
+                        ),
+                      PkQuickAction(
+                        id: 'income',
+                        icon: Icons.south_west_rounded,
+                        label: context.t.quickRecordIncome,
+                        onTap: () => context.push('/add?type=income'),
+                      ),
+                      PkQuickAction(
+                        id: 'budget',
+                        icon: Icons.donut_large_rounded,
+                        label: context.t.quickNewBudget,
+                        onTap: () => context.push('/budgets/new'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               // Everything waiting on the user, ranked, above every passive
               // summary — including the hero. An AI connection request is
               // rarer and less urgent than an unsettled balance or a pending
@@ -289,54 +343,6 @@ class HomeScreen extends StatelessWidget {
                                 ),
                           showChevron: true,
                           onTap: () => context.push('/home/insights'),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // UI-020: the shortcuts sit *below* the first section of
-                  // real data rather than above it. They are a way to start
-                  // something, not an answer to anything, and at the top they
-                  // were 52 px between the reader and their own accounts.
-                  _HomeSection(
-                    child: PkQuickActions(
-                      actions: [
-                        PkQuickAction(
-                          id: 'scan',
-                          icon: Icons.document_scanner_outlined,
-                          label: context.t.quickScanReceipt,
-                          onTap: () => context.push('/add?scan=1'),
-                        ),
-                        if (spaces.isNotEmpty)
-                          PkQuickAction(
-                            id: 'shared',
-                            // Distinct from the Spaces navigation icon: this is
-                            // about splitting one expense, not about the
-                            // destination.
-                            icon: Icons.call_split_rounded,
-                            label: context.t.quickSharedExpense,
-                            onTap: () =>
-                                context.push('/add?space=${spaces.first.id}'),
-                          ),
-                        if (debts.isNotEmpty)
-                          PkQuickAction(
-                            id: 'settle',
-                            icon: Icons.handshake_outlined,
-                            label: context.t.quickSettleUp,
-                            onTap: () => context.push(
-                              '/spaces/${debts.first.spaceId}/settle',
-                            ),
-                          ),
-                        PkQuickAction(
-                          id: 'income',
-                          icon: Icons.south_west_rounded,
-                          label: context.t.quickRecordIncome,
-                          onTap: () => context.push('/add?type=income'),
-                        ),
-                        PkQuickAction(
-                          id: 'budget',
-                          icon: Icons.donut_large_rounded,
-                          label: context.t.quickNewBudget,
-                          onTap: () => context.push('/budgets/new'),
                         ),
                       ],
                     ),
@@ -1089,7 +1095,7 @@ class _HomeLoading extends StatelessWidget {
         ),
         sliver: const SliverToBoxAdapter(
           child: AspectRatio(
-            aspectRatio: 1743 / 855,
+            aspectRatio: 2172 / 724,
             child: PkSkeleton(radius: PkRadius.extraLarge),
           ),
         ),
