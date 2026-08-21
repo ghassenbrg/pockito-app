@@ -27,7 +27,11 @@ abstract final class PkBrandAssets {
 /// surfaces, the light-type lockup on dark ones, so a screen can never ship the
 /// wrong one.
 class PkWordmark extends StatelessWidget {
-  const PkWordmark({super.key, this.height = 34});
+  const PkWordmark({super.key, this.height = defaultHeight});
+
+  /// The lockup's usual height, so other header elements (the icon actions,
+  /// the avatar) can be sized to match it without duplicating the number.
+  static const double defaultHeight = 34;
 
   /// Height of the lockup. The artwork is 415×145, so the width follows.
   final double height;
@@ -57,10 +61,10 @@ class PkWordmark extends StatelessWidget {
   );
 }
 
-/// A circular header action.
+/// A bare-icon header action.
 ///
-/// Search, the assistant and notifications share one component so their size,
-/// touch target, border and spacing cannot drift apart.
+/// Search, the assistant and notifications share one component so their
+/// size, touch target and spacing cannot drift apart.
 class PkIconAction extends StatelessWidget {
   const PkIconAction({
     super.key,
@@ -69,6 +73,7 @@ class PkIconAction extends StatelessWidget {
     required this.onPressed,
     this.color,
     this.showBadge = false,
+    this.size = PkSize.icon,
   });
 
   final IconData icon;
@@ -80,41 +85,30 @@ class PkIconAction extends StatelessWidget {
   final Color? color;
   final bool showBadge;
 
-  /// The visible circle. Section B-03 and D-04 decouple this from the touch
-  /// target: the chrome is 36, and the transparent padding around it brings the
-  /// interactive region up to [PkSize.touch].
-  static const double _visible = 36;
+  /// Glyph size. The header actions size this to [PkWordmark.defaultHeight]
+  /// so the row reads as one height, not a wordmark next to small icons.
+  final double size;
+
+  /// Transparent margin around the bare icon that separates adjacent header
+  /// actions.
+  static const double _inset = PkSpacing.x2;
 
   @override
   Widget build(BuildContext context) {
-    const inset = (PkSize.touch - _visible) / 2;
-    final button = Material(
-      color: context.pk.surface,
-      shape: CircleBorder(side: BorderSide(color: context.pk.borderSubtle)),
-      clipBehavior: Clip.antiAlias,
-      child: SizedBox(
-        width: _visible,
-        height: _visible,
-        child: Icon(
-          icon,
-          size: PkSize.icon,
-          color: color ?? context.pk.textPrimary,
-        ),
-      ),
-    );
+    final icon0 = Icon(icon, size: size, color: color ?? context.pk.textPrimary);
     final target = InkResponse(
       onTap: onPressed,
-      radius: PkSize.touch / 2,
+      radius: (size + PkSpacing.x2) / 2,
       containedInkWell: false,
       child: Padding(
-        padding: const EdgeInsets.all(inset),
+        padding: const EdgeInsets.all(_inset),
         child: showBadge
             ? Badge(
                 alignment: Alignment.topRight,
                 offset: const Offset(-2, 2),
-                child: button,
+                child: icon0,
               )
-            : button,
+            : icon0,
       ),
     );
     return Tooltip(

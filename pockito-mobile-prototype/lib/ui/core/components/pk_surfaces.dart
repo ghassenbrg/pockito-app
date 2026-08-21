@@ -701,6 +701,13 @@ class PkSectionHeader extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: PkSpacing.headerToContent),
     child: Row(
+      // Title and action button are both flex children of equal weight, so
+      // Flutter splits the row's width 50/50 between them before either one
+      // renders, then the button shrinks to its actual text inside that
+      // half — landing near the midpoint instead of the true right edge.
+      // spaceBetween pushes any space the two don't use into the gap
+      // between them instead of leaving it stranded after the button.
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
           child: Column(

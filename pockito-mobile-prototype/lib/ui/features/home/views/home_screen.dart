@@ -516,35 +516,85 @@ class _HomeBrandHeader extends StatelessWidget {
                 child: PkWordmark(),
               ),
             ),
-            const SizedBox(width: PkSpacing.x3),
+            const SizedBox(width: PkSpacing.x2),
             PkIconAction(
               key: const ValueKey('open_search'),
               icon: Icons.search_rounded,
               tooltip: context.t.actionSearch,
               // Search looks across everything — accounts, Spaces, categories,
               // budgets and activity — rather than standing in for Activity.
+              size: _HomeAvatarAction.headerActionSize,
               onPressed: () => context.push('/search'),
             ),
-            const SizedBox(width: PkSpacing.x2),
             PkIconAction(
               key: const ValueKey('open_assistant'),
               icon: Icons.auto_awesome_rounded,
               tooltip: context.t.assistant,
               color: Theme.of(context).colorScheme.primary,
+              size: _HomeAvatarAction.headerActionSize,
               onPressed: () => context.push('/ai'),
             ),
-            const SizedBox(width: PkSpacing.x2),
             PkIconAction(
               icon: Icons.notifications_none_rounded,
               tooltip: context.t.notifications,
               showBadge: repo.notifications.any((item) => !item.read),
+              size: _HomeAvatarAction.headerActionSize,
               onPressed: () => context.push('/notifications'),
+            ),
+            _HomeAvatarAction(
+              displayName: repo.profile.displayName,
+              onPressed: () => context.push('/settings/profile'),
             ),
           ],
         ),
       ),
     );
   }
+}
+
+/// The reader's avatar, sized to match the other header actions so the whole
+/// row reads as one height.
+class _HomeAvatarAction extends StatelessWidget {
+  const _HomeAvatarAction({required this.displayName, required this.onPressed});
+
+  final String displayName;
+  final VoidCallback onPressed;
+
+  /// Glyph size shared with the search, assistant and notifications actions.
+  /// Smaller than [PkWordmark.defaultHeight] so the row doesn't compete with
+  /// the lockup for visual weight.
+  static const double headerActionSize = 26;
+
+  /// Matches [PkWordmark.defaultHeight] so the avatar stands as tall as the
+  /// lockup at the other end of the row.
+  static const double _avatarSize = PkWordmark.defaultHeight;
+
+  /// Matches the inset the neighbouring [PkIconAction]s use, so the avatar
+  /// sits as close to the bell as the icons sit to each other.
+  static const double _inset = PkSpacing.x2;
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+    message: displayName,
+    child: Semantics(
+      button: true,
+      label: displayName,
+      excludeSemantics: true,
+      child: InkResponse(
+        onTap: onPressed,
+        radius: (_avatarSize + PkSpacing.x2) / 2,
+        containedInkWell: false,
+        customBorder: const CircleBorder(),
+        child: Padding(
+          padding: const EdgeInsets.all(_inset),
+          child: PkAvatar(
+            label: displayName.characters.first,
+            size: _avatarSize,
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 class _HomeEmpty extends StatelessWidget {
