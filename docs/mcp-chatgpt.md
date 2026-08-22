@@ -3,9 +3,14 @@
 How a Pockito user adds the MCP server as a ChatGPT connector, and what has to exist on our
 side first.
 
-The server side is implemented and verified. Part 1 records what was built and the one
-step that can only be done against the deployed environment; Part 2 is the guide to hand to
-users.
+The connector works in production as of 22 August 2026. Part 1 records what was built and
+what has to be true of the deployed environment; Part 2 is the guide to hand to users.
+
+Getting there took five separate failures, and every one of them reached the user as the same
+sentence: *"There was a problem connecting Pockito."* ChatGPT's error text never once named a
+cause. If you are here to debug rather than to read, skip to
+[When it does not work](#when-it-does-not-work) — it is organised around getting a real error
+out of a server, because guessing from the symptom does not work on this page.
 
 ## How it works
 
@@ -19,9 +24,18 @@ ChatGPT is given nothing but a URL. Everything else it discovers:
    `S256` against the realm.
 4. It calls `/mcp` again with the resulting bearer token, which `AudienceValidator` accepts
    because it carries `pockito-mcp` in `aud`.
+5. Before the handshake it probes with `server/discover`, a method from a newer MCP revision
+   than the one we implement. We answer in the single way that tells it to fall back to the
+   `initialize` handshake we do speak — see [The protocol-era probe](#the-protocol-era-probe).
 
-Every link was exercised against the local stack, including a real PKCE login as the ChatGPT
-client, ending in successful `tools/call` responses for both tools.
+Every link has been exercised end to end against the deployed stack, ending in `tools/list`
+over a real ChatGPT connector:
+
+```
+initialize            protocolVersion 2025-11-25, clientInfo openai-mcp
+notifications/initialized
+tools/list
+```
 
 ## Part 1 — What was built
 
@@ -92,15 +106,60 @@ anonymous registration on a realm holding real users, to save one manual step, i
 
 Traefik matched `PathPrefix(/mcp)` and nothing else, so `/.well-known/oauth-protected-resource`
 fell through to the catch-all and reached the Nuxt app. A rule at priority 135 now sends it
-to the MCP service ([`50-ingressroute.yaml`](../infra/k8s/50-ingressroute.yaml)). The
-priority is set explicitly, as everything in that file is.
+to the MCP service. The priority is set explicitly, as everything in that file is.
 
-### Step that remains: the deployed realm
+**The manifests in this repo are not what runs.** Production is deployed from a separate
+repository, `ghassen-io-infra`, whose `pockito/` directory is the source of truth for the
+`pockito` namespace and owns `pockito.ghassen.io` outright. `infra/k8s/` here is a parallel
+copy with different file numbering (`50-ingressroute.yaml` against
+`pockito/60-ingressroute.yaml`). A routing change made only in this repo never ships, which
+is exactly how the priority-135 rule sat written-and-unapplied while the connector failed.
 
-`pockito-chatgpt` exists in the realm file and has been verified against the local Keycloak.
-It still has to be created on the **deployed** realm at `auth.ghassen.io`, which cannot be
-done from here. Do not delete and re-import the realm — that destroys the users. Add the
-client on its own:
+Keycloak lives in that repo's other tree, `k8s/`, and needed a change of its own. RFC 8414
+builds an authorization server's metadata URL by inserting `.well-known/…` *between* the
+issuer's host and its path, so a client probes
+`auth.ghassen.io/.well-known/oauth-authorization-server/realms/pockito`. Keycloak serves only
+the appended form and returns 404 for that one. A `kc-wellknown-rewrite` middleware maps one
+onto the other. Without it a client reads no metadata at all and reports that the server
+advertises no PKCE support — an error that names the wrong subsystem entirely.
+
+### The protocol-era probe
+
+MCP revision `2026-07-28` added `server/discover`, which a client sends before anything else
+to learn a server's supported versions. Spring AI has no handler for it, and its stateless
+transport answers an unhandled method with `500` and a plain body. That is the one response
+the specification gives a client no way to act on: the documented fallback — on `400`, if the
+body is not a recognised modern JSON-RPC error, fall back to `initialize` — is keyed on 400,
+so a 500 strands the client and the connection fails with nothing in ChatGPT's message to
+suggest why.
+
+[`LegacyEraProbeFilter`](../pockito-mcp/src/main/java/io/ghassen/pockito/mcp/config/LegacyEraProbeFilter.java)
+answers the probe with `400` and a body that is deliberately *not* a JSON-RPC error, which is
+what makes the client stop treating us as a draft-era server. Two things about it are
+load-bearing and easy to undo by accident:
+
+- It matches **only** `server/discover`. It is not a general "unknown method → 400" rule; a
+  method that reaches an unhandled state later is a real fault and should still surface as a
+  500 rather than be relabelled a bad request.
+- It is registered **after** `AuthorizationFilter`, so an unauthenticated probe still gets the
+  401 and `WWW-Authenticate` that start OAuth discovery. Registering it earlier would fix the
+  handshake by breaking the connector setup that precedes it.
+
+**This filter is temporary.** Delete it when the MCP Java SDK implements `2026-07-28` and
+returns `404` with JSON-RPC `-32601` for unknown methods, as the revision requires. Do not
+"fix" it by implementing `server/discover` for real: answering claims we speak that revision,
+and the client would then send per-request `_meta`, `MCP-Protocol-Version` headers and
+multi-round-trip results the SDK underneath cannot handle.
+
+### The deployed realm
+
+The realm file is **never re-imported into production** — that destroys the users. Everything
+below is applied to the live realm on its own, and the file
+([`realm-pockito.json`](../infra/keycloak/realm-pockito.json), duplicated byte-for-byte at
+`ghassen-io-infra/keycloak/realm-pockito.json` — edit both) only governs fresh and local
+realms.
+
+**The client.** Add it on its own:
 
 ```bash
 kcadm.sh create clients -r pockito -f - <<'JSON'
@@ -124,6 +183,25 @@ ChatGPT's connector settings and never seen by users — treat it as a secret, a
 it does **not** belong in `pockito-config` or any cluster manifest, because our services
 never use it.
 
+**`offline_access`.** ChatGPT requests the `offline_access` scope, because a connector needs a
+refresh token to stay connected. Keycloak issues an offline token only when both the user
+holds the `offline_access` realm role and the client is permitted the scope; if either is
+missing the token exchange fails with `not_allowed` and `"Offline tokens not allowed for the
+user or client"`. Check both:
+
+- Realm roles → `default-roles-pockito` → *Associated roles* contains `offline_access`.
+- Clients → `pockito-chatgpt` → *Client scopes* lists `offline_access` as **Optional**.
+
+Adding the role to the composite takes effect for existing users immediately, since composites
+resolve at token time.
+
+**A trap in this realm's roles.** `realm-pockito.json` used to set `"defaultRoles": ["USER"]`,
+the field Keycloak dropped in version 13. Keycloak 25 ignores it silently and builds
+`default-roles-pockito` from its own stock defaults, so the intended grant never happened:
+**no user in the deployed realm holds `USER`.** The file now uses the modern `defaultRole`
+plus an explicit composite, which fixes fresh imports. The deployed realm is still missing it.
+Before relying on `USER` anywhere, add it to the composite by hand.
+
 ### Verifying a deployment
 
 ```bash
@@ -139,10 +217,15 @@ curl -s https://auth.ghassen.io/realms/pockito/.well-known/openid-configuration 
   | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["authorization_endpoint"]); print(d["code_challenge_methods_supported"])'
 ```
 
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' https://auth.ghassen.io/.well-known/oauth-authorization-server/realms/pockito
+```
+
 The first must show `resource: https://pockito.ghassen.io/mcp` and Keycloak under
-`authorization_servers`; the second the challenge header; the third an authorization
-endpoint and a list containing `S256`. If any is wrong, the connector fails at a point where
-ChatGPT's error message will not say why.
+`authorization_servers` — a redirect or HTML here means the priority-135 rule is not applied.
+The second must show the challenge header. The third must give an authorization endpoint and a
+list containing `S256`. The fourth must be `200`, not `404`; that is the RFC 8414 rewrite. If
+any is wrong, the connector fails at a point where ChatGPT's error message will not say why.
 
 ## Part 2 — Adding the connector (for users)
 
@@ -173,21 +256,60 @@ Still under **Settings → Connectors**, choose **Create** / **Add custom connec
 The URL must be exactly that, with no trailing slash — it is also the identifier the token is
 issued for, and a near-miss fails authentication rather than routing.
 
-**4. Sign in to Pockito.**
+**4. Fill in OAuth advanced settings.**
+ChatGPT discovers the endpoints, but it cannot discover a client identity, so that part is
+typed in. Open **OAuth advanced settings** and set:
+
+| Section | Field | Value |
+|---------|-------|-------|
+| Client registration | Registration method | **User-Defined OAuth Client** |
+| | OAuth Client ID | `pockito-chatgpt` |
+| | OAuth Client Secret | from the client's Credentials tab in Keycloak |
+| | Token endpoint auth method | `client_secret_basic` |
+| Scopes | Default scopes | `openid, profile, email` |
+| | Base scopes | `openid` |
+| OAuth endpoints | Auth URL | `https://auth.ghassen.io/realms/pockito/protocol/openid-connect/auth` |
+| | Token URL | `https://auth.ghassen.io/realms/pockito/protocol/openid-connect/token` |
+| | Registration URL | *leave empty* |
+| | Authorization server base | `https://auth.ghassen.io/realms/pockito` |
+| | Resource | `https://pockito.ghassen.io/mcp` |
+| OpenID support | — | optional; nothing here depends on it |
+
+Three of these are worth understanding rather than copying.
+
+**Token endpoint auth method must not be `none`,** which is the field's default.
+`pockito-chatgpt` is confidential, and Keycloak does not list `none` among its supported
+methods. Leaving it produces the most misleading failure available: the login page never
+checks client authentication, so you sign in perfectly and only the invisible code-to-token
+step is rejected.
+
+**Registration URL must stay empty.** ChatGPT offers Dynamic Client Registration whenever that
+field is populated, and Keycloak's default `Trusted Hosts` policy rejects anonymous
+registration with `Host not trusted`. We do not enable DCR — see Part 1 — so the field being
+blank is what keeps ChatGPT on the manual client.
+
+**Resource must match byte for byte** the `resource` value in our discovery document. It is
+the identifier tokens are minted for; a trailing slash is a failed connector.
+
+There is no field here for the token's audience. ChatGPT sends RFC 8707 `resource=`, Keycloak
+ignores it, and `pockito-mcp` reaches the token only through the `oidc-audience-mapper`. If
+every tool call returns 401, nothing on this page will fix it.
+
+**5. Sign in to Pockito.**
 Saving the connector opens the Pockito login page at `auth.ghassen.io`. Sign in with the
 same account you use in the Pockito app. If you do not have one yet, create it in the app
 first; the connector cannot register you.
 
-**5. Approve the connection.**
+**6. Approve the connection.**
 Keycloak shows what ChatGPT is asking for. Approve it, and you land back in ChatGPT with the
 connector listed.
 
-**6. Enable it in a chat.**
+**7. Enable it in a chat.**
 Open a new conversation, and turn Pockito on in the connector or tools menu. Connectors are
 per-conversation — a connector that is set up but not switched on will be ignored, which
 looks identical to one that is broken.
 
-**7. Check it works.**
+**8. Check it works.**
 Ask: *"Using Pockito, what's my display name and default currency?"* ChatGPT should call
 `get_my_profile` and `get_my_preferences` and answer from real data. If it answers without
 calling a tool, or says it has no access, the connector is not enabled in this conversation.
@@ -211,17 +333,68 @@ chat.
 
 ## When it does not work
 
+Everything below produced the identical message in ChatGPT — *"There was a problem connecting
+Pockito."* Do not try to read a cause out of that sentence; there isn't one in it. Find out
+which hop failed first, then consult the table.
+
+### Find the failing hop
+
+Three places, in order. Each one tells you whether to stop or keep going.
+
+**1. Keycloak's auth events.** The admin console's Events page crashes on Keycloak 25
+(`Cannot destructure property 'rowData' of 'undefined'`), so read them from the pod log
+instead. `KC_LOG_LEVEL=info,org.keycloak.events:debug` is set on the deployment for exactly
+this reason — keep it until Keycloak is upgraded.
+
+```bash
+kubectl -n ghassen-io logs -f deploy/keycloak | grep "type="
+```
+
+| What you see | Where the failure is |
+|--------------|----------------------|
+| No `LOGIN` at all | Discovery: ChatGPT never reached the login page |
+| `LOGIN`, then nothing | ChatGPT never redeemed the code — it failed on the redirect back |
+| `LOGIN`, then `CODE_TO_TOKEN_ERROR` | Keycloak refused the token; the `error=` and `reason=` fields name the cause exactly |
+| `LOGIN`, then `CODE_TO_TOKEN` | OAuth is fine. Go to step 2. |
+
+**2. The MCP server's log.**
+
+```bash
+kubectl -n pockito logs -f deploy/pockito-mcp
+```
+
+A 401 here means the token was issued but rejected — an audience problem, not an OAuth one.
+Silence means ChatGPT never called us.
+
+**3. The protocol exchange,** if the first two are clean and it still fails. Set
+`logging.level.io.modelcontextprotocol: DEBUG` in `application-k8s.yml` to see the JSON-RPC
+messages themselves. A healthy connect reads `initialize` → `notifications/initialized` →
+`tools/list`. Turn it back off afterwards: it logs full message bodies, tool arguments
+included.
+
+### What each failure was
+
 | Symptom | Cause | Fix |
 |---------|-------|-----|
 | No option to add a custom connector | Plan without Developer Mode, or an admin has disabled it | Check the plan; on Business/Enterprise ask the workspace admin |
-| "Could not connect" straight away | Wrong URL, or `/.well-known` not routed to the MCP service | Re-check the URL; run the first verification command above |
-| Login succeeds, tools all fail | Token has no `pockito-mcp` audience | The `oidc-audience-mapper` is missing on `pockito-chatgpt` in the deployed realm |
+| `must advertise PKCE support with code_challenge_methods_supported containing S256` | ChatGPT read no authorization-server metadata at all — either `/.well-known/oauth-protected-resource` is not routed to the MCP service, or the RFC 8414 path-insert URL 404s | Verification commands 1 and 4 above. The message names PKCE but the fault is never PKCE |
+| `Dynamic client registration failed … Policy 'Trusted Hosts' rejected` | ChatGPT chose DCR because a Registration URL was present | Clear the Registration URL and pick User-Defined OAuth Client. Do not enable anonymous DCR on a realm holding real users |
+| Login succeeds, then a generic failure; Keycloak logs `CODE_TO_TOKEN_ERROR` with `invalid_client_credentials` | Token endpoint auth method is `none`, or the secret is stale | Set `client_secret_basic` and regenerate the secret. Regenerating is safe: no Pockito service uses it |
+| Login succeeds; Keycloak logs `not_allowed`, `"Offline tokens not allowed for the user or client"` | ChatGPT asked for `offline_access` and Keycloak will not issue an offline token | Add `offline_access` to `default-roles-pockito` and confirm it is an Optional client scope on `pockito-chatgpt` |
+| Login succeeds, `CODE_TO_TOKEN` is clean, `pockito-mcp` logs `Missing handler for request type: server/discover` | The client speaks a newer MCP revision than the SDK, and an unhandled method returns 500 — a status its fallback rules cannot act on | `LegacyEraProbeFilter` should be answering that probe with 400. If it is not, check it is still registered after `AuthorizationFilter` |
+| Login succeeds, tools all fail with 401 | Token has no `pockito-mcp` audience | The `oidc-audience-mapper` is missing on `pockito-chatgpt` in the deployed realm |
 | Redirect rejected by Keycloak | ChatGPT is using a callback URI the client does not list | Copy the exact redirect URI from the connector page into the client |
 | Tools listed but never called | Connector not enabled in this conversation | Turn it on in the conversation's tools menu |
 | Worked yesterday, `401` today | Refresh token expired or the session was revoked | Reconnect the connector to sign in again |
 
-Server-side, each failed call carries a correlation id in the response and in
-`pockito-mcp`'s logs; it is the fastest way to tell a rejected token from a Core error.
+Each failed call carries a correlation id in the response and in `pockito-mcp`'s logs; it is
+the fastest way to tell a rejected token from a Core error.
+
+### Noise that is not a problem
+
+`Missing handler for notification type: notifications/initialized` is expected. A stateless
+server has no session state to advance when the client announces it is ready, so the SDK
+registers no handler; notifications are answered `202 Accepted` either way.
 
 ## Notes for whoever maintains this
 
@@ -233,6 +406,25 @@ mechanism. Neither is needed now, and both would simplify this page.
 
 Everything in Part 1 is generic OAuth 2.1 discovery, not ChatGPT-specific. Claude, VS Code
 and any other MCP client that speaks the authorization spec connect to the same endpoint
-with no further work.
+with no further work. The `server/discover` probe is likewise not a ChatGPT quirk — any client
+on a current SDK will send it, so `LegacyEraProbeFilter` is what keeps every one of them
+working, not just this connector.
+
+### Things left undone
+
+- **Two debug settings are deliberately on.** `logging.level.io.modelcontextprotocol: DEBUG`
+  in `application-k8s.yml` should come off once the connector is trusted. Keycloak's
+  `KC_LOG_LEVEL` event logging should stay until Keycloak is upgraded, because the admin
+  console cannot show events on 25.0.0.
+- **Upgrades that would remove code from this page.** `mcp-core` 2.0.0 → 2.0.1; Keycloak off
+  25.0.0; and eventually an SDK implementing `2026-07-28`, which retires
+  `LegacyEraProbeFilter` entirely.
+- **`USER` is granted to nobody** in the deployed realm — see [The deployed
+  realm](#the-deployed-realm). Nothing is known to depend on it, but nothing has been checked
+  either.
+- **A recreated Keycloak user orphans its Pockito profile.** Profiles are keyed on the `sub`
+  claim (`UserProfile.keycloak_subject`, unique and non-updatable), so deleting and recreating
+  a user in Keycloak silently mints a fresh, empty profile and strands the old one. Repointing
+  it is a database update, not something the application can do.
 
 See also: [mcp.md](mcp.md) for the server itself, [keycloak.md](keycloak.md) for the realm.

@@ -276,22 +276,41 @@ users.
 
 ## Production deployment
 
-Build from the repository root:
+`auth.ghassen.io` runs this image. It is built, published and rolled out from
+the **ghassen-io-infra** repository, which owns the `ghassen-io` namespace:
+
+```
+Actions -> "Pockito Deploy"
+  action:    build-and-deploy
+  component: keycloak
+```
+
+That workflow checks out this repository, builds `infra/keycloak/Dockerfile`,
+publishes `repo.ghassen.io/library/pockito-keycloak:<sha>`, and rolls it out
+with a database backup, a health check and a rollback path. The full runbook —
+including the Keycloak 25 → 26 upgrade of the live deployment — is
+`keycloak/DEPLOY.md` in that repository.
+
+Building the same image by hand, from this repository root:
 
 ```bash
 infra/keycloak/build-image.sh
 
-# Release/CI publication:
+# Publish an immutable tag:
 PUSH=1 KEYCLOAK_TAG=26.4.7-pockito.1 infra/keycloak/build-image.sh
 ```
 
-Publish/deploy that immutable image through the existing Keycloak deployment,
-then apply the three realm theme settings with `kcadm.sh`. Do not change the
+`/opt/keycloak/themes` must not be mounted over in the deployment: a volume
+there hides the baked-in theme and Keycloak falls back to its default login
+page, which still returns HTTP 200 and so is easy to miss.
+
+The realm's three theme settings are applied with `kcadm.sh` on an existing
+realm — `--import-realm` skips a realm that already exists. Do not change the
 issuer, hostname, database, OAuth clients, or realm import strategy as part of
-the theme rollout.
+a theme rollout.
 
 Rollback is selecting the prior image and prior theme settings. No credential
-or token data is migrated by this change.
+or token data is migrated by a theme change.
 
 ## Evidence-based coverage matrix
 
