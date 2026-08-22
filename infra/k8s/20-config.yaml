@@ -40,7 +40,10 @@ data:
   S3_PUBLIC_ENDPOINT: "https://files.pockito.ghassen.io"
   S3_BUCKET: "pockito"
   S3_REGION: "us-east-1"
-  S3_PRESIGNED_URL_VALIDITY: "15m"
+  # Also the client-caching ceiling: a URL is reused for half of this, and a client
+  # cannot cache bytes for longer than the URL addressing them stays valid. Raising
+  # it means fewer re-downloads and a longer life for a leaked URL.
+  S3_PRESIGNED_URL_VALIDITY: "1h"
 
   # --- Service discovery ---------------------------------------------------
   POCKITO_CORE_URL: "http://pockito-core.pockito.svc.cluster.local:8081"

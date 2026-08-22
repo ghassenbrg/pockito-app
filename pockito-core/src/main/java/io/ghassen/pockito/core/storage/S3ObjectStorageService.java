@@ -1,6 +1,7 @@
 package io.ghassen.pockito.core.storage;
 
 import java.net.URI;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -33,6 +34,10 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
  *
  * <p>Reads and writes go to {@code endpoint}; pre-signed URLs are signed for
  * {@code publicEndpoint}, because the client redeeming one is outside the cluster.
+ *
+ * <p>Objects are written with a {@code Cache-Control} header and their pre-signed URLs are
+ * reused for a window, which together are what let a client cache them at all. See
+ * {@link PresignedUrlCache}.
  */
 @Service
 public class S3ObjectStorageService implements ObjectStorageService {
@@ -42,9 +47,11 @@ public class S3ObjectStorageService implements ObjectStorageService {
     private final S3Client client;
     private final S3Presigner presigner;
     private final ObjectStorageProperties properties;
+    private final PresignedUrlCache presignedUrls;
 
     public S3ObjectStorageService(ObjectStorageProperties properties) {
         this.properties = properties;
+        this.presignedUrls = new PresignedUrlCache(Clock.systemUTC());
         var credentials = StaticCredentialsProvider.create(
                 AwsBasicCredentials.create(properties.accessKey(), properties.secretKey()));
         var serviceConfiguration = S3Configuration.builder()
@@ -98,6 +105,11 @@ public class S3ObjectStorageService implements ObjectStorageService {
                             .key(key)
                             .contentType(contentType)
                             .contentLength((long) content.length)
+                            // Stored on the object, so storage returns it on every read and
+                            // clients get an explicit freshness rule instead of guessing one
+                            // from Last-Modified — which, for a just-uploaded file, means
+                            // revalidating on every load.
+                            .cacheControl(properties.objectCacheControl())
                             .build(),
                     RequestBody.fromBytes(content));
             return new StoredObject(key, contentType, content.length);
@@ -125,6 +137,7 @@ public class S3ObjectStorageService implements ObjectStorageService {
     @Override
     public void deleteObject(String key) {
         try {
+            presignedUrls.evict(key);
             client.deleteObject(DeleteObjectRequest.builder().bucket(properties.bucket()).key(key).build());
         } catch (S3Exception e) {
             throw new ObjectStorageException("Failed to delete object " + key, e);
@@ -133,6 +146,10 @@ public class S3ObjectStorageService implements ObjectStorageService {
 
     @Override
     public String createPresignedUrl(String key, Duration validity) {
+        return presignedUrls.get(key, validity.dividedBy(2), () -> sign(key, validity));
+    }
+
+    private String sign(String key, Duration validity) {
         var presigned = presigner.presignGetObject(GetObjectPresignRequest.builder()
                 .signatureDuration(validity)
                 .getObjectRequest(GetObjectRequest.builder()

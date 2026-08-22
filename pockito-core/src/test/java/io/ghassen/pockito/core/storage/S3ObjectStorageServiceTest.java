@@ -41,8 +41,38 @@ class S3ObjectStorageServiceTest {
         assertThat(properties("   ").publicEndpoint()).isEqualTo(INTERNAL);
     }
 
+    @Test
+    void reusesOneUrlSoTheClientCanCacheTheObject() {
+        var service = new S3ObjectStorageService(properties(PUBLIC));
+
+        String first = service.createPresignedUrl("avatars/abc/def.jpg", Duration.ofHours(1));
+        String second = service.createPresignedUrl("avatars/abc/def.jpg", Duration.ofHours(1));
+
+        // Byte-identical, signature and all: an HTTP cache is keyed on the whole URL, so
+        // anything less than exact equality is a fresh download.
+        assertThat(second).isEqualTo(first);
+    }
+
+    @Test
+    void signsEachObjectSeparately() {
+        var service = new S3ObjectStorageService(properties(PUBLIC));
+
+        String one = service.createPresignedUrl("avatars/abc/one.jpg", Duration.ofHours(1));
+        String two = service.createPresignedUrl("avatars/abc/two.jpg", Duration.ofHours(1));
+
+        assertThat(one).isNotEqualTo(two);
+    }
+
     private static ObjectStorageProperties properties(String publicEndpoint) {
         return new ObjectStorageProperties(
-                INTERNAL, publicEndpoint, "pockito", "key", "secret", "us-east-1", true, Duration.ofMinutes(15));
+                INTERNAL,
+                publicEndpoint,
+                "pockito",
+                "key",
+                "secret",
+                "us-east-1",
+                true,
+                "private, max-age=31536000, immutable",
+                Duration.ofHours(1));
     }
 }

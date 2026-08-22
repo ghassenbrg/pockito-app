@@ -59,7 +59,8 @@ nothing else.
 | `S3_ACCESS_KEY`             | *secret*                                       |
 | `S3_SECRET_KEY`             | *secret*                                       |
 | `S3_REGION`                 | `us-east-1` (SeaweedFS ignores it; the SDK requires one) |
-| `S3_PRESIGNED_URL_VALIDITY` | `15m`                                          |
+| `S3_OBJECT_CACHE_CONTROL`   | `private, max-age=31536000, immutable`         |
+| `S3_PRESIGNED_URL_VALIDITY` | `1h`                                           |
 
 `S3_ENDPOINT` is how the service reaches storage; `S3_PUBLIC_ENDPOINT` is how a browser or
 phone reaches the same storage to redeem a pre-signed URL. They differ in Kubernetes
@@ -67,6 +68,23 @@ because the first is a cluster-internal service name. The split is not cosmetic:
 signature covers the `Host` header, so a URL has to be signed for the host that will
 actually be requested, and it cannot be rewritten afterwards. Leave `S3_PUBLIC_ENDPOINT`
 unset where both sides share a network — it then falls back to `S3_ENDPOINT`.
+
+### Client caching
+
+Two settings decide whether a client re-downloads a stored object on every page load.
+
+`S3_OBJECT_CACHE_CONTROL` is written onto each object at upload and returned on every read.
+Without it storage sends no freshness directive at all, and a browser falls back to guessing
+one from `Last-Modified` — which for a just-uploaded file means revalidating every time. The
+long lifetime is safe because keys are never reused: an upload always writes a new key and
+deletes the old object, so the bytes at a given key never change.
+
+`S3_PRESIGNED_URL_VALIDITY` is the real ceiling. An HTTP cache is keyed on the whole URL
+including the query string, so a URL signed afresh per response is a cache key the client
+has never seen and it re-downloads every time. Pockito therefore reuses one signed URL per
+object for **half** the validity, which is how long a client can actually hold the bytes.
+Raising it means fewer re-downloads and a longer life for a URL that leaks; lowering it, the
+reverse. That trade is why it is configuration.
 
 ### Service discovery
 

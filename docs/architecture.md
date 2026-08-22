@@ -87,8 +87,16 @@ Object storage sits behind `ObjectStorageService`, whose vocabulary is `putObjec
 SeaweedFS exists, and the configuration keys are provider-neutral (`S3_ENDPOINT`,
 `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_REGION`).
 
-Avatar URLs are pre-signed per response rather than stored. The object stays private, and a
-URL that leaks expires on its own.
+Avatar URLs are pre-signed rather than stored. The object stays private, and a URL that
+leaks expires on its own.
+
+They are not, however, signed *per response*. A signature carries a timestamp, and an HTTP
+cache is keyed on the whole URL including its query string, so a per-response signature
+minted a cache key the client had never seen every time and every page load re-downloaded
+bytes the browser already held. `PresignedUrlCache` reuses one URL per object for half its
+validity, and objects are written with a `Cache-Control` header. Both are needed: a stable
+URL with no freshness directive still costs a revalidation round-trip on every load. This
+applies to everything in object storage, not only avatars.
 
 Pre-signing is done against `S3_PUBLIC_ENDPOINT` rather than `S3_ENDPOINT`, because the
 client redeeming the URL is outside the cluster and cannot resolve a Kubernetes service

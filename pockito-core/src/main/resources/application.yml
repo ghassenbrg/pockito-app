@@ -62,7 +62,12 @@ pockito:
     secret-key: ${S3_SECRET_KEY:pockito}
     region: ${S3_REGION:us-east-1}
     path-style-access: true
-    presigned-url-validity: ${S3_PRESIGNED_URL_VALIDITY:15m}
+    # Keys are never reused — every upload writes a new one — so the bytes at a key are
+    # immutable and may be cached indefinitely.
+    object-cache-control: "${S3_OBJECT_CACHE_CONTROL:private, max-age=31536000, immutable}"
+    # Doubles as the client-caching ceiling: a URL is reused for half of this, and nothing
+    # can be cached for longer than the URL addressing it stays valid.
+    presigned-url-validity: ${S3_PRESIGNED_URL_VALIDITY:1h}
   dify:
     enabled: ${DIFY_ENABLED:false}
     base-url: ${DIFY_BASE_URL:http://dify-api.dify.svc.cluster.local:5001}

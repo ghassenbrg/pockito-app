@@ -21,7 +21,7 @@ if [ -z "$css_path" ]; then
   exit 1
 fi
 
-curl -fsS "$KEYCLOAK_URL$css_path" | grep -q -- '--pk-primary'
+curl -fsS "$KEYCLOAK_URL$css_path" | grep -q -- 'Reference-matched login composition'
 resource_base=${css_path%/css/pockito.css}
 
 grep -q 'class="pk-brand-panel"' "$PAGE"
@@ -33,6 +33,16 @@ for asset in \
   pockito-logo-dark.svg \
   kito-welcome.png \
   favicon.ico; do
+  curl -fsS -o /dev/null "$KEYCLOAK_URL$resource_base/img/$asset"
+done
+
+for asset in \
+  auth/pockito-logo.svg \
+  auth/kito-login.png \
+  auth/login-hero.png \
+  auth/login-hero@2x.png \
+  auth/login-hero.webp \
+  auth/login-hero@2x.webp; do
   curl -fsS -o /dev/null "$KEYCLOAK_URL$resource_base/img/$asset"
 done
 

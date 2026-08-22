@@ -22,7 +22,7 @@ infra/keycloak/
     │   ├── template.ftl               shared responsive product shell
     │   ├── footer.ftl                 product/help/legal footer
     │   ├── messages/                  Pockito English/Japanese strings
-    │   └── resources/                 tokens, components, logo, Kito
+    │   └── resources/                 tokens, components, logo, Kito, hero
     ├── account/
     │   ├── theme.properties           inherits keycloak.v3 Account Console
     │   └── resources/                 Account Console skin and current logo
@@ -58,6 +58,8 @@ no replacement logo system is introduced by this theme.
 
 The current files remain the sources used by authentication:
 
+- `login/resources/img/auth/pockito-logo.svg`, the current wallet-style lockup
+  used on the reference-matched light hero panel;
 - `login/resources/img/pockito-logo-light.svg` on light form surfaces;
 - `login/resources/img/pockito-logo-dark.svg` on the navy brand panel;
 - `login/resources/img/favicon.svg` and `favicon.ico` for browser chrome;
@@ -66,9 +68,33 @@ The current files remain the sources used by authentication:
 - `email/resources/img/pockito-logo.png`, an email-safe transparent export of
   the current light-background lockup.
 
-Kito comes from the existing official
-`pockito-mobile/assets/mascot/kito/runtime/kito-welcome.png`. The theme ships one
-optimized copy; an unused derivative was removed.
+Kito's identity comes from the existing official
+`pockito-mobile/assets/mascot/kito/runtime/kito-welcome.png`. The dedicated
+`login/resources/img/auth/kito-login.png` copy is used for the compact mobile
+security block; an older unused derivative remains removed.
+
+## Login hero artwork
+
+The supplied August 2026 login screenshot is the visual source of truth for
+the split-screen composition. Its complete left panel is **not** shipped as an
+image. The production hero was generated as a new transparent composition,
+using the screenshot for composition/style and the official Kito render for
+mascot identity and pose.
+
+```text
+login/resources/img/auth/
+├── login-hero.png          768×512 RGBA fallback
+├── login-hero@2x.png       1536×1024 RGBA Retina master
+├── login-hero.webp         optimized 1× web delivery
+├── login-hero@2x.webp      optimized Retina web delivery
+├── kito-login.png          official standalone mobile Kito
+└── pockito-logo.svg        current wallet-style Pockito logo
+```
+
+The `<picture>` element prefers WebP and retains PNG `srcset` fallbacks. The
+hero contains Kito, wallet, coins, analytics tile, leaves and foreground waves
+only. Logo, headline, description, trust card, language control, form and
+footer are localized HTML/CSS components and remain responsive and accessible.
 
 ## Login-theme architecture
 
@@ -125,10 +151,10 @@ not claimed as a live realm test.
 ## Responsive behavior
 
 - **840 px and wider:** two-pane authentication product with Kito/brand content
-  and a constrained form card.
+  and a rounded authentication panel matching the desktop reference.
 - **600–839 px:** centered tablet card without a compressed decorative panel.
 - **Below 600 px:** mobile-first single column, current logo, compact language
-  selector, 48 px controls, safe-area padding, and a post-form Kito/trust block.
+  selector, 56 px controls, safe-area padding, and a post-form Kito/trust block.
 - **Short landscape:** form-only presentation; Kito is hidden and the document
   scrolls rather than shrinking controls.
 - **Below 360 px:** emergency 12 px gutter and wrapping provider/footer layout.
@@ -140,8 +166,8 @@ increase document height without horizontal overflow.
 Verified login widths/heights with no horizontal overflow:
 
 ```text
-1920x1080  1440x900  1280x800  1024x768  768x1024
-430x932    390x844   375x812   360x800   844x390
+1920x1080  1440x900  1180x820  1024x768  839x900  768x1024
+430x932    390x844   360x800   844x390
 320x568 stress check
 ```
 

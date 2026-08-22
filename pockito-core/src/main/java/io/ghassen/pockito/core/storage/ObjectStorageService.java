@@ -19,8 +19,14 @@ public interface ObjectStorageService {
     void deleteObject(String key);
 
     /**
-     * A time-limited URL that lets a client fetch the object directly, so avatar bytes do
-     * not have to be proxied through the API on every page load.
+     * A time-limited URL that lets a client fetch the object directly, rather than having
+     * the bytes proxied through the API on every page load.
+     *
+     * <p>Callers may get back a URL minted earlier, with less than {@code validity}
+     * remaining on it. That is deliberate and is what makes the object cacheable: a URL
+     * that changed on every call would be a cache key the client had never seen, so it
+     * would re-download bytes it already holds. Never assume a fresh signature, and never
+     * derive anything from the query string.
      */
     String createPresignedUrl(String key, Duration validity);
 

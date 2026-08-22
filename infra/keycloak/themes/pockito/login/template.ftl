@@ -133,16 +133,32 @@
 
 <body id="keycloak-bg" class="${properties.kcBodyClass!}" data-page-id="login-${pageId}">
 <div class="${properties.kcLogin!}">
-  <aside class="pk-brand-panel" aria-hidden="true">
-    <img class="pk-brand-panel__logo" src="${url.resourcesPath}/img/pockito-logo-dark.svg" alt="">
+  <aside class="pk-brand-panel" aria-label="${msg('pkBrandPanelLabel')}">
+    <img class="pk-brand-panel__logo" src="${url.resourcesPath}/img/auth/pockito-logo.svg" alt="">
     <div class="pk-brand-panel__copy">
-      <p class="pk-brand-panel__eyebrow">${msg("pkAuthEyebrow")}</p>
       <h2>${msg("pkAuthWelcome")} <span>${msg("pkBrandName")}</span></h2>
       <p>${msg("pkAuthTagline")}</p>
     </div>
-    <img class="pk-brand-panel__mascot" src="${url.resourcesPath}/img/kito-welcome.png" alt="">
+    <picture class="pk-brand-panel__artwork">
+      <source
+        type="image/webp"
+        srcset="${url.resourcesPath}/img/auth/login-hero.webp 1x, ${url.resourcesPath}/img/auth/login-hero@2x.webp 2x"
+      >
+      <img
+        src="${url.resourcesPath}/img/auth/login-hero.png"
+        srcset="${url.resourcesPath}/img/auth/login-hero.png 1x, ${url.resourcesPath}/img/auth/login-hero@2x.png 2x"
+        width="768"
+        height="512"
+        alt="${msg('pkHeroAlt')}"
+        decoding="async"
+        fetchpriority="high"
+      >
+    </picture>
     <div class="pk-trust-card">
-      <span class="pk-trust-card__shield" aria-hidden="true">✓</span>
+      <svg class="pk-trust-card__shield" viewBox="0 0 48 48" aria-hidden="true">
+        <path d="M24 4 40 10v11c0 10.5-6.7 18.8-16 23-9.3-4.2-16-12.5-16-23V10L24 4Z"/>
+        <path d="m17 24 4.5 4.5L31 19"/>
+      </svg>
       <span><strong>${msg("pkDataSecure")}</strong><small>${msg("pkSecurityTagline")}</small></span>
     </div>
   </aside>
@@ -154,6 +170,9 @@
     <main class="${properties.kcLoginMain!}">
       <div class="${properties.kcLoginMainHeader!}">
         <h1 class="${properties.kcLoginMainTitle!}" id="kc-page-title"><#nested "header"></h1>
+        <#if pageId == "login">
+          <p class="pk-auth-intro">${msg("pkSignInIntro")}</p>
+        </#if>
         <#if realm.internationalizationEnabled  && locale.supported?size gt 1>
         <div class="${properties.kcLoginMainHeaderUtilities!}">
           <div class="${properties.kcInputClass!}">
@@ -268,10 +287,10 @@
             <@loginFooter.content/>
         </div>
     </main>
-    <div class="pk-mobile-brand" aria-hidden="true">
-      <img src="${url.resourcesPath}/img/kito-welcome.png" alt="">
+    <section class="pk-mobile-brand" aria-label="${msg('pkMobileTrustLabel')}">
+      <img src="${url.resourcesPath}/img/auth/kito-login.png" alt="${msg('pkKitoAlt')}" width="739" height="768" loading="lazy" decoding="async">
       <span><strong>${msg("pkDataSecure")}</strong><small>${msg("pkSecurityTagline")}</small></span>
-    </div>
+    </section>
   </div>
 </div>
 </body>
