@@ -30,6 +30,9 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
  *
  * <p>Uses path-style addressing by default because SeaweedFS (like MinIO) does not serve
  * virtual-host-style bucket subdomains.
+ *
+ * <p>Reads and writes go to {@code endpoint}; pre-signed URLs are signed for
+ * {@code publicEndpoint}, because the client redeeming one is outside the cluster.
  */
 @Service
 public class S3ObjectStorageService implements ObjectStorageService {
@@ -55,8 +58,11 @@ public class S3ObjectStorageService implements ObjectStorageService {
                 .region(Region.of(properties.region()))
                 .serviceConfiguration(serviceConfiguration)
                 .build();
+        // Signed for the public origin, not the one Core dials: a SigV4 signature covers the
+        // Host header, so a URL signed for the in-cluster service name is rejected the moment
+        // a browser requests it through the ingress under its public name.
         this.presigner = S3Presigner.builder()
-                .endpointOverride(URI.create(properties.endpoint()))
+                .endpointOverride(URI.create(properties.publicEndpoint()))
                 .credentialsProvider(credentials)
                 .region(Region.of(properties.region()))
                 .serviceConfiguration(serviceConfiguration)

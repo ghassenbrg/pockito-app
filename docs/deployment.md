@@ -25,6 +25,13 @@ so the old application keeps running untouched while the new one comes up.
 | `40-pockito-old-compat.yaml`      | The proxy that makes the legacy app work under `/old`     |
 | `50-ingressroute.yaml`            | Traefik routing, middlewares and the HTTPS redirect       |
 
+### DNS prerequisite
+
+`files.pockito.ghassen.io` must resolve to the same address as `pockito.ghassen.io` before
+`50-ingressroute.yaml` is applied. Traefik's `le` resolver uses the TLS-ALPN-01 challenge,
+so a name that does not resolve to this server on :443 gets no certificate. Avatars are the only thing that depends on it: their
+pre-signed URLs are signed for that host, so they 404 until the record exists.
+
 ## One command
 
 `infra/k8s/deploy.sh` does everything below, in order, with a preflight and a confirmation
@@ -157,6 +164,11 @@ kubectl -n pockito exec deploy/pockito-api -- \
 curl -sI https://pockito.ghassen.io/          # 302 to /app/
 curl -s  https://pockito.ghassen.io/api/v1/bootstrap   # 401 without a token
 curl -sI https://pockito.ghassen.io/old/      # 200, legacy app
+
+# Object storage. 403 is the pass: Traefik routed it and SeaweedFS rejected the
+# missing signature. 404 means the route is wrong; a TLS error means DNS or the
+# certificate is not in place yet.
+curl -sI https://files.pockito.ghassen.io/pockito/nothing.jpg
 ```
 
 `infra/k8s/local-validation/verify.sh` performs most of these automatically and can be

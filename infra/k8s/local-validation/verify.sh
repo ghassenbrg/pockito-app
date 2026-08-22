@@ -9,7 +9,8 @@ ok(){ printf '  \033[32mPASS\033[0m %s\n' "$1"; PASS=$((PASS+1)); }
 bad(){ printf '  \033[31mFAIL\033[0m %s\n        %s\n' "$1" "${2:-}"; FAIL=$((FAIL+1)); }
 check(){ [ "$2" = "$3" ] && ok "$1" || bad "$1" "expected '$3', got '$2'"; }
 
-R(){ curl -sk --resolve 'pockito.ghassen.io:8443:127.0.0.1' "$@"; }
+R(){ curl -sk --resolve 'pockito.ghassen.io:8443:127.0.0.1' \
+         --resolve 'files.pockito.ghassen.io:8443:127.0.0.1' "$@"; }
 code(){ R -o /tmp/vr.txt -w '%{http_code}' --max-time 30 "$@"; }
 
 echo "== Workloads =="
@@ -34,6 +35,10 @@ grep -q 'auth.unauthenticated' /tmp/vr.txt && ok "/api/v1 uses the shared error 
 check "/mcp requires a token" "$(code -XPOST https://pockito.ghassen.io:8443/mcp)" "401"
 check "/old redirects to /old/" "$(code https://pockito.ghassen.io:8443/old)" "301"
 check "HTTP redirects to HTTPS" "$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 -H 'Host: pockito.ghassen.io' http://localhost:8090/app/)" "301"
+# The object storage host reaches SeaweedFS, which rejects the unsigned request itself.
+# 403 is the proof that matters: 404 would mean Traefik never routed it anywhere.
+check "files host reaches object storage" "$(code https://files.pockito.ghassen.io:8443/pockito/nothing.jpg)" "403"
+check "files host refuses writes" "$(code -XPUT https://files.pockito.ghassen.io:8443/pockito/nothing.jpg)" "404"
 
 echo
 echo "== The legacy app under /old =="

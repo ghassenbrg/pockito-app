@@ -90,6 +90,12 @@ SeaweedFS exists, and the configuration keys are provider-neutral (`S3_ENDPOINT`
 Avatar URLs are pre-signed per response rather than stored. The object stays private, and a
 URL that leaks expires on its own.
 
+Pre-signing is done against `S3_PUBLIC_ENDPOINT` rather than `S3_ENDPOINT`, because the
+client redeeming the URL is outside the cluster and cannot resolve a Kubernetes service
+name. Storage is therefore published on its own hostname, `files.pockito.ghassen.io`, for
+GET and HEAD only — a hostname and not a path, because a SigV4 signature covers both the
+`Host` header and the URI path, so a prefix-stripping route would invalidate it.
+
 ## Notifications
 
 ```text

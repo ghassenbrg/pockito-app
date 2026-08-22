@@ -32,6 +32,12 @@ data:
   # Provider-neutral names on purpose: swapping SeaweedFS for Ceph RGW, AWS S3
   # or R2 changes these values and nothing else.
   S3_ENDPOINT: "http://pockito-seaweedfs-s3.pockito.svc.cluster.local:8333"
+  # Where a browser or phone redeems a pre-signed avatar URL. It has to be a
+  # separate value from S3_ENDPOINT: the signature covers the Host header, so a
+  # URL signed for the cluster-internal name is rejected once a client outside
+  # the cluster requests it. A dedicated host, not a path on pockito.ghassen.io,
+  # because stripping a path prefix would change the signed canonical URI.
+  S3_PUBLIC_ENDPOINT: "https://files.pockito.ghassen.io"
   S3_BUCKET: "pockito"
   S3_REGION: "us-east-1"
   S3_PRESIGNED_URL_VALIDITY: "15m"

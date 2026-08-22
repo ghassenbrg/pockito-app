@@ -11,6 +11,11 @@
 #   /api/*     -> legacy Pockito core  (priority 110, everything not /api/v1)
 #   /app/*     -> new Nuxt webapp      (priority 100)
 #   /          -> redirect into /app/  (priority  90)
+#
+# Object storage gets its own hostname, files.pockito.ghassen.io, rather than a
+# path on this one. That is forced by AWS SigV4: a pre-signed URL's signature
+# covers both the Host header and the URI path, so a stripPrefix middleware
+# would invalidate every signature it rewrote.
 ---
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
@@ -201,3 +206,50 @@ spec:
   redirectScheme:
     scheme: https
     permanent: true
+---
+# --- Object storage, public read ---------------------------------------------
+#
+# Fronts the SeaweedFS S3 gateway so browsers and phones can redeem the
+# pre-signed avatar URLs that pockito-core hands out. Traefik forwards the
+# original Host header untouched, which is what lets SeaweedFS recompute the
+# same canonical request the SDK signed.
+#
+# Deliberately narrow: only GET and HEAD under the bucket path reach the
+# gateway, so uploads, deletes and bucket administration stay reachable only
+# from inside the cluster. SeaweedFS still verifies every signature itself —
+# this rule is the second lock, not the first.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: pockito-files
+  namespace: pockito
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`files.pockito.ghassen.io`) && PathPrefix(`/pockito/`) && (Method(`GET`) || Method(`HEAD`))
+      kind: Rule
+      middlewares:
+        - name: pockito-security-headers
+      services:
+        - name: pockito-seaweedfs-s3
+          port: 8333
+  tls:
+    certResolver: le
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: pockito-files-http-redirect
+  namespace: pockito
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`files.pockito.ghassen.io`)
+      kind: Rule
+      middlewares:
+        - name: pockito-https-redirect
+      services:
+        - name: pockito-seaweedfs-s3
+          port: 8333

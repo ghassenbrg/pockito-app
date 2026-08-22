@@ -22,6 +22,10 @@ data:
   POCKITO_NOTIFICATION_STREAM: "pockito.notifications"
 
   S3_ENDPOINT: "http://pockito-seaweedfs-s3.pockito.svc.cluster.local:8333"
+  # Same split as production, on the port the kind cluster publishes. The port is
+  # part of the Host header and therefore part of the signature, so it has to be
+  # written here rather than left to be added by whatever redeems the URL.
+  S3_PUBLIC_ENDPOINT: "https://files.pockito.ghassen.io:8443"
   S3_BUCKET: "pockito"
   S3_REGION: "us-east-1"
   S3_PRESIGNED_URL_VALIDITY: "15m"

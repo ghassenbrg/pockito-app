@@ -54,11 +54,19 @@ nothing else.
 | Variable                    | Example                                        |
 |-----------------------------|------------------------------------------------|
 | `S3_ENDPOINT`               | `http://pockito-seaweedfs-s3:8333`             |
+| `S3_PUBLIC_ENDPOINT`        | `https://files.pockito.ghassen.io`             |
 | `S3_BUCKET`                 | `pockito`                                      |
 | `S3_ACCESS_KEY`             | *secret*                                       |
 | `S3_SECRET_KEY`             | *secret*                                       |
 | `S3_REGION`                 | `us-east-1` (SeaweedFS ignores it; the SDK requires one) |
 | `S3_PRESIGNED_URL_VALIDITY` | `15m`                                          |
+
+`S3_ENDPOINT` is how the service reaches storage; `S3_PUBLIC_ENDPOINT` is how a browser or
+phone reaches the same storage to redeem a pre-signed URL. They differ in Kubernetes
+because the first is a cluster-internal service name. The split is not cosmetic: a SigV4
+signature covers the `Host` header, so a URL has to be signed for the host that will
+actually be requested, and it cannot be rewritten afterwards. Leave `S3_PUBLIC_ENDPOINT`
+unset where both sides share a network — it then falls back to `S3_ENDPOINT`.
 
 ### Service discovery
 

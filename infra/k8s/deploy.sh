@@ -85,6 +85,14 @@ if [ -t 0 ] && [ -z "${ASSUME_YES:-}" ]; then
 fi
 
 step "Traefik routing"
+# The storage hostname is new, and Let's Encrypt cannot issue for a name that does not
+# resolve. Warn rather than stop: everything except avatars works without it, and the
+# route starts serving as soon as the record and the certificate catch up.
+if ! getent hosts files.pockito.ghassen.io >/dev/null 2>&1 \
+   && ! host files.pockito.ghassen.io >/dev/null 2>&1; then
+  echo "    WARNING: files.pockito.ghassen.io does not resolve. Point it at the same"
+  echo "             address as pockito.ghassen.io, or pre-signed avatar URLs will fail."
+fi
 kubectl apply -f "$K8S/50-ingressroute.yaml"
 sleep 5
 
@@ -95,6 +103,8 @@ probe "/app/        → new webapp"      https://pockito.ghassen.io/app/
 probe "/api/v1      → 401 expected"    https://pockito.ghassen.io/api/v1/bootstrap
 probe "/mcp         → 401 expected"    https://pockito.ghassen.io/mcp
 probe "/old/        → legacy app"      https://pockito.ghassen.io/old/
+# 403 is the pass here: Traefik routed it and SeaweedFS rejected the unsigned request.
+probe "files host  → 403 expected"     https://files.pockito.ghassen.io/pockito/nothing.jpg
 printf '    %-34s %s\n' "/old/ base href" \
   "$(curl -s --max-time 30 https://pockito.ghassen.io/old/ | grep -oE '<base href="[^"]*">' | head -1)"
 
