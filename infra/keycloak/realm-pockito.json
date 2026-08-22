@@ -27,6 +27,25 @@
   "roles": {
     "realm": [
       {
+        "name": "default-roles-pockito",
+        "description": "${role_default-roles}",
+        "composite": true,
+        "clientRole": false,
+        "composites": {
+          "realm": [
+            "USER",
+            "offline_access",
+            "uma_authorization"
+          ],
+          "client": {
+            "account": [
+              "view-profile",
+              "manage-account"
+            ]
+          }
+        }
+      },
+      {
         "name": "USER",
         "description": "Standard Pockito user"
       },
@@ -36,9 +55,12 @@
       }
     ]
   },
-  "defaultRoles": [
-    "USER"
-  ],
+  "defaultRole": {
+    "name": "default-roles-pockito",
+    "description": "${role_default-roles}",
+    "composite": true,
+    "clientRole": false
+  },
   "clients": [
     {
       "clientId": "pockito-api",

@@ -21,6 +21,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import tools.jackson.databind.ObjectMapper;
 
 /**
@@ -91,7 +92,10 @@ public class SecurityConfig {
                         })
                         .accessDeniedHandler((request, response, exception) ->
                                 writeError(response, objectMapper, HttpStatus.FORBIDDEN,
-                                        "access.denied", "This token may not use the Pockito MCP server")));
+                                        "access.denied", "This token may not use the Pockito MCP server")))
+                // After authorization, so an unauthenticated probe still gets the 401 that
+                // starts discovery rather than a protocol answer it cannot use.
+                .addFilterAfter(new LegacyEraProbeFilter(mcpEndpoint, objectMapper), AuthorizationFilter.class);
         return http.build();
     }
 

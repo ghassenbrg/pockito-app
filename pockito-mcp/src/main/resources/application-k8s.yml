@@ -3,3 +3,7 @@ logging:
   level:
     root: INFO
     io.ghassen.pockito: INFO
+    # Temporary, while the ChatGPT connector is being brought up: shows the protocol
+    # exchange itself, including which handshake a client attempts and at which
+    # revision. Drop back to the default once the connector is stable.
+    io.modelcontextprotocol: DEBUG
