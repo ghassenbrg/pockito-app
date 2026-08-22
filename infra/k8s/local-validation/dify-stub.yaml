@@ -1,0 +1,70 @@
+# Local validation only. Stands at the exact address the production ConfigMap already
+# points at — service `dify-api` in namespace `dify`, port 5001, path /health — so Core's
+# real, unmodified Dify configuration can be exercised end to end without a second Dify.
+#
+# /health on 5001 is the same endpoint Dify's own deployment uses for its probes
+# (ghassen-io-infra/dify-k8s/40-api.yaml), so this is the contract, not an invention.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dify
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dify-stub-nginx
+  namespace: dify
+data:
+  nginx.conf: |
+    worker_processes 1;
+    events { worker_connections 64; }
+    http {
+      server {
+        listen 5001;
+        location /health { add_header Content-Type application/json; return 200 '{"status":"fine"}'; }
+        location / { return 404; }
+      }
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dify-api
+  namespace: dify
+spec:
+  selector:
+    app: dify-stub
+  ports:
+    - name: http
+      port: 5001
+      targetPort: 5001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dify-stub
+  namespace: dify
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dify-stub
+  template:
+    metadata:
+      labels:
+        app: dify-stub
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.29-alpine
+          ports:
+            - containerPort: 5001
+          volumeMounts:
+            - name: config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: dify-stub-nginx

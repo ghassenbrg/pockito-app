@@ -1,0 +1,33 @@
+- generic [ref=f6e3]:
+  - banner [ref=f6e4]:
+    - generic [ref=f6e5]: Pockito
+  - main [ref=f6e6]:
+    - generic [ref=f6e7]:
+      - heading "パスワードをお忘れですか？" [level=1] [ref=f6e8]
+      - combobox "languages" [ref=f6e11]:
+        - option "日本語" [selected]
+        - option "英語 (English)"
+    - generic [ref=f6e12]:
+      - generic [ref=f6e13]:
+        - generic [ref=f6e14]:
+          - generic [ref=f6e15]: メールアドレス
+          - textbox "メールアドレス" [active] [ref=f6e18]
+        - generic [ref=f6e20]:
+          - button "送信" [ref=f6e21] [cursor=pointer]
+          - link "« ログインに戻る" [ref=f6e22] [cursor=pointer]:
+            - /url: /realms/pockito/login-actions/authenticate?client_id=pockito-webapp&tab_id=P2Qcx2p5cFc&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hdXRoL2NhbGxiYWNrIiwicnQiOiJjb2RlIiwic3QiOiJ2aXN1YWwtZGVza3RvcCJ9
+      - generic [ref=f6e23]: ユーザー名またメールアドレスを入力してください。新しいパスワードの設定方法をお知らせします。
+    - generic "Pockito認証フッター" [ref=f6e27]:
+      - navigation "ヘルプと法的情報" [ref=f6e28]:
+        - link "ヘルプ" [ref=f6e29] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/help
+        - link "プライバシー" [ref=f6e30] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/privacy
+        - link "利用規約" [ref=f6e31] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/terms
+        - link "セキュリティ" [ref=f6e32] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/security
+      - paragraph [ref=f6e33]: © 2026 Pockito. All rights reserved.
+  - generic [ref=f6e35]:
+    - strong [ref=f6e36]: Pockitoがあなたのデータを安全に守ります
+    - generic [ref=f6e37]: 金融機関レベルの暗号化とプライバシー設計

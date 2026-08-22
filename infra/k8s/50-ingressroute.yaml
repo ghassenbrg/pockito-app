@@ -1,0 +1,203 @@
+# Traefik routing for pockito.ghassen.io.
+#
+# Priorities matter here and are set explicitly rather than left to Traefik's
+# rule-length heuristic, because the old and new applications share a hostname
+# and one wrong ordering sends live traffic to the wrong backend.
+#
+#   /api/v1/*  -> new Pockito API      (priority 140)
+#   /.well-known/oauth-protected-resource* -> new Pockito MCP (priority 135)
+#   /mcp*      -> new Pockito MCP      (priority 130)
+#   /old/*     -> legacy Angular app   (priority 120, via the base-href proxy)
+#   /api/*     -> legacy Pockito core  (priority 110, everything not /api/v1)
+#   /app/*     -> new Nuxt webapp      (priority 100)
+#   /          -> redirect into /app/  (priority  90)
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: pockito-root-to-app
+  namespace: pockito
+spec:
+  # The root leads users into the new application, as the architecture requires,
+  # while the app itself keeps its own /app prefix.
+  #
+  # Matched on the scheme-and-authority rather than a literal hostname: anchoring the
+  # pattern to `https://pockito.ghassen.io` makes it silently stop matching behind a
+  # different host or a non-default port, and a redirect that quietly does nothing is
+  # worse than one that fails loudly.
+  redirectRegex:
+    regex: ^(https?://[^/]+)/?$
+    replacement: ${1}/app/
+    permanent: false
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: pockito-old-strip
+  namespace: pockito
+spec:
+  # The legacy app is served from its own root; the /old prefix exists only
+  # outside. Its index.html gets `<base href="/old/">` from the compat proxy, so
+  # the browser puts the prefix back on every asset request.
+  stripPrefix:
+    prefixes:
+      - /old
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: pockito-old-slash
+  namespace: pockito
+spec:
+  # Without the trailing slash the browser resolves relative URLs against
+  # `/`, not `/old/`, and every asset misses.
+  redirectRegex:
+    regex: ^(https?://[^/]+)/old$
+    replacement: ${1}/old/
+    permanent: true
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: pockito-security-headers
+  namespace: pockito
+spec:
+  headers:
+    stsSeconds: 31536000
+    stsIncludeSubdomains: true
+    contentTypeNosniff: true
+    browserXssFilter: true
+    referrerPolicy: strict-origin-when-cross-origin
+    customRequestHeaders:
+      X-Forwarded-Proto: https
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: pockito
+  namespace: pockito
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    # --- New platform ----------------------------------------------------
+    - match: Host(`pockito.ghassen.io`) && PathPrefix(`/api/v1`)
+      kind: Rule
+      priority: 140
+      middlewares:
+        - name: pockito-security-headers
+      services:
+        - name: pockito-api
+          port: 8080
+
+    # OAuth discovery for the MCP server. Without its own rule this falls through
+    # to the catch-all and reaches the Nuxt app, and no AI client can find out how
+    # to authenticate.
+    - match: Host(`pockito.ghassen.io`) && PathPrefix(`/.well-known/oauth-protected-resource`)
+      kind: Rule
+      priority: 135
+      middlewares:
+        - name: pockito-security-headers
+      services:
+        - name: pockito-mcp
+          port: 8082
+
+    - match: Host(`pockito.ghassen.io`) && PathPrefix(`/mcp`)
+      kind: Rule
+      priority: 130
+      middlewares:
+        - name: pockito-security-headers
+      services:
+        - name: pockito-mcp
+          port: 8082
+
+    # --- Legacy application, preserved -----------------------------------
+    - match: Host(`pockito.ghassen.io`) && Path(`/old`)
+      kind: Rule
+      priority: 125
+      middlewares:
+        - name: pockito-old-slash
+      services:
+        - name: pockito-old-compat
+          port: 8080
+
+    - match: Host(`pockito.ghassen.io`) && PathPrefix(`/old/`)
+      kind: Rule
+      priority: 120
+      middlewares:
+        - name: pockito-old-strip
+      services:
+        - name: pockito-old-compat
+          port: 8080
+
+    # Everything under /api that is not /api/v1 belongs to the legacy backend.
+    # The two never overlap: the old controllers are /api/{users,wallets,
+    # transactions,categories,subscriptions} and the new API is /api/v1 only.
+    - match: Host(`pockito.ghassen.io`) && PathPrefix(`/api`)
+      kind: Rule
+      priority: 110
+      services:
+        - name: pockito-core-legacy
+          port: 8080
+
+    # --- New webapp -------------------------------------------------------
+    - match: Host(`pockito.ghassen.io`) && PathPrefix(`/app`)
+      kind: Rule
+      priority: 100
+      middlewares:
+        - name: pockito-security-headers
+      services:
+        - name: pockito-webapp
+          port: 3000
+
+    - match: Host(`pockito.ghassen.io`)
+      kind: Rule
+      priority: 90
+      middlewares:
+        - name: pockito-root-to-app
+      services:
+        - name: pockito-webapp
+          port: 3000
+  tls:
+    certResolver: le
+---
+# The legacy backend lives in the ghassen-io namespace; an ExternalName service
+# lets the routes above name it without duplicating its Deployment here.
+apiVersion: v1
+kind: Service
+metadata:
+  name: pockito-core-legacy
+  namespace: pockito
+spec:
+  type: ExternalName
+  externalName: pockito-core.ghassen-io.svc.cluster.local
+  ports:
+    - name: http
+      port: 8080
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: pockito-http-redirect
+  namespace: pockito
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`pockito.ghassen.io`)
+      kind: Rule
+      middlewares:
+        - name: pockito-https-redirect
+      services:
+        - name: pockito-webapp
+          port: 3000
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: pockito-https-redirect
+  namespace: pockito
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true

@@ -1,0 +1,16 @@
+# Deployed configuration. Every endpoint and credential arrives from the
+# ConfigMap and Secrets in infra/k8s; nothing environment-specific is set here.
+logging:
+  level:
+    root: INFO
+    io.ghassen.pockito: INFO
+    # Quiet by default: the SQL log is useful when chasing a bug and noise the
+    # rest of the time.
+    org.hibernate.SQL: WARN
+
+management:
+  endpoint:
+    health:
+      # Health details name the datastores and the storage endpoint. Fine for an
+      # authorised operator, not for anonymous probes.
+      show-details: when-authorized

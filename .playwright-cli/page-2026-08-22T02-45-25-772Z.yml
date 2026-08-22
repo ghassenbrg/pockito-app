@@ -1,0 +1,48 @@
+- generic [ref=f10e3]:
+  - banner [ref=f10e4]:
+    - generic [ref=f10e5]: Pockito
+  - main [ref=f10e6]:
+    - generic [ref=f10e7]:
+      - heading "Mobile Authenticator Setup" [level=1] [ref=f10e8]
+      - combobox "languages" [ref=f10e11]:
+        - option "English" [selected]
+        - option "Japanese (日本語)"
+    - generic [ref=f10e12]:
+      - generic [ref=f10e13]: You need to set up Mobile Authenticator to activate your account.
+      - list [ref=f10e15]:
+        - listitem [ref=f10e16]:
+          - paragraph [ref=f10e17]: "Install one of the following applications on your mobile:"
+          - list [ref=f10e18]:
+            - listitem [ref=f10e19]: Google Authenticator
+            - listitem [ref=f10e20]: Microsoft Authenticator
+            - listitem [ref=f10e21]: FreeOTP
+        - listitem [ref=f10e22]:
+          - paragraph [ref=f10e23]: "Open the application and enter the key:"
+          - paragraph [ref=f10e24]:
+            - generic [ref=f10e25]: MJTV G5BT OZQT C3TJ HBZX SOBZ HAYW 63KE
+          - paragraph [ref=f10e26]:
+            - link "Scan barcode?" [ref=f10e27] [cursor=pointer]:
+              - /url: http://localhost:8180/realms/pockito/login-actions/required-action?client_id=pockito-webapp&tab_id=HfQrjJHkkNY&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hdXRoL2NhbGxiYWNrIiwicnQiOiJjb2RlIiwic3QiOiJ0b3RwIn0&execution=CONFIGURE_TOTP&mode=qr
+        - listitem [ref=f10e28]:
+          - paragraph [ref=f10e29]: "Use the following configuration values if the application allows setting them:"
+          - paragraph
+          - list [ref=f10e30]:
+            - listitem [ref=f10e31]: "Type: Time-based"
+            - listitem [ref=f10e32]: "Algorithm: SHA1"
+            - listitem [ref=f10e33]: "Digits: 6"
+            - listitem [ref=f10e34]: "Interval: 30"
+          - paragraph
+        - listitem [ref=f10e35]:
+          - paragraph [ref=f10e36]: Enter the one-time code provided by the application and click Submit to finish the setup.
+          - paragraph [ref=f10e37]: Provide a Device Name to help you manage your OTP devices.
+      - generic [ref=f10e38]:
+        - generic [ref=f10e39]:
+          - generic [ref=f10e40]: One-time code *
+          - textbox [ref=f10e43]
+        - generic [ref=f10e44]:
+          - generic [ref=f10e45]: Device Name
+          - textbox [ref=f10e48]
+        - generic [ref=f10e53] [cursor=pointer]:
+          - checkbox "Sign out from other devices" [ref=f10e54]
+          - generic [ref=f10e55]: Sign out from other devices
+        - button "Submit" [ref=f10e58] [cursor=pointer]

@@ -1,0 +1,19 @@
+- generic [ref=f6e3]:
+  - banner [ref=f6e4]:
+    - generic [ref=f6e5]: Pockito
+  - main [ref=f6e6]:
+    - generic [ref=f6e7]:
+      - heading "パスワードをお忘れですか？" [level=1] [ref=f6e8]
+      - combobox "languages" [ref=f6e11]:
+        - option "日本語" [selected]
+        - option "英語 (English)"
+    - generic [ref=f6e12]:
+      - generic [ref=f6e13]:
+        - generic [ref=f6e14]:
+          - generic [ref=f6e15]: メールアドレス
+          - textbox "メールアドレス" [active] [ref=f6e18]
+        - generic [ref=f6e20]:
+          - button "送信" [ref=f6e21] [cursor=pointer]
+          - link "« ログインに戻る" [ref=f6e22] [cursor=pointer]:
+            - /url: /realms/pockito/login-actions/authenticate?client_id=pockito-webapp&tab_id=4GTXP3CYGe4&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hdXRoL2NhbGxiYWNrIiwicnQiOiJjb2RlIiwic3QiOiJ2aXN1YWwifQ
+      - generic [ref=f6e23]: ユーザー名またメールアドレスを入力してください。新しいパスワードの設定方法をお知らせします。

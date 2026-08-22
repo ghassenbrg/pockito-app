@@ -1,0 +1,13 @@
+# Keep build contexts small and free of anything that should not ship.
+**/target
+**/node_modules
+**/.nuxt
+**/.output
+**/build
+**/.dart_tool
+pockito-mobile
+pockito-mobile-prototype
+docs
+.git
+**/.DS_Store
+infra/k8s/01-secrets.yaml

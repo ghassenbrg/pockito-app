@@ -1,0 +1,14 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://auth.invalid/realms/pockito
+          # Never fetched: MockMvc injects an already-validated token.
+          jwk-set-uri: https://auth.invalid/realms/pockito/protocol/openid-connect/certs
+
+pockito:
+  core:
+    base-url: http://core.invalid:8081
+  cors:
+    allowed-origins: https://pockito.ghassen.io

@@ -1,0 +1,14 @@
+{
+  "identities": [
+    {
+      "name": "pockito",
+      "credentials": [
+        {
+          "accessKey": "pockito-local",
+          "secretKey": "pockito-local-secret"
+        }
+      ],
+      "actions": ["Read", "Write", "List", "Tagging", "Admin"]
+    }
+  ]
+}

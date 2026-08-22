@@ -1,0 +1,66 @@
+spring:
+  application:
+    name: pockito-api
+  threads:
+    virtual:
+      enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:https://auth.ghassen.io/realms/pockito}
+          jwk-set-uri: ${KEYCLOAK_JWKS_URI:${KEYCLOAK_ISSUER_URI:https://auth.ghassen.io/realms/pockito}/protocol/openid-connect/certs}
+  servlet:
+    multipart:
+      max-file-size: 4MB
+      max-request-size: 8MB
+
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+  error:
+    include-message: never
+    include-stacktrace: never
+
+pockito:
+  core:
+    # Kubernetes service DNS, never a pod IP.
+    base-url: ${POCKITO_CORE_URL:http://pockito-core:8081}
+    connect-timeout: 2s
+    read-timeout: 10s
+  security:
+    expected-audiences: ${POCKITO_EXPECTED_AUDIENCES:}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when-authorized
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState,core
+  info:
+    env:
+      enabled: true
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{correlationId:-}]"
+  level:
+    root: INFO
+    io.ghassen.pockito: INFO

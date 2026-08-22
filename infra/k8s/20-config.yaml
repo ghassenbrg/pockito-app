@@ -1,0 +1,49 @@
+# Every non-secret endpoint the Pockito services need, in one place.
+#
+# Services address each other by Kubernetes service DNS, never by pod IP, so a
+# pod can be rescheduled without anything being reconfigured.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pockito-config
+  namespace: pockito
+data:
+  # --- Identity ------------------------------------------------------------
+  # The issuer keeps its existing public URL. Moving Keycloak would change the
+  # issuer claim in every token already in circulation and break every client,
+  # so it stays exactly where it is.
+  KEYCLOAK_ISSUER_URI: "https://auth.ghassen.io/realms/pockito"
+  KEYCLOAK_JWKS_URI: "https://auth.ghassen.io/realms/pockito/protocol/openid-connect/certs"
+  # Tokens must be minted for Pockito, not merely by this realm.
+  POCKITO_EXPECTED_AUDIENCES: "pockito-api,pockito-mcp"
+  # The public origin the MCP server advertises to AI clients in its OAuth
+  # discovery document. Behind Traefik the request arrives as plain HTTP on the
+  # pod port, so this cannot be derived from the request and must be stated.
+  POCKITO_PUBLIC_BASE_URL: "https://pockito.ghassen.io"
+
+  # --- Datastores ----------------------------------------------------------
+  POSTGRES_URL: "jdbc:postgresql://pockito-postgres.pockito.svc.cluster.local:5432/pockito"
+  POSTGRES_USER: "pockito"
+  REDIS_HOST: "pockito-redis.pockito.svc.cluster.local"
+  REDIS_PORT: "6379"
+  POCKITO_NOTIFICATION_STREAM: "pockito.notifications"
+
+  # --- Object storage ------------------------------------------------------
+  # Provider-neutral names on purpose: swapping SeaweedFS for Ceph RGW, AWS S3
+  # or R2 changes these values and nothing else.
+  S3_ENDPOINT: "http://pockito-seaweedfs-s3.pockito.svc.cluster.local:8333"
+  S3_BUCKET: "pockito"
+  S3_REGION: "us-east-1"
+  S3_PRESIGNED_URL_VALIDITY: "15m"
+
+  # --- Service discovery ---------------------------------------------------
+  POCKITO_CORE_URL: "http://pockito-core.pockito.svc.cluster.local:8081"
+
+  # --- Dify ----------------------------------------------------------------
+  # The existing deployment in the `dify` namespace. Reached over the cluster
+  # network, so AI traffic never leaves the cluster.
+  DIFY_ENABLED: "false"
+  DIFY_BASE_URL: "http://dify-api.dify.svc.cluster.local:5001"
+
+  # --- Clients -------------------------------------------------------------
+  CORS_ALLOWED_ORIGINS: "https://pockito.ghassen.io"

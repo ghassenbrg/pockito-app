@@ -1,0 +1,20 @@
+# Local validation only: in the real cluster `pockito-ui` and `pockito-core` live in the
+# `ghassen-io` namespace. Here there is nothing in-cluster to proxy to, so the compat proxy
+# and the legacy API service are pointed at the live deployment instead. The rewriting under
+# test is identical either way.
+apiVersion: v1
+kind: Service
+metadata:
+  name: pockito-ui
+  namespace: ghassen-io
+spec:
+  type: ExternalName
+  externalName: pockito.ghassen.io
+  ports:
+    - name: http
+      port: 80
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ghassen-io

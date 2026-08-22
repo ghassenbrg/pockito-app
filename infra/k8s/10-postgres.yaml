@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pockito-postgres
+  namespace: pockito
+spec:
+  selector:
+    app: pockito-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pockito-postgres-data
+  namespace: pockito
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pockito-postgres
+  namespace: pockito
+spec:
+  serviceName: pockito-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pockito-postgres
+  template:
+    metadata:
+      labels:
+        app: pockito-postgres
+    spec:
+      # Recreate rather than rolling: two Postgres pods must never hold the same
+      # ReadWriteOnce volume at once.
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: postgres
+          image: postgres:18-alpine
+          env:
+            - name: POSTGRES_DB
+              value: pockito
+            - name: POSTGRES_USER
+              value: pockito
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pockito-postgres
+                  key: POSTGRES_PASSWORD
+            # Postgres 18 images keep data in a version-specific subdirectory of
+            # this path, so the volume mounts the parent, not /data itself.
+            - name: PGDATA
+              value: /var/lib/postgresql/18/docker
+            - name: TZ
+              value: Asia/Tokyo
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "pockito", "-d", "pockito"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "pockito", "-d", "pockito"]
+            initialDelaySeconds: 45
+            periodSeconds: 20
+            failureThreshold: 6
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pockito-postgres-data

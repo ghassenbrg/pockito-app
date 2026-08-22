@@ -1,0 +1,127 @@
+# Serves the existing Angular application under /old without rebuilding it.
+#
+# The legacy image ships `<base href="/">` baked into index.html, and its assets
+# are referenced relatively. Rewriting that one tag to `<base href="/old/">` is
+# therefore enough to make every script, stylesheet and image resolve under the
+# new prefix — which is the difference between /old actually working and /old
+# returning an HTML page whose assets all 404.
+#
+# Its API calls need no rewriting: the legacy client requests `/api/...` while
+# the new API lives strictly under `/api/v1/...`, so the IngressRoute separates
+# them by prefix priority and both keep working.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pockito-old-compat-nginx
+  namespace: pockito
+data:
+  nginx.conf: |
+    worker_processes 1;
+    events { worker_connections 1024; }
+    http {
+      # Kubernetes DNS, re-resolved rather than cached forever, so a restart of
+      # the legacy pod does not leave this proxy pointing at a dead IP.
+      resolver kube-dns.kube-system.svc.cluster.local valid=30s ipv6=off;
+      access_log /dev/stdout;
+      error_log  /dev/stderr warn;
+      sendfile on;
+
+      server {
+        listen 8080;
+
+        location = /healthz {
+          add_header Content-Type text/plain;
+          return 200 'ok';
+        }
+
+        location / {
+          set $legacy http://pockito-ui.ghassen-io.svc.cluster.local:80;
+          proxy_pass $legacy;
+          proxy_http_version 1.1;
+          proxy_set_header Host              $host;
+          proxy_set_header X-Real-IP         $remote_addr;
+          proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto https;
+          # sub_filter cannot rewrite a compressed body, so ask upstream for
+          # plain text.
+          proxy_set_header Accept-Encoding   "";
+
+          # Two rewrites, both verified against the live legacy bundle:
+          #
+          #   1. The base tag. Every hashed asset in the image is referenced
+          #      relatively, so this one line moves all of them under /old/.
+          #   2. The i18n loader prefix. It is the only absolute path the bundle
+          #      contains ("/assets/i18n/"), and base href cannot affect an
+          #      absolute path — without this the app loads but has no
+          #      translations, which is exactly the kind of half-working /old
+          #      that a status-code check would miss.
+          #
+          # If the legacy app is ever rebuilt, re-check that "/assets/ is still
+          # the only absolute reference:
+          #   curl -s https://pockito.ghassen.io/main-*.js | grep -o '"/[a-z]*/'
+          sub_filter '<base href="/">' '<base href="/old/">';
+          sub_filter '"/assets/' '"/old/assets/';
+          sub_filter_once off;
+          sub_filter_types application/javascript text/javascript;
+        }
+      }
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pockito-old-compat
+  namespace: pockito
+spec:
+  selector:
+    app: pockito-old-compat
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pockito-old-compat
+  namespace: pockito
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pockito-old-compat
+  template:
+    metadata:
+      labels:
+        app: pockito-old-compat
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.29-alpine
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+      volumes:
+        - name: config
+          configMap:
+            name: pockito-old-compat-nginx

@@ -1,0 +1,50 @@
+- generic [ref=f3e3]:
+  - banner [ref=f3e4]:
+    - generic [ref=f3e5]: Pockito
+  - main [ref=f3e6]:
+    - generic [ref=f3e7]:
+      - heading "登録" [level=1] [ref=f3e8]
+      - combobox "languages" [ref=f3e11]:
+        - option "日本語" [selected]
+        - option "英語 (English)"
+    - generic [ref=f3e12]:
+      - generic [ref=f3e13]: "* 必須フィールド"
+      - generic [ref=f3e16]:
+        - generic [ref=f3e17]:
+          - generic [ref=f3e18]: メールアドレス *
+          - textbox "メールアドレス" [ref=f3e22]
+        - generic [ref=f3e23]:
+          - generic [ref=f3e24]: パスワード *
+          - generic [ref=f3e26]:
+            - textbox "パスワード" [ref=f3e29]
+            - button "パスワードの表示" [ref=f3e31] [cursor=pointer]:
+              - generic [ref=f3e32]: 
+        - generic [ref=f3e33]:
+          - generic [ref=f3e34]: パスワード（確認） *
+          - generic [ref=f3e36]:
+            - textbox "パスワード（確認）" [ref=f3e39]
+            - button "パスワードの表示" [ref=f3e41] [cursor=pointer]:
+              - generic [ref=f3e42]: 
+        - generic [ref=f3e43]:
+          - generic [ref=f3e44]: 名
+          - textbox "名" [ref=f3e48]
+        - generic [ref=f3e49]:
+          - generic [ref=f3e50]: 姓
+          - textbox "姓" [ref=f3e54]
+        - button "登録" [ref=f3e56] [cursor=pointer]
+        - link "« ログインに戻る" [ref=f3e61] [cursor=pointer]:
+          - /url: /realms/pockito/login-actions/authenticate?client_id=pockito-webapp&tab_id=P2Qcx2p5cFc&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hdXRoL2NhbGxiYWNrIiwicnQiOiJjb2RlIiwic3QiOiJ2aXN1YWwtZGVza3RvcCJ9
+    - generic "Pockito認証フッター" [ref=f3e63]:
+      - navigation "ヘルプと法的情報" [ref=f3e64]:
+        - link "ヘルプ" [ref=f3e65] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/help
+        - link "プライバシー" [ref=f3e66] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/privacy
+        - link "利用規約" [ref=f3e67] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/terms
+        - link "セキュリティ" [ref=f3e68] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/security
+      - paragraph [ref=f3e69]: © 2026 Pockito. All rights reserved.
+  - generic [ref=f3e71]:
+    - strong [ref=f3e72]: Pockitoがあなたのデータを安全に守ります
+    - generic [ref=f3e73]: 金融機関レベルの暗号化とプライバシー設計

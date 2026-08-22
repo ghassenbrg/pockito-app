@@ -1,0 +1,199 @@
+/*
+ * Pockito web design tokens.
+ *
+ * Mirrors the mobile design system: the same palette, radii and spacing scale, so the two
+ * clients read as one product. Amber is reserved for the "shared money" signal and is not
+ * used for ordinary emphasis.
+ */
+
+:root {
+  /* Kito's palette, shared with the Flutter app so the two clients read as one
+     product. Blue is Pockito; gold is reserved for the shared-money signal and
+     must not be borrowed for ordinary emphasis. */
+  --pk-canvas: #f7f9fd;
+  --pk-blue-50: #edf5ff;
+  --pk-blue-100: #d9e9ff;
+  --pk-blue-300: #7eb5ff;
+  --pk-blue-400: #4a8cff;
+  --pk-blue-500: #286cf2;
+  --pk-blue-600: #1f55d5;
+  --pk-blue-700: #173fad;
+  --pk-aqua-300: #65e0e7;
+  --pk-aqua-400: #34cdd9;
+  --pk-aqua-500: #17b6c8;
+
+  /* Gold as a fill; the darker tone is the same hue as ink, so a shared-money
+     label stays legible at small sizes instead of failing contrast. */
+  --pk-gold-400: #f9b928;
+  --pk-gold-600: #9a6100;
+
+  --pk-navy-50: #f0f5fa;
+  --pk-navy-100: #dde7f0;
+  --pk-navy-400: #6f8498;
+  --pk-navy-500: #4d657d;
+  --pk-navy-600: #324b65;
+  --pk-navy-700: #17314d;
+  --pk-navy-800: #0d2239;
+  --pk-navy-900: #071625;
+
+  --pk-danger: #d92d43;
+  --pk-success: #0f9d68;
+
+  /* The 4 px spacing grid the mobile design system uses. */
+  --pk-space-1: 4px;
+  --pk-space-2: 8px;
+  --pk-space-3: 12px;
+  --pk-space-4: 16px;
+  --pk-space-5: 20px;
+  --pk-space-6: 32px;
+  --pk-space-7: 48px;
+
+  /* Radii: routine cards 16, heroes 20, controls 12. */
+  --pk-radius-sm: 8px;
+  --pk-radius-md: 12px;
+  --pk-radius-lg: 16px;
+  --pk-radius-hero: 20px;
+  --pk-radius-full: 999px;
+
+  --pk-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+  color-scheme: light;
+  --pk-bg: var(--pk-canvas);
+  --pk-surface: #ffffff;
+  --pk-surface-muted: var(--pk-navy-50);
+  --pk-border: var(--pk-navy-100);
+  --pk-text: var(--pk-navy-900);
+  --pk-text-muted: var(--pk-navy-500);
+  --pk-accent: var(--pk-blue-500);
+  --pk-accent-contrast: #ffffff;
+  --pk-shadow: 0 1px 2px rgb(7 22 37 / 6%), 0 8px 24px rgb(7 22 37 / 6%);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --pk-bg: var(--pk-navy-900);
+  --pk-surface: var(--pk-navy-800);
+  --pk-surface-muted: var(--pk-navy-700);
+  --pk-border: var(--pk-navy-700);
+  --pk-text: var(--pk-navy-50);
+  --pk-text-muted: var(--pk-navy-400);
+  /* The 500 blue is a fill, not ink: on a dark surface it drops below the
+     contrast a control needs, so the lighter step carries it. */
+  --pk-accent: var(--pk-blue-300);
+  --pk-accent-contrast: var(--pk-navy-900);
+  --pk-shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px rgb(0 0 0 / 32%);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#__nuxt {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--pk-font);
+  background: var(--pk-bg);
+  color: var(--pk-text);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+h1, h2, h3 { line-height: 1.25; margin: 0; letter-spacing: -0.01em; }
+p { margin: 0; }
+
+a { color: var(--pk-accent); }
+
+.pk-page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: var(--pk-space-6) var(--pk-space-4) var(--pk-space-7);
+}
+
+.pk-card {
+  background: var(--pk-surface);
+  border: 1px solid var(--pk-border);
+  border-radius: var(--pk-radius-lg);
+  box-shadow: var(--pk-shadow);
+  padding: var(--pk-space-5);
+}
+
+.pk-stack { display: flex; flex-direction: column; gap: var(--pk-space-4); }
+.pk-row { display: flex; align-items: center; gap: var(--pk-space-3); }
+.pk-muted { color: var(--pk-text-muted); }
+.pk-label { font-size: 0.875rem; font-weight: 600; }
+
+.pk-button {
+  appearance: none;
+  border: 1px solid transparent;
+  border-radius: var(--pk-radius-full);
+  padding: 12px 22px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--pk-accent);
+  color: var(--pk-accent-contrast);
+  transition: filter 120ms ease, background 120ms ease;
+  /* Never let a button collapse into an ellipse when it shares a flex row with an input. */
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.pk-button:hover:not(:disabled) { filter: brightness(1.06); }
+.pk-button:disabled { opacity: 0.55; cursor: not-allowed; }
+.pk-button--secondary {
+  background: transparent;
+  color: var(--pk-text);
+  border-color: var(--pk-border);
+}
+.pk-button--danger { background: var(--pk-danger); color: #fff; }
+
+.pk-input,
+.pk-select {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: var(--pk-radius-md);
+  border: 1px solid var(--pk-border);
+  background: var(--pk-surface);
+  color: var(--pk-text);
+  font: inherit;
+}
+.pk-input:focus-visible,
+.pk-select:focus-visible,
+.pk-button:focus-visible {
+  outline: 2px solid var(--pk-accent);
+  outline-offset: 2px;
+}
+
+.pk-error {
+  border-radius: var(--pk-radius-md);
+  border: 1px solid var(--pk-danger);
+  background: color-mix(in srgb, var(--pk-danger) 10%, transparent);
+  padding: var(--pk-space-3) var(--pk-space-4);
+  font-size: 0.9rem;
+}
+
+.pk-choices { display: flex; flex-wrap: wrap; gap: var(--pk-space-2); }
+.pk-choice {
+  border: 1px solid var(--pk-border);
+  background: var(--pk-surface);
+  color: var(--pk-text);
+  border-radius: var(--pk-radius-full);
+  padding: 9px 18px;
+  font: inherit;
+  cursor: pointer;
+}
+.pk-choice[aria-pressed='true'] {
+  border-color: var(--pk-accent);
+  background: color-mix(in srgb, var(--pk-accent) 14%, transparent);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

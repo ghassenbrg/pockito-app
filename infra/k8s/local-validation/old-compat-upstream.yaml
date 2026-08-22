@@ -1,0 +1,61 @@
+# Local validation only. Identical to infra/k8s/40-pockito-old-compat.yaml except for the
+# upstream: there is no in-cluster legacy pod here, so it proxies the public site over
+# HTTPS with the matching Host. The two sub_filter rewrites under test are unchanged.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pockito-old-compat-nginx
+  namespace: pockito
+data:
+  nginx.conf: |
+    worker_processes 1;
+    events { worker_connections 1024; }
+    http {
+      # Kubernetes DNS, re-resolved rather than cached forever, so a restart of
+      # the legacy pod does not leave this proxy pointing at a dead IP.
+      resolver kube-dns.kube-system.svc.cluster.local valid=30s ipv6=off;
+      access_log /dev/stdout;
+      error_log  /dev/stderr warn;
+      sendfile on;
+
+      server {
+        listen 8080;
+
+        location = /healthz {
+          add_header Content-Type text/plain;
+          return 200 'ok';
+        }
+
+        location / {
+          set $legacy https://pockito.ghassen.io;
+          proxy_ssl_server_name on;
+          proxy_pass $legacy;
+          proxy_http_version 1.1;
+          proxy_set_header Host              pockito.ghassen.io;
+          proxy_set_header X-Real-IP         $remote_addr;
+          proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto https;
+          # sub_filter cannot rewrite a compressed body, so ask upstream for
+          # plain text.
+          proxy_set_header Accept-Encoding   "";
+
+          # Two rewrites, both verified against the live legacy bundle:
+          #
+          #   1. The base tag. Every hashed asset in the image is referenced
+          #      relatively, so this one line moves all of them under /old/.
+          #   2. The i18n loader prefix. It is the only absolute path the bundle
+          #      contains ("/assets/i18n/"), and base href cannot affect an
+          #      absolute path — without this the app loads but has no
+          #      translations, which is exactly the kind of half-working /old
+          #      that a status-code check would miss.
+          #
+          # If the legacy app is ever rebuilt, re-check that "/assets/ is still
+          # the only absolute reference:
+          #   curl -s https://pockito.ghassen.io/main-*.js | grep -o '"/[a-z]*/'
+          sub_filter '<base href="/">' '<base href="/old/">';
+          sub_filter '"/assets/' '"/old/assets/';
+          sub_filter_once off;
+          sub_filter_types application/javascript text/javascript;
+        }
+      }
+    }

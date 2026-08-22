@@ -1,0 +1,99 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "retry": "Try again",
+    "next": "Continue",
+    "back": "Back",
+    "save": "Save",
+    "saved": "Saved"
+  },
+  "nav": {
+    "primary": "Primary",
+    "home": "Home",
+    "settings": "Settings"
+  },
+  "welcome": {
+    "title": "Welcome to Pockito",
+    "tagline": "Personal and shared money, kept simple.",
+    "login": "Log in",
+    "register": "Create account",
+    "note": "Pockito uses a secure sign-in page. Your password is never entered in this app."
+  },
+  "auth": {
+    "completing": "Signing you in…"
+  },
+  "onboarding": {
+    "progress": "Setup progress",
+    "finish": "Finish setup",
+    "profile": {
+      "title": "What should we call you?",
+      "body": "This is the name Pockito will use to greet you and show you to anyone you share money with."
+    },
+    "avatar": {
+      "title": "Add a photo",
+      "body": "Optional. Without one, Pockito shows your initials."
+    },
+    "language": {
+      "title": "Choose your language",
+      "body": "You can change this at any time in Settings."
+    },
+    "appearance": {
+      "title": "Pick an appearance",
+      "body": "System follows your device setting."
+    },
+    "currency": {
+      "title": "Set your default currency",
+      "body": "Pockito uses this as the starting point for new amounts."
+    }
+  },
+  "profile": {
+    "displayName": "Display name",
+    "displayNamePlaceholder": "e.g. Kito"
+  },
+  "avatar": {
+    "upload": "Upload a photo",
+    "replace": "Change photo",
+    "remove": "Remove photo",
+    "hint": "PNG, JPEG or WebP, up to 2 MB."
+  },
+  "preferences": {
+    "language": "Language",
+    "appearance": "Appearance",
+    "currency": "Default currency"
+  },
+  "languages": { "EN": "English", "JA": "日本語" },
+  "themes": { "SYSTEM": "System", "LIGHT": "Light", "DARK": "Dark" },
+  "home": {
+    "greetingMorning": "Good morning, {name}",
+    "greetingAfternoon": "Good afternoon, {name}",
+    "greetingEvening": "Good evening, {name}",
+    "subtitle": "Your Pockito account is ready.",
+    "readyTitle": "Nothing to track yet",
+    "readyBody": "Expenses, budgets and shared spaces arrive in the next release. Your profile and preferences are already saved to your account, so they will follow you to every device."
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "identity": "Signed in as {email}. Your email and password are managed by the Pockito sign-in service.",
+    "session": "Session",
+    "sessionBody": "Signing out ends this session on this device.",
+    "logout": "Sign out"
+  },
+  "errors": {
+    "reference": "Reference: {id}",
+    "transient": "Pockito is having trouble right now. Please try again in a moment.",
+    "unexpected": "Something went wrong. Please try again.",
+    "network.unreachable": "We can't reach Pockito. Check your connection and try again.",
+    "auth.unauthenticated": "Your session has ended. Please sign in again.",
+    "access.denied": "You don't have permission to do that.",
+    "validation.failed": "Please check the details you entered.",
+    "profile.display_name.blank": "Your display name can't be empty.",
+    "profile.display_name.too_long": "Your display name is too long.",
+    "preferences.currency.unsupported": "That currency isn't supported yet.",
+    "avatar.too_large": "That image is too large. The limit is 2 MB.",
+    "avatar.unsupported_type": "Please choose a PNG, JPEG or WebP image.",
+    "avatar.empty": "That file appears to be empty.",
+    "avatar.not_found": "There's no photo to remove.",
+    "core.unreachable": "Pockito is temporarily unavailable. Please try again shortly."
+  }
+}

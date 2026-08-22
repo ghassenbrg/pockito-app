@@ -1,0 +1,78 @@
+spring:
+  application:
+    name: pockito-mcp
+  threads:
+    virtual:
+      enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:https://auth.ghassen.io/realms/pockito}
+          jwk-set-uri: ${KEYCLOAK_JWKS_URI:${KEYCLOAK_ISSUER_URI:https://auth.ghassen.io/realms/pockito}/protocol/openid-connect/certs}
+  ai:
+    mcp:
+      server:
+        name: pockito
+        version: 1.0.0
+        # Stateless streamable HTTP: every call is a self-contained authenticated request,
+        # which suits a server sitting behind Traefik with bearer tokens and no session.
+        protocol: stateless
+        type: sync
+        instructions: >
+          Pockito is a personal and shared finance assistant. This server currently exposes
+          the authenticated user's profile and preferences. Finance capabilities are not
+          available yet.
+        capabilities:
+          tool: true
+          resource: false
+          prompt: false
+          completion: false
+        streamable-http:
+          mcp-endpoint: /mcp
+
+server:
+  port: ${SERVER_PORT:8082}
+  shutdown: graceful
+  error:
+    include-message: never
+    include-stacktrace: never
+
+pockito:
+  mcp:
+    # The origin AI clients reach us on, not the address we bind to. It is the
+    # resource identifier tokens are minted for, so it must match the URL a user
+    # types into their client exactly.
+    public-base-url: ${POCKITO_PUBLIC_BASE_URL:https://pockito.ghassen.io}
+  core:
+    base-url: ${POCKITO_CORE_URL:http://pockito-core:8081}
+    connect-timeout: 2s
+    read-timeout: 10s
+  security:
+    expected-audiences: ${POCKITO_EXPECTED_AUDIENCES:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when-authorized
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState,core
+  info:
+    env:
+      enabled: true
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{correlationId:-}]"
+  level:
+    root: INFO
+    io.ghassen.pockito: INFO

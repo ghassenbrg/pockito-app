@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: pockito-notification-worker
+  threads:
+    virtual:
+      enabled: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2s
+
+server:
+  port: ${SERVER_PORT:8083}
+  shutdown: graceful
+
+pockito:
+  notifications:
+    stream: ${POCKITO_NOTIFICATION_STREAM:pockito.notifications}
+    consumer-group: pockito-notification-worker
+    # Defaults to the pod name in Kubernetes so each replica is a distinct consumer.
+    consumer-name: ${POD_NAME:}
+    dedupe-ttl: 24h
+    poll-timeout: 2s
+    push:
+      provider: ${PUSH_PROVIDER:none}
+      credentials-path: ${PUSH_CREDENTIALS_PATH:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when-authorized
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState,redis
+  info:
+    env:
+      enabled: true
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:}]"
+  level:
+    root: INFO
+    io.ghassen.pockito: INFO

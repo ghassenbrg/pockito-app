@@ -1,0 +1,10 @@
+- generic [ref=f18e3]:
+  - banner [ref=f18e4]:
+    - generic [ref=f18e5]: Pockito
+  - main [ref=f18e6]:
+    - generic [ref=f18e7]:
+      - heading "We are sorry..." [level=1] [ref=f18e8]
+      - combobox "languages" [ref=f18e11]:
+        - option "English" [selected]
+        - option "Japanese (日本語)"
+    - paragraph [ref=f18e14]: "Invalid parameter: redirect_uri"

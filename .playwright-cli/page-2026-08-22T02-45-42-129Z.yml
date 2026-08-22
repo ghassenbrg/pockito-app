@@ -1,0 +1,4 @@
+- main [ref=f11e4]:
+  - alert [ref=f11e6]:
+    - paragraph [ref=f11e7]: Something went wrong. Please try again.
+    - button "Try again" [ref=f11e8] [cursor=pointer]

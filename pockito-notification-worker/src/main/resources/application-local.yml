@@ -1,0 +1,8 @@
+spring:
+  data:
+    redis:
+      host: localhost
+
+logging:
+  level:
+    io.ghassen.pockito: DEBUG

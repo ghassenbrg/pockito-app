@@ -2,6 +2,17 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "pockito-webapp",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "pockito-webapp"
+      ],
+      "port": 3000
+    },
+    {
       "name": "prototype",
       "runtimeExecutable": "python3",
       "runtimeArgs": [

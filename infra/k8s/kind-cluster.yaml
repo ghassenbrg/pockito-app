@@ -1,0 +1,23 @@
+# A local stand-in for the single-node VM cluster, used to validate these manifests
+# end to end: workloads, probes, PVC persistence across pod deletion, and Traefik routing.
+#
+# Port 80 and 443 are mapped to the host so the routing can be exercised the way a browser
+# would, rather than through a port-forward that bypasses Traefik.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: pockito
+nodes:
+  - role: control-plane
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      - containerPort: 30080
+        hostPort: 8090
+        protocol: TCP
+      - containerPort: 30443
+        hostPort: 8443
+        protocol: TCP

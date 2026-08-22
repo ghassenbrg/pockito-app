@@ -1,0 +1,5 @@
+# Deployed configuration; endpoints and credentials come from the ConfigMap.
+logging:
+  level:
+    root: INFO
+    io.ghassen.pockito: INFO

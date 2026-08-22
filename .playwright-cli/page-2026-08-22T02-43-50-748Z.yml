@@ -1,0 +1,40 @@
+- generic [ref=f4e3]:
+  - banner [ref=f4e4]:
+    - generic [ref=f4e5]: Pockito
+  - main [ref=f4e6]:
+    - generic [ref=f4e7]:
+      - heading "登録" [level=1] [ref=f4e8]
+      - combobox "languages" [ref=f4e11]:
+        - option "日本語" [selected]
+        - option "英語 (English)"
+    - generic [ref=f4e12]:
+      - generic [ref=f4e13]: "* 必須フィールド"
+      - generic [ref=f4e16]:
+        - generic [ref=f4e17]:
+          - generic [ref=f4e18]: メールアドレス *
+          - textbox "メールアドレス" [invalid] [ref=f4e22]
+          - generic [ref=f4e23]: メールアドレスを指定してください。
+        - generic [ref=f4e28]:
+          - generic [ref=f4e29]: パスワード *
+          - generic [ref=f4e31]:
+            - generic [ref=f4e33]:
+              - textbox "パスワード" [invalid] [ref=f4e34]
+              - generic: 
+            - button "パスワードの表示" [ref=f4e36] [cursor=pointer]:
+              - generic [ref=f4e37]: 
+          - generic [ref=f4e38]: パスワードを指定してください。
+        - generic [ref=f4e43]:
+          - generic [ref=f4e44]: パスワード（確認） *
+          - generic [ref=f4e46]:
+            - textbox "パスワード（確認）" [ref=f4e49]
+            - button "パスワードの表示" [ref=f4e51] [cursor=pointer]:
+              - generic [ref=f4e52]: 
+        - generic [ref=f4e53]:
+          - generic [ref=f4e54]: 名
+          - textbox "名" [ref=f4e58]
+        - generic [ref=f4e59]:
+          - generic [ref=f4e60]: 姓
+          - textbox "姓" [ref=f4e64]
+        - button "登録" [ref=f4e66] [cursor=pointer]
+        - link "« ログインに戻る" [ref=f4e71] [cursor=pointer]:
+          - /url: /realms/pockito/login-actions/authenticate?client_id=pockito-webapp&tab_id=4GTXP3CYGe4&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hdXRoL2NhbGxiYWNrIiwicnQiOiJjb2RlIiwic3QiOiJ2aXN1YWwifQ

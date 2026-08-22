@@ -1,0 +1,62 @@
+- generic [active] [ref=f10e1]:
+  - generic [ref=f10e3]:
+    - banner [ref=f10e4]:
+      - button "navigation" [expanded] [ref=f10e6] [cursor=pointer]
+      - link [ref=f10e9] [cursor=pointer]:
+        - /url: https://pockito.ghassen.io/app/
+        - img "Logo" [ref=f10e10]
+      - button "theme-audit@example.test" [ref=f10e16] [cursor=pointer]
+    - navigation "Global" [ref=f10e34]:
+      - list [ref=f10e35]:
+        - listitem [ref=f10e36]:
+          - link "Personal info" [ref=f10e37] [cursor=pointer]:
+            - /url: /realms/pockito/account/?kc_locale=en
+        - listitem [ref=f10e38]:
+          - button [ref=f10e39] [cursor=pointer]
+        - listitem [ref=f10e44]:
+          - link "Applications" [ref=f10e45] [cursor=pointer]:
+            - /url: /realms/pockito/account/applications?kc_locale=en
+    - main [ref=f10e46]:
+      - generic [ref=f10e48]:
+        - heading "Personal info" [level=1] [ref=f10e49]
+        - paragraph [ref=f10e50]: Manage your basic information
+      - generic [ref=f10e52]:
+        - generic [ref=f10e53]:
+          - generic [ref=f10e55]:
+            - heading "General" [level=1] [ref=f10e56]
+            - generic [ref=f10e57]:
+              - generic [ref=f10e58]:
+                - generic [ref=f10e59]: Select a locale
+                - button "Select a locale" [ref=f10e62] [cursor=pointer]:
+                  - generic [ref=f10e63]: Choose...
+              - generic [ref=f10e68]:
+                - generic [ref=f10e69]: Username
+                - textbox "Username" [disabled] [ref=f10e73]:
+                  - /placeholder: ""
+                  - text: theme-audit@example.test
+              - generic [ref=f10e74]:
+                - generic [ref=f10e76]:
+                  - text: Email
+                  - generic [ref=f10e77]: "*"
+                - textbox "Email" [disabled] [ref=f10e80]:
+                  - /placeholder: ""
+                  - text: theme-audit@example.test
+              - generic [ref=f10e81]:
+                - generic [ref=f10e82]: First name
+                - textbox "First name" [ref=f10e86]:
+                  - /placeholder: ""
+              - generic [ref=f10e87]:
+                - generic [ref=f10e88]: Last name
+                - textbox "Last name" [ref=f10e92]:
+                  - /placeholder: ""
+          - navigation "Jump to section" [ref=f10e95]:
+            - generic [ref=f10e96]:
+              - generic [ref=f10e97]: Jump to section
+              - list [ref=f10e99]:
+                - listitem [ref=f10e100]:
+                  - generic [ref=f10e101] [cursor=pointer]: General
+        - generic [ref=f10e105]:
+          - button "Save" [ref=f10e106] [cursor=pointer]
+          - button "Cancel" [ref=f10e107] [cursor=pointer]
+  - generic:
+    - list

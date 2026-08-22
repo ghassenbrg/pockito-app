@@ -1,0 +1,9 @@
+# Pockito V1 runs in its own namespace, alongside — not inside — the existing
+# `ghassen-io` namespace that hosts the legacy stack. Keeping them apart is what
+# lets the old application keep running untouched while the new one comes up.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pockito
+  labels:
+    app.kubernetes.io/part-of: pockito

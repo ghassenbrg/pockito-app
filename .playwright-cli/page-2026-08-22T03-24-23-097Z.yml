@@ -1,0 +1,29 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - paragraph [ref=e5]: Your financial life, in one place
+      - heading [level=2] [ref=e6]: Welcome back to Pockito
+      - paragraph [ref=e7]: The all-in-one platform for a clearer, calmer financial life.
+    - generic [ref=e8]:
+      - generic [ref=e9]: ✓
+      - generic [ref=e10]:
+        - strong [ref=e11]: Your data is secure with Pockito
+        - generic [ref=e12]: Bank-level encryption and privacy by design
+  - main [ref=e14]:
+    - generic [ref=e15]:
+      - heading "We are sorry..." [level=1] [ref=e16]
+      - combobox "languages" [ref=e19]:
+        - option "English" [selected]
+        - option "Japanese (日本語)"
+    - paragraph [ref=e22]: "Invalid parameter: redirect_uri"
+    - generic "Pockito authentication footer" [ref=e24]:
+      - navigation "Help and legal information" [ref=e25]:
+        - link "Help" [ref=e26] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/help
+        - link "Privacy" [ref=e27] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/privacy
+        - link "Terms" [ref=e28] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/terms
+        - link "Security" [ref=e29] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/security
+      - paragraph [ref=e30]: © 2026 Pockito. All rights reserved.

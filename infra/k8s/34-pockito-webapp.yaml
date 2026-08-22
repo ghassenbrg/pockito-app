@@ -1,0 +1,68 @@
+# The Nuxt webapp, served by its own Node server behind Traefik at /app.
+apiVersion: v1
+kind: Service
+metadata:
+  name: pockito-webapp
+  namespace: pockito
+spec:
+  selector:
+    app: pockito-webapp
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pockito-webapp
+  namespace: pockito
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pockito-webapp
+  template:
+    metadata:
+      labels:
+        app: pockito-webapp
+    spec:
+      containers:
+        - name: pockito-webapp
+          image: ghassenbrg/pockito-webapp:1.0.0
+          ports:
+            - containerPort: 3000
+          env:
+            # Public values only: this is a browser app, and everything here is
+            # visible in the page source by definition. No secret belongs here.
+            - name: NUXT_PUBLIC_API_BASE_URL
+              value: "https://pockito.ghassen.io/api/v1"
+            - name: NUXT_PUBLIC_KEYCLOAK_ISSUER
+              value: "https://auth.ghassen.io/realms/pockito"
+            - name: NUXT_PUBLIC_KEYCLOAK_CLIENT_ID
+              value: "pockito-webapp"
+            # Served under /app, so every asset URL and route carries the prefix.
+            - name: NUXT_APP_BASE_URL
+              value: "/app/"
+            - name: NITRO_PORT
+              value: "3000"
+            - name: TZ
+              value: Asia/Tokyo
+          readinessProbe:
+            httpGet:
+              path: /app/
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /app/
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 512Mi

@@ -1,0 +1,103 @@
+spring:
+  application:
+    name: pockito-core
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/pockito}
+    username: ${POSTGRES_USER:pockito}
+    password: ${POSTGRES_PASSWORD:pockito}
+  jpa:
+    open-in-view: false
+    hibernate:
+      # Flyway owns the schema; Hibernate only checks that the mapping still matches it.
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2s
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:https://auth.ghassen.io/realms/pockito}
+          jwk-set-uri: ${KEYCLOAK_JWKS_URI:${KEYCLOAK_ISSUER_URI:https://auth.ghassen.io/realms/pockito}/protocol/openid-connect/certs}
+  servlet:
+    multipart:
+      max-file-size: 4MB
+      max-request-size: 8MB
+
+server:
+  port: ${SERVER_PORT:8081}
+  shutdown: graceful
+  error:
+    include-message: never
+    include-stacktrace: never
+
+pockito:
+  supported-currencies: ${POCKITO_CURRENCIES:EUR,USD,JPY,GBP,CHF,TND,CAD,AUD}
+  security:
+    # Empty means "accept any audience in the realm". Set in deployed environments.
+    expected-audiences: ${POCKITO_EXPECTED_AUDIENCES:}
+  avatar:
+    max-size-bytes: 2097152
+    allowed-content-types: image/png,image/jpeg,image/webp
+  notifications:
+    stream: ${POCKITO_NOTIFICATION_STREAM:pockito.notifications}
+  storage:
+    endpoint: ${S3_ENDPOINT:http://localhost:8333}
+    bucket: ${S3_BUCKET:pockito}
+    access-key: ${S3_ACCESS_KEY:pockito}
+    secret-key: ${S3_SECRET_KEY:pockito}
+    region: ${S3_REGION:us-east-1}
+    path-style-access: true
+    presigned-url-validity: ${S3_PRESIGNED_URL_VALIDITY:15m}
+  dify:
+    enabled: ${DIFY_ENABLED:false}
+    base-url: ${DIFY_BASE_URL:http://dify-api.dify.svc.cluster.local:5001}
+    api-key: ${DIFY_API_KEY:}
+    connect-timeout: 3s
+    read-timeout: 15s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when-authorized
+      group:
+        liveness:
+          include: livenessState
+        # Dify is intentionally absent: Pockito's foundation works without AI, so Dify
+        # being down must not remove Core from service.
+        readiness:
+          include: readinessState,db,redis,objectStorage
+  health:
+    # Liveness stays independent of downstream state: a Postgres blip should stop traffic
+    # being routed here, not have Kubernetes kill an otherwise healthy JVM.
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  info:
+    env:
+      enabled: true
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{correlationId:-}]"
+  level:
+    root: INFO
+    io.ghassen.pockito: INFO

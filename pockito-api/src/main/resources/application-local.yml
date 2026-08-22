@@ -1,0 +1,17 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/pockito
+          jwk-set-uri: http://localhost:8180/realms/pockito/protocol/openid-connect/certs
+
+pockito:
+  core:
+    base-url: http://localhost:8081
+  cors:
+    allowed-origins: http://localhost:3000,http://localhost:8080
+
+logging:
+  level:
+    io.ghassen.pockito: DEBUG

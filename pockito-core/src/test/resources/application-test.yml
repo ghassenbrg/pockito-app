@@ -1,0 +1,28 @@
+# Tests run against a real Postgres from Testcontainers. The issuer is never contacted:
+# MockMvc supplies an already-validated JWT, and the decoder resolves metadata lazily.
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://auth.invalid/realms/pockito
+          # Never fetched: MockMvc injects an already-validated token.
+          jwk-set-uri: https://auth.invalid/realms/pockito/protocol/openid-connect/certs
+  data:
+    redis:
+      host: localhost
+      port: 1
+
+pockito:
+  storage:
+    endpoint: http://localhost:1
+    bucket: pockito-test
+    access-key: test
+    secret-key: test
+  dify:
+    enabled: false
+
+logging:
+  level:
+    org.testcontainers: WARN
+    io.ghassen.pockito: INFO

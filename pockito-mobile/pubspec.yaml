@@ -1,0 +1,45 @@
+name: pockito
+description: "Pockito — personal and shared money, kept simple."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Authorization Code + PKCE against Keycloak, in a system browser tab. Pockito
+  # never renders a password field, so there is no in-app web view here.
+  flutter_appauth: ^9.0.1
+  # Refresh tokens live in the Keychain / EncryptedSharedPreferences, never in
+  # plain shared preferences.
+  flutter_secure_storage: ^11.0.0
+  shared_preferences: ^2.5.4
+
+  http: ^1.6.0
+  # Used directly to set the multipart content type on avatar uploads.
+  http_parser: ^4.1.2
+  provider: ^6.1.5+1
+  go_router: ^17.5.0
+  intl: ^0.20.2
+  flutter_svg: ^2.3.0
+  image_picker: ^1.2.1
+  mime: ^2.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - assets/brand/
+    - assets/mascot/kito/runtime/

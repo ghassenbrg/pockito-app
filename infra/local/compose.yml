@@ -1,0 +1,105 @@
+# Local Pockito platform dependencies.
+#
+# Mirrors the Kubernetes topology closely enough that application configuration differs
+# only by endpoint: the same Postgres, Redis, S3-compatible storage and Keycloak realm.
+# Application services themselves run from your IDE or `mvn spring-boot:run`.
+name: pockito-local
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: pockito
+      POSTGRES_USER: pockito
+      POSTGRES_PASSWORD: pockito
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    ports:
+      # 55432 on the host: a natively installed Postgres commonly holds 5432, and the
+      # local stack must never shadow it.
+      - "55432:5432"
+    volumes:
+      # Postgres 18+ images expect the whole directory, not the data subdirectory, so that
+      # a future pg_upgrade --link does not cross a mount boundary.
+      - postgres-data:/var/lib/postgresql
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pockito -d pockito"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:8-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Single-binary SeaweedFS: master, volume, filer and the S3 gateway in one process.
+  # The S3 API is what Pockito Core talks to; nothing depends on SeaweedFS specifics.
+  seaweedfs:
+    image: chrislusf/seaweedfs:3.98
+    command: >
+      server -dir=/data -master.volumeSizeLimitMB=256 -volume.max=10
+      -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json -filer -ip=seaweedfs
+    ports:
+      - "8333:8333"
+      - "9333:9333"
+    volumes:
+      - seaweedfs-data:/data
+      - ./seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:9333/cluster/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  keycloak:
+    build:
+      context: ../..
+      dockerfile: infra/keycloak/Dockerfile
+      args:
+        KEYCLOAK_VERSION: 26.4.7
+    image: pockito-keycloak:26.4.7
+    command:
+      - start-dev
+      - --import-realm
+      # Disable only presentation caches for immediate local theme feedback.
+      - --spi-theme--static-max-age=-1
+      - --spi-theme--cache-themes=false
+      - --spi-theme--cache-templates=false
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KC_HEALTH_ENABLED: "true"
+      KC_HTTP_PORT: "8180"
+    ports:
+      - "8180:8180"
+    volumes:
+      - ../keycloak/realm-pockito.json:/opt/keycloak/data/import/realm-pockito.json:ro
+      # The image is the production artifact; this mount adds live editing in development.
+      - ../keycloak/themes/pockito:/opt/keycloak/themes/pockito:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      # The Keycloak image has no shell utilities; its own JVM does the probing.
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '\"status\": \"UP\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  postgres-data:
+  redis-data:
+  seaweedfs-data:

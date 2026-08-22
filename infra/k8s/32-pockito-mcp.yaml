@@ -1,0 +1,68 @@
+# Pockito MCP: the Model Context Protocol server for AI clients.
+# Stateless streamable HTTP, so like the API it needs no sticky sessions.
+apiVersion: v1
+kind: Service
+metadata:
+  name: pockito-mcp
+  namespace: pockito
+spec:
+  selector:
+    app: pockito-mcp
+  ports:
+    - name: http
+      port: 8082
+      targetPort: 8082
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pockito-mcp
+  namespace: pockito
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pockito-mcp
+  template:
+    metadata:
+      labels:
+        app: pockito-mcp
+    spec:
+      containers:
+        - name: pockito-mcp
+          image: ghassenbrg/pockito-mcp:1.0.0
+          ports:
+            - containerPort: 8082
+          envFrom:
+            - configMapRef:
+                name: pockito-config
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "k8s"
+
+            - name: TZ
+              value: Asia/Tokyo
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8082
+            periodSeconds: 5
+            failureThreshold: 24
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8082
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8082
+            periodSeconds: 20
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: 150m
+              memory: 384Mi
+            limits:
+              memory: 768Mi

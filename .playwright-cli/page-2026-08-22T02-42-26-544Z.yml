@@ -1,0 +1,36 @@
+- generic [ref=f1e3]:
+  - banner [ref=f1e4]:
+    - generic [ref=f1e5]: Pockito
+  - main [ref=f1e6]:
+    - generic [ref=f1e7]:
+      - heading "Register" [level=1] [ref=f1e8]
+      - combobox "languages" [ref=f1e11]:
+        - option "English" [selected]
+        - option "Japanese (日本語)"
+    - generic [ref=f1e12]:
+      - generic [ref=f1e13]: "* Required fields"
+      - generic [ref=f1e16]:
+        - generic [ref=f1e17]:
+          - generic [ref=f1e18]: Email *
+          - textbox "Email" [ref=f1e22]
+        - generic [ref=f1e23]:
+          - generic [ref=f1e24]: Password *
+          - generic [ref=f1e26]:
+            - textbox "Password" [ref=f1e29]
+            - button "Show password" [ref=f1e31] [cursor=pointer]:
+              - generic [ref=f1e32]: 
+        - generic [ref=f1e33]:
+          - generic [ref=f1e34]: Confirm password *
+          - generic [ref=f1e36]:
+            - textbox "Confirm password" [ref=f1e39]
+            - button "Show password" [ref=f1e41] [cursor=pointer]:
+              - generic [ref=f1e42]: 
+        - generic [ref=f1e43]:
+          - generic [ref=f1e44]: First name
+          - textbox "First name" [ref=f1e48]
+        - generic [ref=f1e49]:
+          - generic [ref=f1e50]: Last name
+          - textbox "Last name" [ref=f1e54]
+        - button "Register" [ref=f1e56] [cursor=pointer]
+        - link "« Back to Login" [ref=f1e61] [cursor=pointer]:
+          - /url: /realms/pockito/login-actions/authenticate?client_id=pockito-webapp&tab_id=4GTXP3CYGe4&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hdXRoL2NhbGxiYWNrIiwicnQiOiJjb2RlIiwic3QiOiJ2aXN1YWwifQ

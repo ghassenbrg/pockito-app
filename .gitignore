@@ -1,0 +1,21 @@
+# Build output
+target/
+build/
+dist/
+.output/
+.nuxt/
+.dart_tool/
+.flutter-plugins-list
+output/playwright/
+
+# Dependencies
+node_modules/
+
+# Real secrets never enter the repository; only the templates do.
+infra/k8s/01-secrets.yaml
+**/.env
+!**/.env.example
+
+# Local tooling
+.DS_Store
+*.log

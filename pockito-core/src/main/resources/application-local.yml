@@ -1,0 +1,25 @@
+# Local development against the compose stack in infra/local.
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:55432/pockito
+  data:
+    redis:
+      host: localhost
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/pockito
+          jwk-set-uri: http://localhost:8180/realms/pockito/protocol/openid-connect/certs
+
+pockito:
+  storage:
+    endpoint: http://localhost:8333
+    access-key: pockito-local
+    secret-key: pockito-local-secret
+  dify:
+    enabled: false
+
+logging:
+  level:
+    io.ghassen.pockito: DEBUG

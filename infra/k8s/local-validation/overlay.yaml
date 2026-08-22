@@ -1,0 +1,34 @@
+# Overrides applied on top of infra/k8s/20-config.yaml for the local cluster only.
+#
+# The issuer and the JWKS URI deliberately differ here, which is exactly the split the
+# production configuration allows for: the issuer must match the `iss` claim in the token
+# as the client sees it, while the JWKS URI only has to be fetchable from inside the
+# cluster. Keeping them separate is what lets a service validate tokens from an issuer it
+# cannot address by the same name.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pockito-config
+  namespace: pockito
+data:
+  KEYCLOAK_ISSUER_URI: "http://localhost:8180/realms/pockito"
+  KEYCLOAK_JWKS_URI: "http://host.containers.internal:8180/realms/pockito/protocol/openid-connect/certs"
+  POCKITO_EXPECTED_AUDIENCES: "pockito-api,pockito-mcp"
+
+  POSTGRES_URL: "jdbc:postgresql://pockito-postgres.pockito.svc.cluster.local:5432/pockito"
+  POSTGRES_USER: "pockito"
+  REDIS_HOST: "pockito-redis.pockito.svc.cluster.local"
+  REDIS_PORT: "6379"
+  POCKITO_NOTIFICATION_STREAM: "pockito.notifications"
+
+  S3_ENDPOINT: "http://pockito-seaweedfs-s3.pockito.svc.cluster.local:8333"
+  S3_BUCKET: "pockito"
+  S3_REGION: "us-east-1"
+  S3_PRESIGNED_URL_VALIDITY: "15m"
+
+  POCKITO_CORE_URL: "http://pockito-core.pockito.svc.cluster.local:8081"
+
+  DIFY_ENABLED: "false"
+  DIFY_BASE_URL: "http://dify-api.dify.svc.cluster.local:5001"
+
+  CORS_ALLOWED_ORIGINS: "http://pockito.ghassen.io:8090"

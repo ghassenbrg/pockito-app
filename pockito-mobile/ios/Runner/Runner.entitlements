@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  flutter_secure_storage writes the refresh token to the Keychain, and the Keychain
+	  refuses to serve an app with no access group (errSecMissingEntitlement, -34018).
+	  Without this the app cannot store a session at all.
+	-->
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)app.pockito.pockito</string>
+	</array>
+</dict>
+</plist>

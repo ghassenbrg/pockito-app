@@ -1,0 +1,52 @@
+- generic [ref=f1e3]:
+  - banner [ref=f1e4]:
+    - generic [ref=f1e5]: Pockito
+  - main [ref=f1e6]:
+    - generic [ref=f1e7]:
+      - heading "Mobile Authenticator Setup" [level=1] [ref=f1e8]
+      - combobox "languages" [ref=f1e11]:
+        - option "English" [selected]
+        - option "Japanese (日本語)"
+    - generic [ref=f1e12]:
+      - generic [ref=f1e13]: You need to set up Mobile Authenticator to activate your account.
+      - list [ref=f1e15]:
+        - listitem [ref=f1e16]:
+          - paragraph [ref=f1e17]: "Install one of the following applications on your mobile:"
+          - list [ref=f1e18]:
+            - listitem [ref=f1e19]: Google Authenticator
+            - listitem [ref=f1e20]: Microsoft Authenticator
+            - listitem [ref=f1e21]: FreeOTP
+        - listitem [ref=f1e22]:
+          - paragraph [ref=f1e23]: "Open the application and scan the barcode:"
+          - 'img "Figure: Barcode" [ref=f1e24]'
+          - paragraph [ref=f1e25]:
+            - link "Unable to scan?" [ref=f1e26] [cursor=pointer]:
+              - /url: http://localhost:8180/realms/pockito/login-actions/required-action?client_id=pockito-webapp&tab_id=CFkJQOwcsgU&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hdXRoL2NhbGxiYWNrIiwicnQiOiJjb2RlIiwic3QiOiJtZmEtY2hlY2sifQ&mode=manual&execution=CONFIGURE_TOTP
+        - listitem [ref=f1e27]:
+          - paragraph [ref=f1e28]: Enter the one-time code provided by the application and click Submit to finish the setup.
+          - paragraph [ref=f1e29]: Provide a Device Name to help you manage your OTP devices.
+      - generic [ref=f1e30]:
+        - generic [ref=f1e31]:
+          - generic [ref=f1e32]: One-time code *
+          - textbox [ref=f1e35]
+        - generic [ref=f1e36]:
+          - generic [ref=f1e37]: Device Name
+          - textbox [ref=f1e40]
+        - generic [ref=f1e45] [cursor=pointer]:
+          - checkbox "Sign out from other devices" [ref=f1e46]
+          - generic [ref=f1e47]: Sign out from other devices
+        - button "Submit" [ref=f1e50] [cursor=pointer]
+    - generic "Pockito authentication footer" [ref=f1e52]:
+      - navigation "Help and legal information" [ref=f1e53]:
+        - link "Help" [ref=f1e54] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/help
+        - link "Privacy" [ref=f1e55] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/privacy
+        - link "Terms" [ref=f1e56] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/terms
+        - link "Security" [ref=f1e57] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/security
+      - paragraph [ref=f1e58]: © 2026 Pockito. All rights reserved.
+  - generic [ref=f1e60]:
+    - strong [ref=f1e61]: Your data is secure with Pockito
+    - generic [ref=f1e62]: Bank-level encryption and privacy by design

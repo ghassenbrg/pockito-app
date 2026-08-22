@@ -1,0 +1,305 @@
+:root {
+  color-scheme: light;
+  --pk-page: #f7f9fd;
+  --pk-surface: #ffffff;
+  --pk-sunken: #f0f5fa;
+  --pk-border: #dde7f0;
+  --pk-border-strong: #cbd8e5;
+  --pk-text: #071625;
+  --pk-secondary: #324b65;
+  --pk-primary: #286cf2;
+  --pk-primary-hover: #1f55d5;
+  --pk-danger: #d01640;
+  --pk-success: #047857;
+  --pk-focus: 0 0 0 3px rgb(40 108 242 / 22%);
+  --pk-font: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  --pf-v5-global--FontFamily--sans-serif: var(--pk-font);
+  --pf-v5-global--primary-color--100: var(--pk-primary);
+  --pf-v5-global--link--Color: var(--pk-primary);
+}
+
+:root.pf-v5-theme-dark {
+  color-scheme: dark;
+  --pk-page: #071625;
+  --pk-surface: #0d2239;
+  --pk-sunken: #091b2e;
+  --pk-border: #1e3954;
+  --pk-border-strong: #31506d;
+  --pk-text: #f8fafc;
+  --pk-secondary: #a9b8c8;
+  --pk-primary: #7eb5ff;
+  --pk-primary-hover: #9bc6ff;
+  --pk-danger: #fb7185;
+  --pk-success: #34d399;
+  --pk-focus: 0 0 0 3px rgb(126 181 255 / 28%);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app,
+.pf-v5-c-page {
+  min-width: 0;
+  min-height: 100%;
+  background: var(--pk-page);
+  color: var(--pk-text);
+  font-family: var(--pk-font);
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--pk-primary);
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--pk-primary-hover);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--pk-primary);
+  outline-offset: 2px;
+}
+
+.pf-v5-c-page__header {
+  min-height: 72px;
+  border-bottom: 1px solid var(--pk-border);
+  background: var(--pk-surface);
+  box-shadow: 0 1px 2px rgb(7 22 37 / 5%);
+}
+
+.pf-v5-c-masthead {
+  min-height: 70px;
+  border-bottom: 1px solid #17314d;
+  background: #071625;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgb(7 22 37 / 18%);
+}
+
+.pf-v5-c-masthead .pf-v5-c-button.pf-m-plain,
+.pf-v5-c-masthead .pf-v5-c-menu-toggle,
+.pf-v5-c-masthead .pf-v5-c-dropdown__toggle {
+  color: #ffffff;
+}
+
+.pf-v5-c-masthead .pf-v5-c-menu-toggle,
+.pf-v5-c-masthead .pf-v5-c-dropdown__toggle {
+  border-color: #31506d;
+  background: #0d2239;
+}
+
+.pf-v5-c-brand img,
+.pf-v5-c-page__header-brand-link img,
+.pf-v5-c-masthead__brand img {
+  width: min(190px, 42vw);
+  max-height: 52px;
+}
+
+.pf-v5-c-page__sidebar {
+  border-inline-end: 1px solid var(--pk-border);
+  background: var(--pk-surface);
+}
+
+.pf-v5-c-nav,
+.pf-v5-c-nav__list,
+.pf-v5-c-nav__item {
+  background: transparent;
+}
+
+.pf-v5-c-nav__link {
+  min-height: 48px;
+  margin: 3px 10px;
+  border-radius: 12px;
+  color: var(--pk-secondary);
+  font-weight: 600;
+}
+
+.pf-v5-c-nav__link:hover,
+.pf-v5-c-nav__link:focus-visible,
+.pf-v5-c-nav__link.pf-m-current {
+  background: color-mix(in srgb, var(--pk-primary) 10%, var(--pk-surface));
+  color: var(--pk-primary);
+}
+
+.pf-v5-c-nav__link.pf-m-current::after {
+  display: none;
+}
+
+.pf-v5-c-page__main-container {
+  background: var(--pk-page);
+}
+
+.pf-v5-c-page__main-section,
+.pf-v5-c-page__main-body {
+  max-width: 1120px;
+  margin-inline: auto;
+  padding: clamp(16px, 3vw, 36px);
+}
+
+.pf-v5-c-title,
+h1,
+h2,
+h3 {
+  color: var(--pk-text);
+  font-family: var(--pk-font);
+  letter-spacing: -0.02em;
+}
+
+.pf-v5-c-content,
+.pf-v5-c-form__helper-text,
+.pf-v5-c-description-list__description,
+.pf-v5-c-data-list__cell {
+  color: var(--pk-secondary);
+}
+
+.pf-v5-c-card,
+.pf-v5-c-data-list,
+.pf-v5-c-panel,
+.pf-v5-c-modal-box {
+  overflow: hidden;
+  border: 1px solid var(--pk-border);
+  border-radius: 16px;
+  background: var(--pk-surface);
+  box-shadow: 0 1px 2px rgb(7 22 37 / 5%), 0 8px 24px rgb(7 22 37 / 5%);
+  color: var(--pk-text);
+}
+
+.pf-v5-c-data-list__item {
+  border-color: var(--pk-border);
+  background: var(--pk-surface);
+}
+
+.pf-v5-c-form-control,
+.pf-v5-c-text-input-group,
+.pf-v5-c-select__toggle {
+  min-height: 48px;
+  overflow: hidden;
+  border: 1px solid var(--pk-border);
+  border-radius: 12px;
+  background: var(--pk-sunken);
+  color: var(--pk-text);
+  box-shadow: none;
+}
+
+.pf-v5-c-form-control:focus-within,
+.pf-v5-c-text-input-group:focus-within,
+.pf-v5-c-select__toggle:focus-visible {
+  border-color: var(--pk-primary);
+  box-shadow: var(--pk-focus);
+}
+
+.pf-v5-c-form__label,
+.pf-v5-c-form__label-text {
+  color: var(--pk-secondary);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.pf-v5-c-button {
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: 12px;
+  font-family: var(--pk-font);
+  font-weight: 700;
+}
+
+.pf-v5-c-button.pf-m-primary {
+  border-color: var(--pk-primary);
+  background: var(--pk-primary);
+  color: #ffffff;
+}
+
+:root.pf-v5-theme-dark .pf-v5-c-button.pf-m-primary {
+  color: #071625;
+}
+
+.pf-v5-c-button.pf-m-primary:hover {
+  border-color: var(--pk-primary-hover);
+  background: var(--pk-primary-hover);
+}
+
+.pf-v5-c-button.pf-m-secondary,
+.pf-v5-c-button.pf-m-tertiary {
+  border-color: var(--pk-border-strong);
+  background: var(--pk-surface);
+  color: var(--pk-text);
+}
+
+.pf-v5-c-alert {
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.pf-v5-c-alert.pf-m-danger {
+  border-color: var(--pk-danger);
+}
+
+.pf-v5-c-alert.pf-m-success {
+  border-color: var(--pk-success);
+}
+
+.keycloak__loading-container {
+  background: var(--pk-page) !important;
+  color: var(--pk-text) !important;
+  font-family: var(--pk-font);
+}
+
+@media (max-width: 768px) {
+  .pf-v5-c-page__header {
+    min-height: 64px;
+  }
+
+  .pf-v5-c-page__main-section,
+  .pf-v5-c-page__main-body {
+    padding:
+      max(16px, env(safe-area-inset-top))
+      max(16px, env(safe-area-inset-right))
+      max(24px, env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
+  }
+
+  .pf-v5-c-card__body,
+  .pf-v5-c-card__header {
+    padding: 16px;
+  }
+}
+
+html[lang^="ja"] body {
+  line-break: strict;
+  word-break: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .pf-v5-c-card,
+  .pf-v5-c-data-list,
+  .pf-v5-c-panel,
+  .pf-v5-c-form-control,
+  .pf-v5-c-button {
+    border: 1px solid CanvasText;
+  }
+}

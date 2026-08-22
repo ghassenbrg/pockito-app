@@ -1,0 +1,13 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://auth.invalid/realms/pockito
+          jwk-set-uri: https://auth.invalid/realms/pockito/protocol/openid-connect/certs
+
+pockito:
+  mcp:
+    public-base-url: https://pockito.invalid
+  core:
+    base-url: http://core.invalid:8081

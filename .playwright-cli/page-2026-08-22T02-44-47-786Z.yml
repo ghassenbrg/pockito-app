@@ -1,0 +1,31 @@
+- generic [ref=f7e3]:
+  - banner [ref=f7e4]:
+    - generic [ref=f7e5]: Pockito
+  - main [ref=f7e6]:
+    - generic [ref=f7e7]:
+      - heading "アカウントにサインイン" [level=1] [ref=f7e8]
+      - combobox "languages" [ref=f7e11]:
+        - option "日本語" [selected]
+        - option "英語 (English)"
+    - generic [ref=f7e12]:
+      - generic [ref=f7e15]:
+        - generic [ref=f7e16]:
+          - generic [ref=f7e17]: メールアドレス
+          - textbox "メールアドレス" [active] [ref=f7e20]
+        - generic [ref=f7e21]:
+          - generic [ref=f7e22]: パスワード
+          - generic [ref=f7e24]:
+            - textbox "パスワード" [ref=f7e27]
+            - button "パスワードの表示" [ref=f7e29] [cursor=pointer]:
+              - generic [ref=f7e30]: 
+          - generic [ref=f7e32]:
+            - generic [ref=f7e34] [cursor=pointer]:
+              - checkbox "ログイン状態の保存" [ref=f7e35]
+              - generic [ref=f7e36]: ログイン状態の保存
+            - link "パスワードをお忘れですか？" [ref=f7e39] [cursor=pointer]:
+              - /url: /realms/pockito/login-actions/reset-credentials?client_id=pockito-webapp&tab_id=HfQrjJHkkNY&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hdXRoL2NhbGxiYWNrIiwicnQiOiJjb2RlIiwic3QiOiJ0b3RwIn0
+        - button "サインイン" [ref=f7e42] [cursor=pointer]
+      - generic [ref=f7e48]:
+        - text: 新規ユーザーですか？
+        - link "登録" [ref=f7e49] [cursor=pointer]:
+          - /url: /realms/pockito/login-actions/registration?client_id=pockito-webapp&tab_id=HfQrjJHkkNY&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hdXRoL2NhbGxiYWNrIiwicnQiOiJjb2RlIiwic3QiOiJ0b3RwIn0

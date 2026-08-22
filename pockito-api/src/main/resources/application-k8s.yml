@@ -1,0 +1,11 @@
+# Deployed configuration; endpoints and credentials come from the ConfigMap.
+springdoc:
+  # The OpenAPI document stays available — clients and tooling read it — but the
+  # interactive Swagger UI is not exposed on the public API host.
+  swagger-ui:
+    enabled: false
+
+logging:
+  level:
+    root: INFO
+    io.ghassen.pockito: INFO

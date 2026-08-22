@@ -1,0 +1,167 @@
+# SeaweedFS: Pockito's object storage, reached only through its S3 API.
+#
+# Single-binary mode (master + volume + filer + S3 gateway in one process),
+# which suits a single-node cluster and keeps the moving parts to one. Nothing
+# in Pockito depends on SeaweedFS specifics, so replacing it with Ceph RGW or a
+# hosted S3 later is a change to the S3_* configuration, not to any code.
+apiVersion: v1
+kind: Service
+metadata:
+  name: pockito-seaweedfs-s3
+  namespace: pockito
+spec:
+  selector:
+    app: pockito-seaweedfs
+  ports:
+    - name: s3
+      port: 8333
+      targetPort: 8333
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pockito-seaweedfs-master
+  namespace: pockito
+spec:
+  selector:
+    app: pockito-seaweedfs
+  ports:
+    - name: master
+      port: 9333
+      targetPort: 9333
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pockito-seaweedfs-s3-config
+  namespace: pockito
+data:
+  # The S3 identity template. The entrypoint substitutes the credentials from
+  # the secret at start-up so they never appear in a ConfigMap.
+  #
+  # "Admin" is present because CreateBucket requires it, and Core creates its own
+  # bucket the first time it starts against a fresh volume. This store is
+  # single-tenant to Pockito, so the identity is not being granted reach over
+  # anyone else's data — but it is why the credential must not be shared out.
+  s3.json.template: |
+    {
+      "identities": [
+        {
+          "name": "pockito",
+          "credentials": [
+            { "accessKey": "__ACCESS_KEY__", "secretKey": "__SECRET_KEY__" }
+          ],
+          "actions": ["Read", "Write", "List", "Tagging", "Admin"]
+        }
+      ]
+    }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pockito-seaweedfs-data
+  namespace: pockito
+spec:
+  # The whole point of this claim: avatars have to survive the pod being
+  # recreated. Container-local storage would lose every uploaded image on the
+  # next rollout.
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pockito-seaweedfs
+  namespace: pockito
+spec:
+  serviceName: pockito-seaweedfs-s3
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pockito-seaweedfs
+  template:
+    metadata:
+      labels:
+        app: pockito-seaweedfs
+    spec:
+      containers:
+        - name: seaweedfs
+          image: chrislusf/seaweedfs:3.98
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              # Render the identity file with the real credentials, into a
+              # directory that is not the read-only ConfigMap mount.
+              sed -e "s|__ACCESS_KEY__|${S3_ACCESS_KEY}|" \
+                  -e "s|__SECRET_KEY__|${S3_SECRET_KEY}|" \
+                  /etc/seaweedfs-template/s3.json.template > /etc/seaweedfs/s3.json
+              exec weed server \
+                -dir=/data \
+                -master.volumeSizeLimitMB=1024 \
+                -volume.max=20 \
+                -filer \
+                -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json \
+                -ip=$(hostname -i)
+          env:
+            - name: S3_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pockito-object-storage
+                  key: S3_ACCESS_KEY
+            - name: S3_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pockito-object-storage
+                  key: S3_SECRET_KEY
+          ports:
+            - name: s3
+              containerPort: 8333
+            - name: master
+              containerPort: 9333
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: s3-config-template
+              mountPath: /etc/seaweedfs-template
+              readOnly: true
+            - name: s3-config
+              mountPath: /etc/seaweedfs
+          startupProbe:
+            httpGet:
+              path: /cluster/healthz
+              port: 9333
+            # Generous: a first start formats the volume, and killing it
+            # half-way is how a storage node gets corrupted.
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /cluster/healthz
+              port: 9333
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /cluster/healthz
+              port: 9333
+            periodSeconds: 30
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pockito-seaweedfs-data
+        - name: s3-config-template
+          configMap:
+            name: pockito-seaweedfs-s3-config
+        - name: s3-config
+          emptyDir: {}

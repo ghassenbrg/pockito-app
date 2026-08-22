@@ -1,0 +1,31 @@
+- generic [ref=f14e3]:
+  - banner [ref=f14e4]:
+    - generic [ref=f14e5]: Pockito
+  - main [ref=f14e6]:
+    - generic [ref=f14e7]:
+      - heading "Sign in to your account" [level=1] [ref=f14e8]
+      - combobox "languages" [ref=f14e11]:
+        - option "English" [selected]
+        - option "Japanese (日本語)"
+    - generic [ref=f14e12]:
+      - generic [ref=f14e15]:
+        - generic [ref=f14e16]:
+          - generic [ref=f14e17]: Email
+          - textbox "Email" [active] [ref=f14e20]
+        - generic [ref=f14e21]:
+          - generic [ref=f14e22]: Password
+          - generic [ref=f14e24]:
+            - textbox "Password" [ref=f14e27]
+            - button "Show password" [ref=f14e29] [cursor=pointer]:
+              - generic [ref=f14e30]: 
+          - generic [ref=f14e32]:
+            - generic [ref=f14e34] [cursor=pointer]:
+              - checkbox "Remember me" [ref=f14e35]
+              - generic [ref=f14e36]: Remember me
+            - link "Forgot Password?" [ref=f14e39] [cursor=pointer]:
+              - /url: /realms/pockito/login-actions/reset-credentials?client_id=pockito-webapp&tab_id=sc8KS1YNel8&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hdXRoL2NhbGxiYWNrIiwicnQiOiJjb2RlIiwic3QiOiJtYXRyaXgifQ
+        - button "Sign In" [ref=f14e42] [cursor=pointer]
+      - generic [ref=f14e48]:
+        - text: New user?
+        - link "Register" [ref=f14e49] [cursor=pointer]:
+          - /url: /realms/pockito/login-actions/registration?client_id=pockito-webapp&tab_id=sc8KS1YNel8&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hdXRoL2NhbGxiYWNrIiwicnQiOiJjb2RlIiwic3QiOiJtYXRyaXgifQ

@@ -1,0 +1,50 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - paragraph [ref=e5]: Your financial life, in one place
+      - heading [level=2] [ref=e6]: Welcome back to Pockito
+      - paragraph [ref=e7]: The all-in-one platform for a clearer, calmer financial life.
+    - generic [ref=e8]:
+      - generic [ref=e9]: ✓
+      - generic [ref=e10]:
+        - strong [ref=e11]: Your data is secure with Pockito
+        - generic [ref=e12]: Bank-level encryption and privacy by design
+  - main [ref=e14]:
+    - generic [ref=e15]:
+      - heading "Sign in to your account" [level=1] [ref=e16]
+      - combobox "languages" [ref=e19]:
+        - option "English" [selected]
+        - option "Japanese (日本語)"
+    - generic [ref=e20]:
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - generic [ref=e25]: Email
+          - textbox "Email" [active] [ref=e28]
+        - generic [ref=e29]:
+          - generic [ref=e30]: Password
+          - generic [ref=e32]:
+            - textbox "Password" [ref=e35]
+            - button "Show password" [ref=e37] [cursor=pointer]:
+              - generic [ref=e38]: 
+          - generic [ref=e40]:
+            - generic [ref=e42] [cursor=pointer]:
+              - checkbox "Remember me" [ref=e43]
+              - generic [ref=e44]: Remember me
+            - link "Forgot Password?" [ref=e47] [cursor=pointer]:
+              - /url: /realms/pockito/login-actions/reset-credentials?client_id=pockito-webapp&tab_id=CFkJQOwcsgU&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hdXRoL2NhbGxiYWNrIiwicnQiOiJjb2RlIiwic3QiOiJtZmEtY2hlY2sifQ
+        - button "Sign In" [ref=e50] [cursor=pointer]
+      - generic [ref=e56]:
+        - text: New user?
+        - link "Register" [ref=e57] [cursor=pointer]:
+          - /url: /realms/pockito/login-actions/registration?client_id=pockito-webapp&tab_id=CFkJQOwcsgU&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hdXRoL2NhbGxiYWNrIiwicnQiOiJjb2RlIiwic3QiOiJtZmEtY2hlY2sifQ
+    - generic "Pockito authentication footer" [ref=e59]:
+      - navigation "Help and legal information" [ref=e60]:
+        - link "Help" [ref=e61] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/help
+        - link "Privacy" [ref=e62] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/privacy
+        - link "Terms" [ref=e63] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/terms
+        - link "Security" [ref=e64] [cursor=pointer]:
+          - /url: https://pockito.ghassen.io/security
+      - paragraph [ref=e65]: © 2026 Pockito. All rights reserved.

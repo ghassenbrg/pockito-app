@@ -1,0 +1,38 @@
+- generic [ref=f9e3]:
+  - banner [ref=f9e4]:
+    - generic [ref=f9e5]: Pockito
+  - main [ref=f9e6]:
+    - generic [ref=f9e7]:
+      - heading "Mobile Authenticator Setup" [level=1] [ref=f9e8]
+      - combobox "languages" [ref=f9e11]:
+        - option "English" [selected]
+        - option "Japanese (日本語)"
+    - generic [ref=f9e12]:
+      - generic [ref=f9e13]: You need to set up Mobile Authenticator to activate your account.
+      - list [ref=f9e15]:
+        - listitem [ref=f9e16]:
+          - paragraph [ref=f9e17]: "Install one of the following applications on your mobile:"
+          - list [ref=f9e18]:
+            - listitem [ref=f9e19]: Google Authenticator
+            - listitem [ref=f9e20]: Microsoft Authenticator
+            - listitem [ref=f9e21]: FreeOTP
+        - listitem [ref=f9e22]:
+          - paragraph [ref=f9e23]: "Open the application and scan the barcode:"
+          - 'img "Figure: Barcode" [ref=f9e24]'
+          - paragraph [ref=f9e25]:
+            - link "Unable to scan?" [ref=f9e26] [cursor=pointer]:
+              - /url: http://localhost:8180/realms/pockito/login-actions/required-action?client_id=pockito-webapp&tab_id=HfQrjJHkkNY&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hdXRoL2NhbGxiYWNrIiwicnQiOiJjb2RlIiwic3QiOiJ0b3RwIn0&mode=manual&execution=CONFIGURE_TOTP
+        - listitem [ref=f9e27]:
+          - paragraph [ref=f9e28]: Enter the one-time code provided by the application and click Submit to finish the setup.
+          - paragraph [ref=f9e29]: Provide a Device Name to help you manage your OTP devices.
+      - generic [ref=f9e30]:
+        - generic [ref=f9e31]:
+          - generic [ref=f9e32]: One-time code *
+          - textbox [ref=f9e35]
+        - generic [ref=f9e36]:
+          - generic [ref=f9e37]: Device Name
+          - textbox [ref=f9e40]
+        - generic [ref=f9e45] [cursor=pointer]:
+          - checkbox "Sign out from other devices" [ref=f9e46]
+          - generic [ref=f9e47]: Sign out from other devices
+        - button "Submit" [ref=f9e50] [cursor=pointer]
